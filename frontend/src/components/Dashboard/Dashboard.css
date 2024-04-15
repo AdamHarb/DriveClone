@@ -1,0 +1,70 @@
+.dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.dashboard h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.quick-access ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.quick-access li {
+    margin-bottom: 10px;
+}
+
+.quick-access a {
+    text-decoration: none;
+    color: #1a73e8;
+}
+
+.storage-info {
+    background-color: #f1f3f4;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+.storage-bar {
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.storage-bar::after {
+    content: "";
+    display: block;
+    width: 60%;
+    height: 100%;
+    background-color: #1a73e8;
+    border-radius: 4px;
+}
+
+.recent-activity ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.recent-activity li {
+    margin-bottom: 10px;
+}
+
+.create-new button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #1a73e8;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.create-new button:hover {
+    background-color: #0d47a1;
+}
