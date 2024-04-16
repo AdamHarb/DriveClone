@@ -1,17 +1,20 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import Signup from './components/Auth/SignUp/Signup'
-import './components/Auth/SignUp/Signup.css';
-import Login from './components/Auth/Login/Login';
-import './components/Auth/Login/Login.css'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Dashboard from "./components/Dashboard/Dashboard.jsx";
+import Login from "./components/Auth/Login/Login.jsx";
+
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-   <Login />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/">
+            <Route index element={<Dashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<h1> 404 page not found </h1>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </>
   )
 }
