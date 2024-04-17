@@ -14,7 +14,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import CloudIcon from '@material-ui/icons/Cloud';
 
 const drawerWidth = 240;
-
+// makestyles is from material ui . its a hook that defines css with javascript objects
 const useStyles = makeStyles((theme) => ({
 	root: {
 		display: 'flex',
@@ -90,76 +90,77 @@ const Dashboard = () => {
 		handleLogoutClose();
 	};
 
+	const files = [
+		{ file_id: 1, user_id: '123', parent_id: '321', name: 'Report.pdf', mime_type: 'application/pdf', size: 1500, uploaded_at: new Date(), updated_at: new Date() },
+		{ file_id: 2, user_id: '456', parent_id: '654', name: 'Photo.png', mime_type: 'image/png', size: 2500, uploaded_at: new Date(), updated_at: new Date() }
+	];
+
 	return (
-			<div className={classes.root}>
-				<Drawer
-						className={classes.drawer}
-						variant="permanent"
-						classes={{
-							paper: classes.drawerPaper,
-						}}
-				>
-					<div className={classes.logo}>
-						<CloudIcon className={classes.logoIcon} />
-						<Typography variant="h6">Drive</Typography>
+		<div className={classes.root}>
+			<Drawer
+				className={classes.drawer}
+				variant="permanent"
+				classes={{
+					paper: classes.drawerPaper,
+				}}
+			>
+				<div className={classes.logo}>
+					<CloudIcon className={classes.logoIcon} />
+					<Typography variant="h6">Drive</Typography>
+				</div>
+				<List>
+					<ListItem button>
+						<ListItemText primary="Home" />
+					</ListItem>
+					<ListItem button>
+						<ListItemText primary="Shared with others" />
+					</ListItem>
+				</List>
+				<div className={classes.storageInfo}>
+					<Typography variant="subtitle1">Storage Used: 10 GB</Typography>
+					<div style={{ width: '100%', height: 10, backgroundColor: '#ddd' }}>
+						<div style={{ width: '60%', height: '100%', backgroundColor: '#4caf50' }}></div>
 					</div>
-					<List>
-						<ListItem button>
-							<ListItemText primary="Home" />
-						</ListItem>
-						<ListItem button>
-							<ListItemText primary="Shared with others" />
-						</ListItem>
-					</List>
-					<div className={classes.storageInfo}>
-						<Typography variant="subtitle1">Storage Used: 10 GB</Typography>
-						<div style={{ width: '100%', height: 10, backgroundColor: '#ddd' }}>
-							<div style={{ width: '60%', height: '100%', backgroundColor: '#4caf50' }}></div>
-						</div>
-					</div>
-				</Drawer>
-				<main className={classes.content}>
-					<Avatar className={classes.avatar} onClick={handleLogoutClick}>
-						JD
-					</Avatar>
-					<TextField
-							className={classes.searchBar}
-							label="Search files"
-							variant="outlined"
-							fullWidth
-					/>
+				</div>
+			</Drawer>
+			<main className={classes.content}>
+				<Avatar className={classes.avatar} onClick={handleLogoutClick}>
+					JD
+				</Avatar>
+				<TextField
+					className={classes.searchBar}
+					label="Search files"
+					variant="outlined"
+					fullWidth
+				/>
 					<div className={classes.fileList}>
-						<div className={classes.fileItem}>
-							<Typography>File 1</Typography>
-							<IconButton onClick={handleClick}>
-								<MoreVertIcon />
-							</IconButton>
-						</div>
-						<div className={classes.fileItem}>
-							<Typography>File 2</Typography>
-							<IconButton onClick={handleClick}>
-								<MoreVertIcon />
-							</IconButton>
-						</div>
-						{/* Add more file items */}
-					</div>
-				</main>
-				<Menu
-						anchorEl={anchorEl}
-						open={Boolean(anchorEl)}
-						onClose={handleClose}
-				>
-					<MenuItem onClick={handleClose}>Delete</MenuItem>
-					<MenuItem onClick={handleClose}>Share</MenuItem>
-				</Menu>
-				<Menu
-						anchorEl={logoutAnchorEl}
-						open={Boolean(logoutAnchorEl)}
-						onClose={handleLogoutClose}
-				>
-					<MenuItem onClick={handleLogout}>Logout</MenuItem>
-				</Menu>
-			</div>
+						{files.map(file => (
+							<div key={file.file_id} className={classes.fileItem}>
+								<Typography>{file.name}</Typography>
+								<IconButton onClick={handleClick}>
+									<MoreVertIcon />
+								</IconButton>
+							</div>
+
+						))}
+				</div>
+			</main >
+			<Menu
+				anchorEl={anchorEl}
+				open={Boolean(anchorEl)}
+				onClose={handleClose}
+			>
+				<MenuItem onClick={handleClose}>Delete</MenuItem>
+				<MenuItem onClick={handleClose}>Share</MenuItem>
+			</Menu>
+			<Menu
+				anchorEl={logoutAnchorEl}
+				open={Boolean(logoutAnchorEl)}
+				onClose={handleLogoutClose}
+			>
+				<MenuItem onClick={handleLogout}>Logout</MenuItem>
+			</Menu>
+		</div >
 	);
 };
 
