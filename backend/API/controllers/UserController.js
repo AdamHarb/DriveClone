@@ -1,4 +1,4 @@
-import User from '../models/User';
+const User = require("../models/User");
 
 exports.getProfileByUsername = async (req, res) => {
     try {

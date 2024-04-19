@@ -7,6 +7,6 @@ router.get('/', (req, res) => {
 			res.send('Hello World!');
 });
 
-router.get('/profile:username', userController.getProfileByUsername());
+router.get('/profile:username', userController.getProfileByUsername);
 
 module.exports = router;

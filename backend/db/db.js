@@ -3,6 +3,7 @@ require('dotenv').config();
 
 async function main() {
     const uri = process.env.ATLAS_URI;
+    console.log(uri)
     const client = new MongoClient(uri)
     try {
         await client.connect()
