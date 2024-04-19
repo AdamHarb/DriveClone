@@ -11,7 +11,8 @@ const UserSchema = new mongoose.Schema({
     username : { type: String, required: true },
     storage_used: { type: Number, default: 0, required: true },
     created_at: { type: Date, required: false, default: Date.now },
-    updated_at: { type: Date, required: false, default: Date.now }
+    updated_at: { type: Date, required: false, default: Date.now },
+    avatar: { type: String, required: false, default: 'default.jpg' }
 });
 
 UserSchema.pre('save', function (next) {
