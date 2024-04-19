@@ -14,7 +14,7 @@ const FolderSchema = new mongoose.Schema({
 });
 
 FolderSchema.pre('save', function (next) {
-    this.updated = Date.now();
+    this.updated_at = Date.now();
     next();
 });
 
