@@ -12,6 +12,10 @@ import Avatar from '@material-ui/core/Avatar';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import CloudIcon from '@material-ui/icons/Cloud';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
+import FolderIcon from '@material-ui/icons/Folder';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines css with javascript objects
@@ -42,10 +46,31 @@ const useStyles = makeStyles((theme) => ({
 	fileList: {
 		marginTop: theme.spacing(2),
 	},
+	fileName: {
+		marginTop: '10px', // the name of the file was a bit up from its details. this is to push it down
+		flexGrow: 1,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis', // SOME FILES NAMES MIGHT BE EXTREMELEY LONG SO WE PUT ...
+		width: '400px', // since name takes most of the row 
+		// color: rgb(31, 31, 31),
+
+	},
 	fileItem: {
 		display: 'flex',
-		justifyContent: 'space-between',
+		transition: 'background-color 0.3s', // Smooth transition for background color
+		'&:hover': {
+			backgroundColor: '#f5f5f5', // Change to your preferred shade of grey
+		},
+	}, //puting the the 2 divs as flex items: name AND (locations, reason, owner) 
+	fileDetails: {
+		display: 'flex',
 		alignItems: 'center',
+		justifyContent: 'space-between',
+		flexGrow: 1, //assigning some space for each flex item
+		marginLeft: theme.spacing(2),
+	},
+	fileDetailsItem: {
+
 	},
 	avatar: {
 		position: 'absolute',
@@ -61,6 +86,20 @@ const useStyles = makeStyles((theme) => ({
 	logoIcon: {
 		marginRight: theme.spacing(1),
 	},
+	suggestedContainer: {
+		display: 'flex',
+	},
+	suggested: {
+		marginRight: '10px'
+	},
+	suggestedIcons: {
+		borderRadius: '10px',
+		width: '90px',
+		height: '40px',
+	},
+	filefolderIcon : {
+		width: '16px',
+	}
 }));
 
 const Dashboard = () => {
@@ -90,10 +129,46 @@ const Dashboard = () => {
 		handleLogoutClose();
 	};
 
-	const files = [
-		{ file_id: 1, user_id: '123', parent_id: '321', name: 'Report.pdf', mime_type: 'application/pdf', size: 1500, uploaded_at: new Date(), updated_at: new Date() },
-		{ file_id: 2, user_id: '456', parent_id: '654', name: 'Photo.png', mime_type: 'image/png', size: 2500, uploaded_at: new Date(), updated_at: new Date() }
-	];
+	const files =
+		[
+			{
+				"name": "ProposaljahkwrjwehfljwhefjkhwelkfhklwehfkwefkwflkwNKCLKAEFJKSLJFKLWEFRJL.pdf",
+				"uploadedAt": "2024-04-12T07:20:50.123Z",
+				"lastEdited": "2024-04-15T09:30:00.123Z",
+				"ownerName": "507f1f77bcf86cd799439011",
+				"sharedWith": [
+					"507f191e810c19729de860ea",
+					"507f191e810c19729de860eb"
+				],
+				"size": 153402,
+				"mime_type": "application/pdf"
+			},
+			{
+				"name": "Budget.xlsx",
+				"uploadedAt": "2024-03-27T05:24:30.123Z",
+				"lastEdited": "2024-04-05T11:45:30.123Z",
+				"ownerName": "507f1f77bcf86cd799439012",
+				"sharedWith": [],
+				"size": 55843,
+				"mime_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+			},
+			{
+				"name": "LogoDesign.ai",
+				"uploadedAt": "2024-02-18T12:00:00.123Z",
+				"lastEdited": "2024-02-20T08:50:00.123Z",
+				"ownerName": "507f1f77bcf86cd799439013",
+				"sharedWith": [
+					"507f191e810c19729de860ec"
+				],
+				"size": 102400,
+				"mime_type": "application/illustrator"
+			}
+		];
+
+
+
+
+
 
 	return (
 		<div className={classes.root}>
@@ -133,16 +208,36 @@ const Dashboard = () => {
 					variant="outlined"
 					fullWidth
 				/>
-					<div className={classes.fileList}>
-						{files.map(file => (
-							<div key={file.file_id} className={classes.fileItem}>
-								<Typography>{file.name}</Typography>
-								<IconButton onClick={handleClick}>
-									<MoreVertIcon />
-								</IconButton>
+				<Typography variant="h5">Welcome to Drive</Typography>
+				<br />
+				<div className={classes.suggestedContainer}>
+					<Typography className={classes.suggested}variant="subtitle1" gutterBottom>
+						Suggested
+					</Typography>
+					<ToggleButton className={classes.suggestedIcons}value="files" aria-label="left aligned">
+						<InsertDriveFileIcon className={classes.filefolderIcon} />
+						Files
+					</ToggleButton>
+					<ToggleButton className={classes.suggestedIcons}value="folders" aria-label="centered">
+						<FolderIcon  className={classes.filefolderIcon} />
+						Folders
+					</ToggleButton>
+				</div>
+				<div className={classes.fileList}>
+					{files.map(file => (
+						<div key={file.file_id} className={classes.fileItem}>
+							<Typography className={classes.fileName}>{file.name}</Typography>
+							<div className={classes.fileDetails}>
+								<Typography className={classes.fileDetailsItem} > {file.lastEdited}</Typography>
+								<Typography > {file.sharedWith.length} people</Typography>
+								<Typography > {file.ownerName}</Typography>
 							</div>
+							<IconButton onClick={handleClick}>
+								<MoreVertIcon />
+							</IconButton>
+						</div>
 
-						))}
+					))}
 				</div>
 			</main >
 			<Menu
