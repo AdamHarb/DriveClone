@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
+const mongAuto = require('mongoose-auto-increment');
 
 const UserSchema = new mongoose.Schema({
     user_id: {
-        type: Number, required: true, unique: true, index: true, default: function () {
-            return this.model('User').countDocuments({}) + 1;
-        }
+        type: Number, required: true, unique: true, index: true
     },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -19,6 +18,10 @@ UserSchema.pre('save', function (next) {
     this.updated_at = Date.now();
     next();
 });
+
+mongAuto.initialize(mongoose.connection);
+
+UserSchema.plugin(mongAuto.plugin, { model: 'User', field: 'user_id' });
 
 const User = mongoose.model('User', UserSchema);
 

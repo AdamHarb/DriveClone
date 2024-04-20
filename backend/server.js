@@ -1,6 +1,6 @@
 const app = require('./API/index');
 require('dotenv').config();
-const { main } = require('./db/db.js');
+const main = require('./db/db.js');
 
 main().catch(console.error).then(() => {
 	app.listen(3000, () => {
