@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
@@ -15,6 +16,17 @@ import CloudIcon from '@material-ui/icons/Cloud';
 import ToggleButton from '@material-ui/lab/ToggleButton';
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+// more icons for the sidebar
+import HomeIcon from '@material-ui/icons/Home';
+//import DriveFolderUploadIcon from '@material-ui/icons/DriveFolderUpload';
+import ComputerIcon from '@material-ui/icons/Computer';
+import PeopleIcon from '@material-ui/icons/People';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
+import ReportIcon from '@material-ui/icons/Report';
+import DeleteIcon from '@material-ui/icons/Delete';
+import StorageIcon from '@material-ui/icons/Storage';
+
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines css with javascript objects
@@ -96,7 +108,7 @@ const useStyles = makeStyles((theme) => ({
 		width: '90px',
 		height: '40px',
 	},
-	filefolderIcon : {
+	filefolderIcon: {
 		width: '16px',
 	}
 }));
@@ -184,10 +196,46 @@ const Dashboard = () => {
 				</div>
 				<List>
 					<ListItem button>
+						<ListItemIcon>
+							<HomeIcon />
+						</ListItemIcon>
 						<ListItemText primary="Home" />
 					</ListItem>
 					<ListItem button>
+						<ListItemIcon>
+							<PeopleIcon />
+						</ListItemIcon>
 						<ListItemText primary="Shared with others" />
+					</ListItem>
+					<ListItem button>
+						<ListItemIcon>
+							<AccessTimeIcon/>
+						</ListItemIcon>
+						<ListItemText primary="Recent" />
+					</ListItem>
+					<ListItem button>
+						<ListItemIcon>
+							<StarBorderIcon />
+						</ListItemIcon>
+						<ListItemText primary="Starred" />
+					</ListItem>
+					<ListItem button>
+						<ListItemIcon>
+							<ReportIcon />
+						</ListItemIcon>
+						<ListItemText primary="Spam" />
+					</ListItem>
+					<ListItem button>
+						<ListItemIcon>
+							<DeleteIcon />
+						</ListItemIcon>
+						<ListItemText primary="Delete" />
+					</ListItem>
+					<ListItem button>
+						<ListItemIcon>
+							<StorageIcon />
+						</ListItemIcon>
+						<ListItemText primary="Storage" />
 					</ListItem>
 				</List>
 				<div className={classes.storageInfo}>
@@ -210,15 +258,15 @@ const Dashboard = () => {
 				<Typography variant="h5">Welcome to Drive</Typography>
 				<br />
 				<div className={classes.suggestedContainer}>
-					<Typography className={classes.suggested}variant="subtitle1" gutterBottom>
+					<Typography className={classes.suggested} variant="subtitle1" gutterBottom>
 						Suggested
 					</Typography>
-					<ToggleButton className={classes.suggestedIcons}value="files" aria-label="left aligned">
+					<ToggleButton className={classes.suggestedIcons} value="files" aria-label="left aligned">
 						<InsertDriveFileIcon className={classes.filefolderIcon} />
 						Files
 					</ToggleButton>
-					<ToggleButton className={classes.suggestedIcons}value="folders" aria-label="centered">
-						<FolderIcon  className={classes.filefolderIcon} />
+					<ToggleButton className={classes.suggestedIcons} value="folders" aria-label="centered">
+						<FolderIcon className={classes.filefolderIcon} />
 						Folders
 					</ToggleButton>
 				</div>
