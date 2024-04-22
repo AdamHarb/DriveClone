@@ -27,6 +27,8 @@ import StarBorderIcon from '@material-ui/icons/StarBorder';
 import ReportIcon from '@material-ui/icons/Report';
 import DeleteIcon from '@material-ui/icons/Delete';
 import StorageIcon from '@material-ui/icons/Storage';
+import Button from '@material-ui/core/Button';
+import AddIcon from '@material-ui/icons/Add';
 
 
 const drawerWidth = 240;
@@ -111,7 +113,17 @@ const useStyles = makeStyles((theme) => ({
 	},
 	filefolderIcon: {
 		width: '16px',
-	}
+	},
+	addbutton: {
+		margin: theme.spacing(1),
+		borderRadius: 20,
+		boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)', // adds shadow
+		paddingLeft: theme.spacing(2),
+		paddingRight: theme.spacing(2),
+	},
+	newicon: {
+		marginRight: theme.spacing(1),
+	},
 }));
 
 const Dashboard = () => {
@@ -195,6 +207,15 @@ const Dashboard = () => {
 					<CloudIcon className={classes.logoIcon} />
 					<Typography variant="h6">Drive</Typography>
 				</div>
+
+				<Button
+					variant="contained"
+					color="default"
+					className={classes.addbutton}
+					startIcon={<AddIcon className={classes.newicon} />}
+				>
+					<Typography variant="body2">New</Typography>
+				</Button>
 				<List>
 					<ListItem button>
 						<ListItemIcon>
@@ -210,7 +231,7 @@ const Dashboard = () => {
 					</ListItem>
 					<ListItem button>
 						<ListItemIcon>
-							<AccessTimeIcon/>
+							<AccessTimeIcon />
 						</ListItemIcon>
 						<ListItemText primary="Recent" />
 					</ListItem>
