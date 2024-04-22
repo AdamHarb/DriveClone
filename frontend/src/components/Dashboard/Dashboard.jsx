@@ -29,6 +29,10 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import StorageIcon from '@material-ui/icons/Storage';
 import Button from '@material-ui/core/Button';
 import AddIcon from '@material-ui/icons/Add';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import SearchIcon from '@material-ui/icons/Search';
+import FilterListIcon from '@material-ui/icons/FilterList';
+
 
 
 const drawerWidth = 240;
@@ -117,7 +121,7 @@ const useStyles = makeStyles((theme) => ({
 	addbutton: {
 		margin: theme.spacing(1),
 		borderRadius: 20,
-		boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)', // adds shadow
+		boxShadow: '0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12)',
 		paddingLeft: theme.spacing(2),
 		paddingRight: theme.spacing(2),
 	},
@@ -273,10 +277,25 @@ const Dashboard = () => {
 				</Avatar>
 				<TextField
 					className={classes.searchBar}
-					label="Search files"
+					label="Search in Drive"
 					variant="outlined"
 					fullWidth
+					InputProps={{ //this is an object that provides properties to the input element
+						startAdornment: (
+							<InputAdornment position="start">
+								<SearchIcon />
+							</InputAdornment>
+						),
+						endAdornment: (
+							<InputAdornment position="end">
+								<IconButton>
+									<FilterListIcon />
+								</IconButton>
+							</InputAdornment>
+						),
+					}}
 				/>
+
 				<Typography variant="h5">Welcome to Drive</Typography>
 				<br />
 				<div className={classes.suggestedContainer}>
