@@ -32,6 +32,9 @@ import AddIcon from '@material-ui/icons/Add';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchIcon from '@material-ui/icons/Search';
 import FilterListIcon from '@material-ui/icons/FilterList';
+import ViewListIcon from '@material-ui/icons/ViewList'; 
+import ViewModuleIcon from '@material-ui/icons/ViewModule'; 
+import DoneIcon from '@material-ui/icons/Done'; 
 
 
 
@@ -127,6 +130,10 @@ const useStyles = makeStyles((theme) => ({
 	},
 	newicon: {
 		marginRight: theme.spacing(1),
+	},
+	filteroptions: {
+		display: 'flex',
+		justifyContent: 'space-between'
 	},
 }));
 
@@ -298,18 +305,34 @@ const Dashboard = () => {
 
 				<Typography variant="h5">Welcome to Drive</Typography>
 				<br />
-				<div className={classes.suggestedContainer}>
-					<Typography className={classes.suggested} variant="subtitle1" gutterBottom>
-						Suggested
-					</Typography>
-					<ToggleButton className={classes.suggestedIcons} value="files" aria-label="left aligned">
-						<InsertDriveFileIcon className={classes.filefolderIcon} />
-						Files
-					</ToggleButton>
-					<ToggleButton className={classes.suggestedIcons} value="folders" aria-label="centered">
-						<FolderIcon className={classes.filefolderIcon} />
-						Folders
-					</ToggleButton>
+				<div className={classes.filteroptions}>
+					<div className={classes.suggestedContainer}>
+						<Typography className={classes.suggested} variant="subtitle1" gutterBottom>
+							Suggested
+						</Typography>
+						<ToggleButton className={classes.suggestedIcons} value="files" aria-label="left aligned">
+							<InsertDriveFileIcon className={classes.filefolderIcon} />
+							Files
+						</ToggleButton>
+						<ToggleButton className={classes.suggestedIcons} value="folders" aria-label="centered">
+							<FolderIcon className={classes.filefolderIcon} />
+							Folders
+						</ToggleButton>
+					</div>
+					<div>
+						<ToggleButtonGroup
+							exclusive
+							aria-label="text alignment"
+						>
+							<ToggleButton value="list" aria-label="left aligned">
+								<DoneIcon />
+								<ViewListIcon />
+							</ToggleButton>
+							<ToggleButton value="module" aria-label="centered">
+								<ViewModuleIcon />
+							</ToggleButton>
+						</ToggleButtonGroup>
+					</div>
 				</div>
 				<div className={classes.fileList}>
 					{files.map(file => (
