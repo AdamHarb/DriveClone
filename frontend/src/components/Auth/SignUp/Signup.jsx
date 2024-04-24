@@ -82,7 +82,7 @@ const Signup = () => {
 
 
             <div id="signinoption">
-                <div id='already'> Already have an account ? </div>
+                <div id='already'>Already have an account?&ensp;</div>
                 <a href="/login"> Sign In </a>
             </div>
         </div>
