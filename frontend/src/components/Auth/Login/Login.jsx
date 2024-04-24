@@ -7,8 +7,8 @@ const Login = () => {
                 <form id='loginform'  >
                     <div id="loginaccount">
                         <div id="loginyouraccount">LOGIN YOUR ACCOUNT</div>
+ 
 
-                        
                         <div class="fields">
                             <label for="email">Email</label>
                             <input type="text" id="email" name="email" />
