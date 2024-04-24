@@ -1,15 +1,13 @@
-const { MongoClient } = require('mongodb')
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 async function main() {
-    const uri = process.env.ATLAS_URI;
-    const client = new MongoClient(uri)
     try {
-        await client.connect()
-        console.log("Connected to the database");
-    } catch (e) {
-        console.log("Error: ", e);
+        await mongoose.connect(process.env.ATLAS_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+        console.log("Connected to MongoDB Atlas via Mongoose");
+    } catch (error) {
+        console.error("Error connecting to MongoDB Atlas: ", error);
     }
 }
 
-main()
+module.exports = main;
