@@ -78,3 +78,25 @@ label {
     margin-top: 5px;
     color: rgb(108, 106, 104)
 }
+
+#names-container {
+    display: flex;
+}
+
+#lastnamefield, #firstnamefield {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+#lastnamefield {
+    margin-left: 10px;
+}
+
+#firstnamefield input, #lastnamefield input {
+    width: 140px;
+}
+
+.password-container {
+    display:flex;
+    justify-content: space-between;
+}
