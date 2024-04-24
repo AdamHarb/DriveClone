@@ -7,6 +7,8 @@ const Login = () => {
                 <form id='loginform'  >
                     <div id="loginaccount">
                         <div id="loginyouraccount">LOGIN YOUR ACCOUNT</div>
+
+                        
                         <div class="fields">
                             <label for="email">Email</label>
                             <input type="text" id="email" name="email" />
@@ -22,7 +24,7 @@ const Login = () => {
             <br />
             <div id="signupoption">
                 <div id='already'> Don't have an account? </div>
-                <button class="button" id="signupbutton"> Sign Up </button>
+                <a href="/signup"> Sign Up </a>
             </div>
         </div>
     )
