@@ -6,7 +6,7 @@ const Login = () => {
             <div id="login">
                 <form id='loginform'  >
                     <div id="loginaccount">
-                        <div id="loginyouraccount">LOGIN YOUR ACCOUNT</div>
+                        <div id="loginyouraccount">LOGIN TO YOUR ACCOUNT</div>
  
 
                         <div class="fields">
@@ -23,7 +23,7 @@ const Login = () => {
             </div>
             <br />
             <div id="signupoption">
-                <div id='already'> Don't have an account? </div>
+                <div id='already'>Don't have an account?&ensp;</div>
                 <a href="/signup"> Sign Up </a>
             </div>
         </div>
