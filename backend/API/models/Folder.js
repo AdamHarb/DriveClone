@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
+const mongAuto = require('mongoose-auto-increment');
 
 const FolderSchema = new mongoose.Schema({
     folder_id: {
-        type: Number, required: true, unique: true, index: true, default: function () {
-            return this.model('Folder').countDocuments({}) + 1;
-        }
+        type: Number, required: true, unique: true, index: true
     },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     parent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', required: false },
@@ -19,6 +18,7 @@ FolderSchema.pre('save', function (next) {
     next();
 });
 
+FolderSchema.plugin(mongAuto.plugin, { model: 'Folder', field: 'folder_id' });
 const Folder = mongoose.model('Folder', FolderSchema);
 
 module.exports = Folder;
