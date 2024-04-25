@@ -1,5 +1,4 @@
-import File from '../models/File';
-import Folder from '../models/Folder';
+const Folder = require('../models/Folder');
 
 //When user logs in to website display his folders (This should be used with getFilesByUserId to get everything)
 exports.getFoldersByUserId = async (req, res) => {
@@ -14,20 +13,28 @@ exports.getFoldersByUserId = async (req, res) => {
 }
 //This only creates the folder name and object which needs to be filled using another api.
 exports.createFolder = async (req, res) => {
-    try{
-        const {user_id, folder_name} = req.body;
+    try {
+        const { user_id, folder_name, parent_id} = req.body;
+
+        if (!folder_name) {
+            return res.status(400).json({ message: "Missing required field: folder_name" });
+        }
+
         const folder = new Folder({
             user_id,
-            folder_name
+            folder_name,
+            parent_id
         });
+
         await folder.save();
-        res.status(201).json({message: "Folder created successfully"});
-    }
-    catch (err){
+        console.log(folder);
+        res.status(201).json({ message: "Folder created successfully" });
+    } catch (err) {
         console.error(err);
-        res.status(500).json({message: "Internal server error"});
+        res.status(500).json({ message: "Internal server error" });
     }
-}
+};
+
 
 
 

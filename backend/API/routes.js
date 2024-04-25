@@ -1,7 +1,6 @@
 const express = require('express');
 const userController = require("./controllers/UserController");
 const folderController = require("./controllers/FolderController");
-const getFoldersByUserId = require("./controllers/FolderController");
 
 const router = express.Router();
 
