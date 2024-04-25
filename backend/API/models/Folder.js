@@ -10,7 +10,8 @@ const FolderSchema = new mongoose.Schema({
     parent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', required: false },
     name: { type: String, required: true },
     created_at: { type: Date, required: false, default: Date.now },
-    updated_at: { type: Date, required: false, default: Date.now }
+    updated_at: { type: Date, required: false, default: Date.now },
+    files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }]
 });
 
 FolderSchema.pre('save', function (next) {
