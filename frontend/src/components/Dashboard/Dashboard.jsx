@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
@@ -32,9 +32,9 @@ import AddIcon from '@material-ui/icons/Add';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import SearchIcon from '@material-ui/icons/Search';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import ViewListIcon from '@material-ui/icons/ViewList'; 
-import ViewModuleIcon from '@material-ui/icons/ViewModule'; 
-import DoneIcon from '@material-ui/icons/Done'; 
+import ViewListIcon from '@material-ui/icons/ViewList';
+import ViewModuleIcon from '@material-ui/icons/ViewModule';
+import DoneIcon from '@material-ui/icons/Done';
 
 
 
@@ -139,8 +139,13 @@ const useStyles = makeStyles((theme) => ({
 
 const Dashboard = () => {
 	const classes = useStyles();
+	const fileInputRef = useRef(null);
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const [logoutAnchorEl, setLogoutAnchorEl] = React.useState(null);
+
+	const handleButtonClick = () => {
+		fileInputRef.current.click();
+	};
 
 	const handleClick = (event) => {
 		setAnchorEl(event.currentTarget);
@@ -218,12 +223,21 @@ const Dashboard = () => {
 					<CloudIcon className={classes.logoIcon} />
 					<Typography variant="h6">Drive</Typography>
 				</div>
-
+				<input
+					type="file"
+					style={{ display: 'none' }} // Hide the file input element
+					ref={fileInputRef}
+					onChange={(event) => {
+						const file = event.target.files[0];
+						console.log(file); // Log the selected file, or handle it as needed
+					}}
+				/>
 				<Button
 					variant="contained"
 					color="default"
 					className={classes.addbutton}
 					startIcon={<AddIcon className={classes.newicon} />}
+					onClick={handleButtonClick}
 				>
 					<Typography variant="body2">New</Typography>
 				</Button>
@@ -319,6 +333,7 @@ const Dashboard = () => {
 							Folders
 						</ToggleButton>
 					</div>
+					
 					<div>
 						<ToggleButtonGroup
 							exclusive
