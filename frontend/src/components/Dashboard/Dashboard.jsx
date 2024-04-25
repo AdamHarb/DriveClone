@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
@@ -35,6 +35,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import ViewListIcon from '@material-ui/icons/ViewList';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import DoneIcon from '@material-ui/icons/Done';
+import { useState } from 'react';
 
 
 
@@ -169,7 +170,7 @@ const Dashboard = () => {
 		handleLogoutClose();
 	};
 
-	const files =
+	const initialFiles =
 		[
 			{
 				"name": "ProposaljahkwrjwehfljwhefjkhwelkfhklwehfkwefkwflkwNKCLKAEFJKSLJFKLWEFRJL.pdf",
@@ -205,7 +206,19 @@ const Dashboard = () => {
 			}
 		];
 
+	const [files, setFiles] = useState(initialFiles);
+	const [searchTerm, setSearchTerm] = useState('');
 
+	useEffect(() => {
+		const filteredFiles = initialFiles.filter(file =>
+			file.name.toLowerCase().includes(searchTerm.toLowerCase())
+		);
+		setFiles(filteredFiles);
+	}, [searchTerm]);
+
+	const handleChangeSearch = (event) => {
+		setSearchTerm(event.target.value);
+	};
 
 
 
@@ -300,6 +313,8 @@ const Dashboard = () => {
 					className={classes.searchBar}
 					label="Search in Drive"
 					variant="outlined"
+					onChange={handleChangeSearch}
+					value={searchTerm}
 					fullWidth
 					InputProps={{ //this is an object that provides properties to the input element
 						startAdornment: (
@@ -333,7 +348,7 @@ const Dashboard = () => {
 							Folders
 						</ToggleButton>
 					</div>
-					
+
 					<div>
 						<ToggleButtonGroup
 							exclusive
@@ -362,7 +377,6 @@ const Dashboard = () => {
 								<MoreVertIcon />
 							</IconButton>
 						</div>
-
 					))}
 				</div>
 			</main >
