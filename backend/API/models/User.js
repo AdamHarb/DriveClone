@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const mongAuto = require('mongoose-auto-increment');
 
 const UserSchema = new mongoose.Schema({
@@ -14,10 +15,20 @@ const UserSchema = new mongoose.Schema({
     avatar: { type: String, required: false, default: 'default.jpg' }
 });
 
-UserSchema.pre('save', function (next) {
+UserSchema.pre('save', async function (next) {
     this.updated_at = Date.now();
+    if (!this.isModified('password')) {
+        return next();
+    }
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
     next();
 });
+
+UserSchema.methods.comparePassword = async function (password) {
+    return bcrypt.compare(password, this.password);
+};
+
 
 mongAuto.initialize(mongoose.connection);
 
