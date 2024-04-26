@@ -33,7 +33,7 @@ const loginUser = async (req, res) => {
 
 const getProfileByUsername = async (req, res) => {
     try {
-        const username = req.params.username;
+        const username = req.user.username;
         console.log(username);
         const user = await User.findOne({ username: username });
         console.log(user);

@@ -1,21 +1,18 @@
 const mongoose = require('mongoose');
+const client = require('mongodb').MongoClient;
 const { GridFSBucket } = require('mongodb');
 require('dotenv').config();
 
-let db;
 let gfsBucket;
 
 async function connectDB() {
     try {
-        await mongoose.connect(
-            process.env.ATLAS_URI,
-            {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-            }
-        );
+        await mongoose.connect(process.env.ATLAS_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
         console.log("Connected to MongoDB Atlas via Mongoose");
-        db = mongoose.connection.db;
+        const db = await getDB();
         gfsBucket = new GridFSBucket(db);
     } catch (error) {
         console.error("Error connecting to MongoDB Atlas: ", error);
@@ -24,13 +21,27 @@ async function connectDB() {
 }
 
 function getGridFSBucket() {
-    if (!gfsBucket) {
-        throw new Error("GridFS bucket not initialized");
-    }
-    return gfsBucket;
+    return new Promise((resolve, reject) => {
+        if (gfsBucket) {
+            resolve(gfsBucket);
+        } else {
+            connectDB()
+                .then(() => {
+                    resolve(gfsBucket);
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        }
+    });
+}
+
+async function getDB() {
+    return await client.connect(process.env.ATLAS_URI).then((client) => client.db());
 }
 
 module.exports = {
     connectDB,
     getGridFSBucket,
+    getDB
 };
