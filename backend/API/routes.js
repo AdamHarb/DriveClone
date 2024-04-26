@@ -8,7 +8,7 @@ router.get('/', (req, res) => {
 			res.send('Hello World!');
 });
 //Add to this route the get files without folders api as well.
-router.get('/homepage', folderController.getFoldersByUserId);
+router.get('/homepage/:user_id', folderController.getFoldersByUserId);
 router.post('/createFolder', folderController.createFolder);
 
 router.get('/profile/:username', userController.getProfileByUsername);
