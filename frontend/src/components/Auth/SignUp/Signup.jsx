@@ -6,12 +6,6 @@ import axios from "axios";
 
 const Signup = () => {
 
-    const [formData, setFormData] = useState({
-        username: '',
-        email: '',
-        password: '',
-    });
-
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword1, setShowPassword1] = useState(false);
 
@@ -28,14 +22,15 @@ const Signup = () => {
     const handleSubmit = async (event) => {
         event.preventDefault(); // Prevent default form submission
 
-        setFormData( {
+        const newFormData = {
             username: document.getElementById('username').value,
             email: document.getElementById('email').value,
             password: document.getElementById('password').value,
-        });
+        };
+
 
         try {
-            const response = await axios.post('http://localhost:3000/api/create-user', formData); // Make API request
+            const response = await axios.post('http://localhost:3000/api/create-user', newFormData); // Make API request
             console.log(response.data);
             // Handle successful response
             if (response.data.success) {

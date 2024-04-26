@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
 
 router.get('/profile/:username', userController.getProfileByUsername);
 
-router.get('/login', userController.loginUser);
+router.post('/login', userController.loginUser);
 
 router.post('/create-user', userController.createUser);
 
