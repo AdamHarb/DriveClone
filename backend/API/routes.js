@@ -1,14 +1,18 @@
 const express = require('express');
 const userController = require("./controllers/UserController");
 const userAuth = require("./middlewares/userAuth");
+const folderController = require("./controllers/FolderController");
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
 			res.send('Hello World!');
 });
+//Add to this route the get files without folders api as well.
+router.get('/homepage', userAuth, folderController.getFoldersByUserId);
+router.post('/create-folder', userAuth, folderController.createFolder);
 
-router.get('/profile/:username', userController.getProfileByUsername);
+router.get('/profile', userAuth ,userController.getProfileByUsername);
 
 router.get('/login', userController.loginUser);
 
