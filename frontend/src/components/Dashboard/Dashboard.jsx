@@ -85,7 +85,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	avatar: {
 		position: 'absolute',
-		top: theme.spacing(2),
+		top: theme.spacing(4),
 		right: theme.spacing(2),
 		cursor: 'pointer',
 	},
@@ -106,7 +106,8 @@ const useStyles = makeStyles((theme) => ({
 	suggestedIcons: {
 		borderRadius: '10px',
 		width: '90px',
-		height: '40px',
+		height: '25px',
+		marginRight: '10px',
 	},
 	filefolderIcon: {
 		width: '16px',
