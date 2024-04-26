@@ -2,8 +2,15 @@ import './Signup.css';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useState } from 'react';
+import axios from "axios";
 
 const Signup = () => {
+
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+    });
 
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword1, setShowPassword1] = useState(false);
@@ -16,6 +23,31 @@ const Signup = () => {
     const togglePasswordVisibility1 = () => {
         event.preventDefault();
         setShowPassword1(!showPassword1);
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        setFormData( {
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+        });
+
+        try {
+            const response = await axios.post('http://localhost:3000/api/create-user', formData); // Make API request
+            console.log(response.data);
+            // Handle successful response
+            if (response.data.success) {
+                // Handle successful signup (e.g., redirect to another page)
+                console.log('Signup successful!'); // Replace with your desired action
+            } else {
+                // Handle signup errors (e.g., display error messages)
+                console.error('Signup failed:', response.data.error); // Replace with error handling
+            }
+        } catch (error) {
+            console.error('Error during signup:', error); // Handle errors during request
+        }
     };
 
 
@@ -68,7 +100,7 @@ const Signup = () => {
                             </div>
                         </div>
 
-                        <button class="button" id="signupbutton"> Sign up</button>
+                        <button class="button" id="signupbutton" onClick={handleSubmit}> Sign up</button>
                     </div>
                 </form>
 
