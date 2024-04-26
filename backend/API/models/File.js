@@ -7,7 +7,7 @@ const FileSchema = new mongoose.Schema({
         }
     },
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    parent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', required: false },
+    parent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', required: false, default: null },
     name: { type: String, required: true },
     mime_type: { type: String, required: true },
     size: { type: Number, required: true },
