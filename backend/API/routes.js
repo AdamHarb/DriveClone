@@ -18,6 +18,11 @@ router.post('/test-middleware', userAuth, (req, res) => {
 			})
 });
 
+// User Routes
+router.get('/profile/:username', userController.getProfileByUsername);
+router.post('/login', userController.loginUser);
+router.post('/create-user', userController.createUser);
+
 // Folder Routes
 router.get('/homepage', userAuth, folderController.getFoldersByUserId);
 router.post('/create-folder', userAuth, folderController.createFolder);
