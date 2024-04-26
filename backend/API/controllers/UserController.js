@@ -1,6 +1,37 @@
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
-exports.getProfileByUsername = async (req, res) => {
+const loginUser = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const isMatch = await user.comparePassword(password);
+
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
+        return res.status(200).json({ message: 'Login successful' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+const getProfileByUsername = async (req, res) => {
     try {
         const username = req.params.username;
         console.log(username);
@@ -23,9 +54,14 @@ exports.getProfileByUsername = async (req, res) => {
     }
 };
 
-exports.CreateUser = async (req, res) => {
+const createUser = async (req, res) => {
     try {
         const { email, password, username } = req.body;
+
+        if (!email || !password || !username) {
+            return res.status(400).json({ message: "Please fill in all fields" });
+        }
+
         const user = new User({
             email,
             password,
@@ -39,3 +75,9 @@ exports.CreateUser = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+
+module.exports = {
+    loginUser,
+    getProfileByUsername,
+    createUser
+};
