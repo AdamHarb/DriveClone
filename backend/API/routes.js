@@ -1,6 +1,9 @@
 const express = require('express');
 const userController = require("./controllers/UserController");
 const userAuth = require("./middlewares/userAuth");
+const fileController = require("./controllers/FileController");
+const multer = require('multer');
+const upload = multer();
 
 const router = express.Router();
 
@@ -19,5 +22,17 @@ router.post('/test-middleware', userAuth, (req, res) => {
 				message: `You have been authorized, ${req.user.username}!`
 			})
 });
+
+router.post('/upload', userAuth, upload.single('file'), fileController.uploadFile);
+
+router.get('/download/:fileId', userAuth, fileController.downloadFile);
+
+router.get('/details/:fileId', userAuth, fileController.getFileDetails);
+
+router.put('/update/:fileId', userAuth, fileController.updateFileDetails);
+
+router.delete('/delete/:fileId', userAuth, fileController.deleteFile);
+
+router.get('/list', userAuth, fileController.listFiles);
 
 module.exports = router;
