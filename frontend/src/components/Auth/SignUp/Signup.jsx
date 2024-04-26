@@ -1,28 +1,80 @@
-import './Signup.css'
+import Login from '../Login/Login';
+import './Signup.css';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useState } from 'react';
 
 const Signup = () => {
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword1, setShowPassword1] = useState(false);
+
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+    const togglePasswordVisibility1 = () => {
+        setShowPassword1(!showPassword1);
+    };
+
+
     return (
         <div id="signuppage">
-            <div id="signup">
-                <div id="signupaccount">
-                    <div id="createyouraccount"> CREATE YOUR ACCOUNT</div>
-                    <div class="fields">
-                        <label for="email">Email</label>
-                        <input  type="text" id="email" name="email" />
-                    </div>
+            <div id="signup" method='post'>
+                <form id="signupform">
+                    <div id="signupaccount">
+                        <div id="createyouraccount"> CREATE YOUR ACCOUNT</div>
+                        <div id="names-container">
+                            <div id="firstnamefield">
+                                <label for="firstname"> First Name</label>
+                                <input type="firstname" id="firstname" name="firstname"></input>
+                            </div>
 
-                    <div class="fields">
-                        <label for="password"> Password</label>
-                        <input type="password" id="password" name="password" />
-                    </div>
+                            <div id="lastnamefield">
+                                <label for="lastname"> Last Name</label>
+                                <input type="lastname" id="lastname" name="lastname"></input>
+                            </div>
+                        </div>
 
-                    <div class="fields">
-                        <label for="confirmpassword">Confirm Password</label>
-                        <input  type="password" id="confirmpassword" name="confirmpassword" />
-                    </div>
+                        <div class="fields">
+                            <input type="text" id="email" name="email" />
+                            <label for="email">Email</label>
+                        </div>
 
-                    <button class="button" id="signupbutton"> Sign up</button>
-                </div>
+                        <div class="fields">
+                            <input type={showPassword ? 'text' : 'password'}  id="password" name="password" />
+                            <div className="password-container">
+                                <label for="password"> Password</label>
+                                <button  onClick={togglePasswordVisibility} style={{
+                                    background: 'none', // Removes background
+                                    border: 'none',  // Removes border
+                                    padding: 0,      // Removes padding
+                                    boxShadow: 'none' // Removes box shadow if any
+                                }}>
+                                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                </button>
+
+                            </div>
+                        </div>
+
+                        <div class="fields">
+                            <input type={showPassword1 ? 'text' : 'password'} id="confirmpassword" name="confirmpassword" />
+                            <div className="password-container">
+                                <label for="confirmpassword">Confirm Password</label>
+                                <button onClick={togglePasswordVisibility1}style={{
+                                    background: 'none',
+                                    border: 'none', 
+                                    padding: 0,      
+                                    boxShadow: 'none' 
+                                }}>
+                                  {showPassword1 ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="button" id="signupbutton"> Sign up</button>
+                    </div>
+                </form>
 
             </div>
 
@@ -30,9 +82,8 @@ const Signup = () => {
 
 
             <div id="signinoption">
-                <div id='already'> Already have an account ? </div>
-
-                <button class="button" id="signinbutton"> Sign In  </button>
+                <div id='already'>Already have an account?&ensp;</div>
+                <a href="/login"> Sign In </a>
             </div>
         </div>
     )
