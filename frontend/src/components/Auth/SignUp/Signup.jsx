@@ -1,4 +1,3 @@
-import Login from '../Login/Login';
 import './Signup.css';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -10,10 +9,12 @@ const Signup = () => {
     const [showPassword1, setShowPassword1] = useState(false);
 
 
-    const togglePasswordVisibility = () => {
+    const  togglePasswordVisibility = () => {
+        event.preventDefault();
         setShowPassword(!showPassword);
     };
     const togglePasswordVisibility1 = () => {
+        event.preventDefault();
         setShowPassword1(!showPassword1);
     };
 
@@ -24,15 +25,10 @@ const Signup = () => {
                 <form id="signupform">
                     <div id="signupaccount">
                         <div id="createyouraccount"> CREATE YOUR ACCOUNT</div>
-                        <div id="names-container">
+                        <div class="fields">
                             <div id="firstnamefield">
-                                <label for="firstname"> First Name</label>
-                                <input type="firstname" id="firstname" name="firstname"></input>
-                            </div>
-
-                            <div id="lastnamefield">
-                                <label for="lastname"> Last Name</label>
-                                <input type="lastname" id="lastname" name="lastname"></input>
+                                <label for="username">Username</label>
+                                <input type="username" id="username" name="username"></input>
                             </div>
                         </div>
 
