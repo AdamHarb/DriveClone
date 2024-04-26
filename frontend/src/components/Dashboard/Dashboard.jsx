@@ -141,6 +141,14 @@ const Dashboard = () => {
 		handleLogoutClose();
 	};
 
+	const file_filter = () => {
+
+	}
+
+	const folder_filter = () => {
+
+	}
+
 	const files =
 		[
 			{
@@ -262,11 +270,11 @@ const Dashboard = () => {
 					<Typography className={classes.suggested} variant="subtitle1" gutterBottom>
 						Suggested
 					</Typography>
-					<ToggleButton className={classes.suggestedIcons} value="files" aria-label="left aligned">
+					<ToggleButton className={classes.suggestedIcons} value="files" aria-label="left aligned" onClick={file_filter}>
 						<InsertDriveFileIcon className={classes.filefolderIcon} />
 						Files
 					</ToggleButton>
-					<ToggleButton className={classes.suggestedIcons} value="folders" aria-label="centered">
+					<ToggleButton className={classes.suggestedIcons} value="folders" aria-label="centered" onClick={folder_filter}>
 						<FolderIcon className={classes.filefolderIcon} />
 						Folders
 					</ToggleButton>
