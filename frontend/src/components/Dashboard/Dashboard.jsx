@@ -36,6 +36,13 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import DoneIcon from '@material-ui/icons/Done';
 import { useState } from 'react';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import ShareIcon from '@mui/icons-material/Share';
+import EditIcon from '@mui/icons-material/Edit';
+import InfoIcon from '@mui/icons-material/Info';
+import { Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { FormControl, InputLabel, Select, FormControlLabel, Checkbox, Box } from '@mui/material';
+
 
 
 
@@ -136,13 +143,37 @@ const useStyles = makeStyles((theme) => ({
 		display: 'flex',
 		justifyContent: 'space-between'
 	},
+	listlayout: {
+		display: 'flex',
+		justifyContent: 'space-between',
+	},
+	listlayoutitems: {
+		display: 'flex',
+		marginRight: '2rem',
+		flexGrow: 0.45,
+	},
+
+	listlayoutitem: {
+		display:'flex',
+		flexGrow: 1,
+	}
 }));
 
 const Dashboard = () => {
 	const classes = useStyles();
 	const fileInputRef = useRef(null);
+	const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false); // handling the advancedsearch modal
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const [logoutAnchorEl, setLogoutAnchorEl] = React.useState(null);
+	const [searchParams, setSearchParams] = React.useState({
+		type: '',
+		owner: '',
+		hasTheWords: '',
+		itemName: '',
+		location: '',
+		inTrash: false,
+		starred: false,
+	});
 
 	const handleButtonClick = () => {
 		fileInputRef.current.click();
@@ -170,13 +201,37 @@ const Dashboard = () => {
 		handleLogoutClose();
 	};
 
+	const handleReset = () => {
+		resetForm(); // Function to reset the advancedsearch form
+	};
+
+	const handleSearch = () => {
+		performSearch(); // Function to perform the advancedsearch
+	};
+
+	const handleAdvancedSearchClick = () => {
+		setIsAdvancedSearchOpen(!isAdvancedSearchOpen); // if filtericon is clicked, will set AdvancedSearchOpen to TRUE
+	};
+
+	const handleInputChange = (event) => {
+		const { name, value, checked, type } = event.target;
+
+		setSearchParams(prevParams => ({
+			...prevParams,
+			[name]: type === 'checkbox' ? checked : value,
+		}));
+	};
+	//This creates a new object with all the current searchParams, but with the value for the property named name updated to the new value that came from the text field. 
+	//The new object is then set as the new state.
+
+
 	const initialFiles =
 		[
 			{
 				"name": "ProposaljahkwrjwehfljwhefjkhwelkfhklwehfkwefkwflkwNKCLKAEFJKSLJFKLWEFRJL.pdf",
 				"uploadedAt": "2024-04-12T07:20:50.123Z",
 				"lastEdited": "2024-04-15T09:30:00.123Z",
-				"ownerName": "507f1f77bcf86cd799439011",
+				"user_id": "507f1f77bcf86cd799439011",
 				"sharedWith": [
 					"507f191e810c19729de860ea",
 					"507f191e810c19729de860eb"
@@ -188,7 +243,7 @@ const Dashboard = () => {
 				"name": "Budget.xlsx",
 				"uploadedAt": "2024-03-27T05:24:30.123Z",
 				"lastEdited": "2024-04-05T11:45:30.123Z",
-				"ownerName": "507f1f77bcf86cd799439012",
+				"user_id": "507f1f77bcf86cd799439012",
 				"sharedWith": [],
 				"size": 55843,
 				"mime_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -197,7 +252,7 @@ const Dashboard = () => {
 				"name": "LogoDesign.ai",
 				"uploadedAt": "2024-02-18T12:00:00.123Z",
 				"lastEdited": "2024-02-20T08:50:00.123Z",
-				"ownerName": "507f1f77bcf86cd799439013",
+				"user_id": "507f1f77bcf86cd799439013",
 				"sharedWith": [
 					"507f191e810c19729de860ec"
 				],
@@ -218,7 +273,7 @@ const Dashboard = () => {
 
 	const handleChangeSearch = (event) => {
 		setSearchTerm(event.target.value);
-	};
+	}; // everytime the search input changes, set it as the new search term and it will filter it out 
 
 
 
@@ -325,12 +380,109 @@ const Dashboard = () => {
 						endAdornment: (
 							<InputAdornment position="end">
 								<IconButton>
-									<FilterListIcon />
+									<FilterListIcon onClick={handleAdvancedSearchClick} />
+									{/*  will trigger whether to open a modal or not  */}
 								</IconButton>
 							</InputAdornment>
 						),
 					}}
 				/>
+				{/* This is the Modal for the Advanced Search Fields BTWWWW */}
+				<Dialog open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClick}>
+					<DialogTitle>Advanced Search</DialogTitle>
+					<DialogContent>
+						<FormControl fullWidth margin="normal">
+							<InputLabel>Type</InputLabel>
+							<Select
+								name="type" //for each textfield you give it a name attribute that corresponds to a key in you searchParams object
+								value={searchParams.type}
+								onChange={handleInputChange}
+								label="Type"
+							>
+								<MenuItem value="office-doc">Office Document (Word, Excel)</MenuItem>
+								<MenuItem value="text-file">Text File</MenuItem>
+								<MenuItem value="archive">Zip/Rar File</MenuItem>
+								<MenuItem value="pdf">PDF</MenuItem>
+								<MenuItem value="video">Video</MenuItem>
+							</Select>
+						</FormControl>
+
+						<FormControl fullWidth margin="normal">
+							<InputLabel id="owner-select-label">Owner</InputLabel>
+							<Select
+								labelId="owner-select-label"
+								name="owner"
+								value={searchParams.owner}
+								onChange={handleInputChange}
+								label="Owner"
+							>
+
+								<MenuItem></MenuItem>
+							</Select>
+						</FormControl>
+
+						<TextField
+							name="hasTheWords"
+							label="Has the words"
+							fullWidth
+							margin="normal"
+							value={searchParams.hasTheWords}
+							onChange={handleInputChange}
+						/>
+
+						<TextField
+							name="itemName"
+							label="Item name"
+							fullWidth
+							margin="normal"
+							value={searchParams.itemName}
+							onChange={handleInputChange}
+						/>
+
+						<FormControl fullWidth margin="normal">
+							<InputLabel id="location-select-label">Location</InputLabel>
+							<Select
+								labelId="location-select-label"
+								name="location"
+								value={searchParams.location}
+								onChange={handleInputChange}
+								label="Location"
+							>
+								<MenuItem></MenuItem>
+							</Select>
+						</FormControl>
+
+						<FormControlLabel
+							control={
+								<Checkbox
+									name="starred"
+									checked={searchParams.starred}
+									onChange={handleInputChange}
+								/>
+							}
+							label="Starred"
+						/>
+						<FormControlLabel
+							control={
+								<Checkbox
+									name="inTrash"
+									checked={searchParams.inTrash}
+									onChange={handleInputChange}
+								/>
+							}
+							label="In trash"
+						/>
+
+						<Box mt={2} display="flex" justifyContent="space-between">
+							<Button variant="outlined" onClick={handleReset}>
+								Reset
+							</Button>
+							<Button variant="contained" color="primary" onClick={handleSearch}>
+								Search
+							</Button>
+						</Box>
+					</DialogContent>
+				</Dialog>
 
 				<Typography variant="h5">Welcome to Drive</Typography>
 				<br />
@@ -364,6 +516,14 @@ const Dashboard = () => {
 						</ToggleButtonGroup>
 					</div>
 				</div>
+				<div className={classes.listlayout}>
+					<Typography> File Name</Typography>
+					<div className={classes.listlayoutitems}>
+						<Typography className={classes.listlayoutitem}> Date Uploaded</Typography>
+						<Typography className={classes.listlayoutitem}> Owner</Typography>
+						<Typography className={classes.listlayoutitem}> Location</Typography>
+					</div>
+				</div>
 				<div className={classes.fileList}>
 					{files.map(file => (
 						<div key={file.file_id} className={classes.fileItem}>
@@ -371,7 +531,7 @@ const Dashboard = () => {
 							<div className={classes.fileDetails}>
 								<Typography className={classes.fileDetailsItem} > {file.lastEdited}</Typography>
 								<Typography > {file.sharedWith.length} people</Typography>
-								<Typography > {file.ownerName}</Typography>
+								<Typography > {file.user_id}</Typography>
 							</div>
 							<IconButton onClick={handleClick}>
 								<MoreVertIcon />
@@ -385,8 +545,10 @@ const Dashboard = () => {
 				open={Boolean(anchorEl)}
 				onClose={handleClose}
 			>
-				<MenuItem onClick={handleClose}>Delete</MenuItem>
 				<MenuItem onClick={handleClose}>Share</MenuItem>
+				<MenuItem onClick={handleClose}>Download</MenuItem>
+				<MenuItem onClick={handleClose}>Rename</MenuItem>
+				<MenuItem onClick={handleClose}>Star</MenuItem>
 			</Menu>
 			<Menu
 				anchorEl={logoutAnchorEl}
