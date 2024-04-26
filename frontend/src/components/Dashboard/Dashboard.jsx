@@ -103,7 +103,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 	avatar: {
 		position: 'absolute',
-		top: theme.spacing(2),
+		top: theme.spacing(4),
 		right: theme.spacing(2),
 		cursor: 'pointer',
 	},
@@ -124,7 +124,8 @@ const useStyles = makeStyles((theme) => ({
 	suggestedIcons: {
 		borderRadius: '10px',
 		width: '90px',
-		height: '40px',
+		height: '25px',
+		marginRight: '10px',
 	},
 	filefolderIcon: {
 		width: '16px',
@@ -221,9 +222,15 @@ const Dashboard = () => {
 			[name]: type === 'checkbox' ? checked : value,
 		}));
 	};
-	//This creates a new object with all the current searchParams, but with the value for the property named name updated to the new value that came from the text field. 
+	//This creates a new object with all the current searchParams, but with the value for the property named name updated to the new value that came from the text field.
 	//The new object is then set as the new state.
+    const file_filter = () => {
 
+    }
+
+    const folder_filter = () => {
+
+    }
 
 	const initialFiles =
 		[
@@ -273,7 +280,7 @@ const Dashboard = () => {
 
 	const handleChangeSearch = (event) => {
 		setSearchTerm(event.target.value);
-	}; // everytime the search input changes, set it as the new search term and it will filter it out 
+	}; // everytime the search input changes, set it as the new search term and it will filter it out
 
 
 
@@ -491,11 +498,11 @@ const Dashboard = () => {
 						<Typography className={classes.suggested} variant="subtitle1" gutterBottom>
 							Suggested
 						</Typography>
-						<ToggleButton className={classes.suggestedIcons} value="files" aria-label="left aligned">
+						<ToggleButton className={classes.suggestedIcons} value="files" aria-label="left aligned" onClick={file_filter}>
 							<InsertDriveFileIcon className={classes.filefolderIcon} />
 							Files
 						</ToggleButton>
-						<ToggleButton className={classes.suggestedIcons} value="folders" aria-label="centered">
+						<ToggleButton className={classes.suggestedIcons} value="folders" aria-label="centered"   onClick={folder_filter}>
 							<FolderIcon className={classes.filefolderIcon} />
 							Folders
 						</ToggleButton>
