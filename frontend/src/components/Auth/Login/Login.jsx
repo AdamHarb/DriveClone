@@ -3,14 +3,17 @@ import {useState} from "react";
 import axios from "axios";
 
 const Login = () => {
-
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    });
 
     const handleLogin = async (event) => {
         event.preventDefault();
-        const formData ={
+        setFormData({
             email: document.getElementById('email').value,
             password: document.getElementById('password').value,
-        };
+        });
         try {
             const response = await axios.post('http://localhost:3000/api/login', formData);
             console.log(response.data);
