@@ -1,8 +1,8 @@
-import Login from '../Login/Login';
 import './Signup.css';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useState } from 'react';
+import axios from "axios";
 
 const Signup = () => {
 
@@ -10,11 +10,39 @@ const Signup = () => {
     const [showPassword1, setShowPassword1] = useState(false);
 
 
-    const togglePasswordVisibility = () => {
+    const  togglePasswordVisibility = () => {
+        event.preventDefault();
         setShowPassword(!showPassword);
     };
     const togglePasswordVisibility1 = () => {
+        event.preventDefault();
         setShowPassword1(!showPassword1);
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        const newFormData = {
+            username: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+        };
+
+
+        try {
+            const response = await axios.post('http://localhost:3000/api/create-user', newFormData); // Make API request
+            console.log(response.data);
+            // Handle successful response
+            if (response.data.success) {
+                // Handle successful signup (e.g., redirect to another page)
+                console.log('Signup successful!'); // Replace with your desired action
+            } else {
+                // Handle signup errors (e.g., display error messages)
+                console.error('Signup failed:', response.data.error); // Replace with error handling
+            }
+        } catch (error) {
+            console.error('Error during signup:', error); // Handle errors during request
+        }
     };
 
 
@@ -24,15 +52,10 @@ const Signup = () => {
                 <form id="signupform">
                     <div id="signupaccount">
                         <div id="createyouraccount"> CREATE YOUR ACCOUNT</div>
-                        <div id="names-container">
+                        <div class="fields">
                             <div id="firstnamefield">
-                                <label for="firstname"> First Name</label>
-                                <input type="firstname" id="firstname" name="firstname"></input>
-                            </div>
-
-                            <div id="lastnamefield">
-                                <label for="lastname"> Last Name</label>
-                                <input type="lastname" id="lastname" name="lastname"></input>
+                                <label for="username">Username</label>
+                                <input type="username" id="username" name="username"></input>
                             </div>
                         </div>
 
@@ -72,7 +95,7 @@ const Signup = () => {
                             </div>
                         </div>
 
-                        <button class="button" id="signupbutton"> Sign up</button>
+                        <button class="button" id="signupbutton" onClick={handleSubmit}> Sign up</button>
                     </div>
                 </form>
 

@@ -33,7 +33,7 @@ const loginUser = async (req, res) => {
 
 const getProfileByUsername = async (req, res) => {
     try {
-        const username = req.params.username;
+        const username = req.user.username;
         console.log(username);
         const user = await User.findOne({ username: username });
         console.log(user);
@@ -69,10 +69,10 @@ const createUser = async (req, res) => {
         });
         console.log(user)
         await user.save();
-        res.status(201).json({ message: "User created successfully" });
+        res.status(201).json({ message: "User created successfully",success:true });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "Internal server error",success:false });
     }
 }
 
