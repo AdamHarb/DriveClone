@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const mongAuto = require('mongoose-auto-increment');
+const AutoIncrement = require('../../db/db').getAutoInc();
 
 const UserSchema = new mongoose.Schema({
     user_id: {
-        type: Number, required: true, unique: true, index: true
+        type: Number
     },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -29,10 +29,7 @@ UserSchema.methods.comparePassword = async function (password) {
     return bcrypt.compare(password, this.password);
 };
 
-
-mongAuto.initialize(mongoose.connection);
-
-UserSchema.plugin(mongAuto.plugin, { model: 'User', field: 'user_id' });
+UserSchema.plugin(AutoIncrement, { inc_field: 'user_id' });
 
 const User = mongoose.model('User', UserSchema);
 
