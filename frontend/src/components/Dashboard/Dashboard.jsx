@@ -154,7 +154,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 
 	listlayoutitem: {
-		display:'flex',
+		display: 'flex',
 		flexGrow: 1,
 	}
 }));
@@ -163,6 +163,7 @@ const Dashboard = () => {
 	const classes = useStyles();
 	const fileInputRef = useRef(null);
 	const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false); // handling the advancedsearch modal
+	const [isAvatarClicked, setAvatarClicked] = useState(false); //handling the userProfile dialog/modal
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const [logoutAnchorEl, setLogoutAnchorEl] = React.useState(null);
 	const [searchParams, setSearchParams] = React.useState({
@@ -174,6 +175,10 @@ const Dashboard = () => {
 		inTrash: false,
 		starred: false,
 	});
+
+	const handleAvatarClick = () => {
+		setAvatarClicked(!isAvatarClicked);
+	}
 
 	const handleButtonClick = () => {
 		fileInputRef.current.click();
@@ -361,9 +366,22 @@ const Dashboard = () => {
 				</div>
 			</Drawer>
 			<main className={classes.content}>
-				<Avatar className={classes.avatar} onClick={handleLogoutClick}>
-					JD
-				</Avatar>
+					<Avatar className={classes.avatar} onClick={handleAvatarClick}/* onClick={handleLogoutClick} */>
+						JD
+					</Avatar>
+					{/* Dialog to show user's profile */}
+					<Dialog open={isAvatarClicked} onClose={handleAvatarClick}>
+						<DialogTitle>User Profile </DialogTitle>
+						<DialogContent fullWidth margin="normal">
+								<div>
+									Hi , username
+								</div>
+								<div>
+									User email
+								</div>
+
+						</DialogContent>
+					</Dialog>
 				<TextField
 					className={classes.searchBar}
 					label="Search in Drive"
