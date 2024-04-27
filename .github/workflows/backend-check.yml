@@ -5,7 +5,7 @@ on: [ push, pull_request ]
 jobs:
   run-check:
     env:
-      MY_VARIABLE: ${{ secrets.ATLAS_URI }}
+      ATLAS_URI: ${{ secrets.ATLAS_URI }}
     name: Backend Check
     runs-on: ubuntu-latest
 
