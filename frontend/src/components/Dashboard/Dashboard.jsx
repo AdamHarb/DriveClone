@@ -36,12 +36,13 @@ import ViewListIcon from '@material-ui/icons/ViewList';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import DoneIcon from '@material-ui/icons/Done';
 import { useState } from 'react';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import ShareIcon from '@mui/icons-material/Share';
-import EditIcon from '@mui/icons-material/Edit';
-import InfoIcon from '@mui/icons-material/Info';
 import { Dialog, DialogTitle, DialogContent } from '@mui/material';
 import { FormControl, InputLabel, Select, FormControlLabel, Checkbox, Box } from '@mui/material';
+import DescriptionIcon from '@material-ui/icons/Description'; // default icon
+import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf'; // for PDFs
+import OndemandVideoIcon from '@material-ui/icons/OndemandVideo'; // for videos
+import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined'; // for office documents
+
 
 
 
@@ -175,6 +176,28 @@ const Dashboard = () => {
 		inTrash: false,
 		starred: false,
 	});
+
+	const getFileIcon = (mime_type) => {
+		switch (mime_type) {
+		  case 'application/pdf':
+			return <PictureAsPdfIcon />;
+		  case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+		  case 'application/msword':
+		  case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+			return <InsertDriveFileOutlinedIcon />;
+		  case 'text/plain':
+			return <InsertDriveFileIcon />;
+		  case 'application/zip':
+		  case 'application/x-rar-compressed':
+			return <FolderIcon />;
+		  case 'video/mp4':
+		  case 'video/mpeg':
+			return <OndemandVideoIcon />;
+		  default:
+			return <DescriptionIcon />;
+		}
+	  };
+	  
 
 	const handleAvatarClick = () => {
 		setAvatarClicked(!isAvatarClicked);
@@ -545,6 +568,7 @@ const Dashboard = () => {
 				<div className={classes.fileList}>
 					{files.map(file => (
 						<div key={file.file_id} className={classes.fileItem}>
+							{getFileIcon(file.mime_type)}
 							<Typography className={classes.fileName}>{file.name}</Typography>
 							<div className={classes.fileDetails}>
 								<Typography className={classes.fileDetailsItem} > {file.lastEdited}</Typography>
