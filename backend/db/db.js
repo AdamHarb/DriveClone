@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const client = require('mongodb').MongoClient;
 const { GridFSBucket } = require('mongodb');
 require('dotenv').config();
-
 let gfsBucket;
 
 async function connectDB() {
@@ -40,8 +39,13 @@ async function getDB() {
     return await client.connect(process.env.ATLAS_URI).then((client) => client.db());
 }
 
+function getAutoInc() {
+    return require('mongoose-sequence')(mongoose);
+}
+
 module.exports = {
     connectDB,
     getGridFSBucket,
-    getDB
+    getDB,
+    getAutoInc
 };
