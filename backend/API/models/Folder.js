@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const mongAuto = require('mongoose-auto-increment');
+const AutoIncrement = require('../../db/db').getAutoInc();
 
 const FolderSchema = new mongoose.Schema({
     folder_id: {
-        type: Number, required: true, unique: true, index: true
+        type: Number
     },
     user_id: { type: Number, ref: 'User', required: true },
     folder_name: { type: String, required: true },
@@ -18,7 +18,8 @@ FolderSchema.pre('save', function (next) {
     next();
 });
 
-FolderSchema.plugin(mongAuto.plugin, { model: 'Folder', field: 'folder_id' });
+FolderSchema.plugin(AutoIncrement, { inc_field: 'folder_id' });
+
 const Folder = mongoose.model('Folder', FolderSchema);
 
 module.exports = Folder;
