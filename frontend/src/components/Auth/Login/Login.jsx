@@ -1,9 +1,12 @@
 import './Login.css'
 import {useState} from "react";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
+import {useCookies} from "react-cookie";
 
 const Login = () => {
-
+    const navigate = useNavigate();
+    const [cookies, setCookie, removeCookie] = useCookies(['token']);
 
     const handleLogin = async (event) => {
         event.preventDefault();
@@ -12,7 +15,13 @@ const Login = () => {
             password: document.getElementById('password').value,
         };
         try {
-            const response = await axios.post('http://localhost:3000/api/login', formData);
+            const response = await axios.post('http://localhost:3000/api/login', formData).then((response) => {
+                if (response.status === 200) {
+                    setCookie('token', response.data.token)
+                    navigate('/');
+                }
+            });
+
             console.log(response.data);
         } catch (error) {
             console.error('Error during login:', error);
@@ -38,7 +47,7 @@ const Login = () => {
             </div>
             <br />
             <div id="signupoption">
-                <div id='already'>Don't have an account?&ensp;</div>
+                <div id='already'>Don&apos;t have an account?&ensp;</div>
                 <a href="/signup"> Sign Up </a>
             </div>
         </div>
