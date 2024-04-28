@@ -7,12 +7,10 @@ exports.uploadFile = async (req, res) => {
 	try {
 		const { parent_id } = req.body;
 
-		const fileCount = await File.countDocuments({ user_id: req.user._id });
+		const user = await User.findOne({ _id: req.user._id });
 
-		// const him = await User.findOne({ _id: req.user._id });
-		// const newsize = him.storage_used + req.file.size;
-		// const user = await User.updateOne({ _id: req.user._id }, { storage_used: newsize });
-    //
+		await User.updateOne({ _id: req.user._id }, { storage_used: user.storage_used + req.file.size / 1048576 });
+
 		const fileBuffer = req.file.buffer;
 
 		const bucket = await getGridFSBucket();
@@ -32,9 +30,8 @@ exports.uploadFile = async (req, res) => {
 			file_id: fileId
 		});
 
-
-
 		await file.save();
+
 		res.status(201).json({ message: "File uploaded successfully", fileId });
 	} catch (err) {
 		console.error(err);
@@ -137,7 +134,12 @@ exports.deleteFile = async (req, res) => {
 			return res.status(404).json({ message: "File not found" });
 		}
 
+		const user = await User.findOne({ _id: req.user._id });
+
+		await User.updateOne({ _id: user._id }, { storage_used: user.storage_used - file.size / 1048576 });
+
 		const bucket = await getGridFSBucket();
+
 		await bucket.delete(file.file_id);
 
 		res.status(200).json({ message: "File deleted successfully" });
