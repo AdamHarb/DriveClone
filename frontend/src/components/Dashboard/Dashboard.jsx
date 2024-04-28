@@ -471,15 +471,92 @@ const Dashboard = () => {
       console.log(response.data)
       return response.data;
     } catch (error) {
-        console.error('Error during login:', error);
+      console.error('Error during login:', error);
     }
   }
 
-  function handleSharedWith(file) {
-    if (file.sharedWith){
-      return file.sharedWith.length
+  const handleUploadFile = async (file) => {
+    try {
+      if (!file) {
+        return;
+      }
+
+      console.log(file);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post('http://localhost:3000/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${cookies.token}`
+        }
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error during file upload:', error);
     }
-    else return 0
+  };
+
+  const handleCreateFolder = async (folderName) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/create-folder', {
+            name: folderName
+          }, {
+            headers: {
+              'Authorization': `Bearer ${cookies.token}`
+            }
+          }
+      );
+      console.log(response.data)
+
+      return response.data.folder_id;
+    } catch (e) {
+      console.error('Error during folder creation:', e);
+    }
+  }
+
+  // Use: <input type="file" webkitdirectory="" directory="" onChange={handleFileChange} />
+  const handleUploadFolder = async (folder) => {
+    try {
+      if (!folder) {
+        return;
+      }
+
+      const files = Array.from(folder.target.files);
+      const directoryName = files[0].webkitRelativePath.split('/').slice(0, -1).join('/');
+
+      const folder_id = await handleCreateFolder(directoryName);
+
+      const uploadPromises = files.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('parent_id', folder_id);
+
+        try {
+          const response = await axios.post('http://localhost:3000/api/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${cookies.token}`
+            }
+          });
+          console.log(response.data);
+        } catch (error) {
+          console.error('Error during file upload:', error);
+        }
+      });
+
+      await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error('Error during folder upload:', error);
+    }
+  }
+
+
+  function handleSharedWith(file) {
+    if (file.sharedWith) {
+      return file.sharedWith.length
+    } else return 0
   }
 
   const handleButtonClick = () => {
@@ -534,34 +611,34 @@ const Dashboard = () => {
   };
 
   const getFileIcon = (mime_type) => {
-		switch (mime_type) {
-		  case 'application/pdf':
-			return <PictureAsPdfIcon style={{ color: '#ea4335' }} />;
-		  case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-		  case 'application/msword':
-		  case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-			return <ArticleIcon style={{ color: '#4285f4' }}/>;
-		  case 'text/plain':
-			return <DescriptionIcon  style={{ color: '#34a853' }}/>;
-		  case 'application/zip':
-		  case 'application/x-rar-compressed':
-			return <FolderZipIcon  style={{ color: '#5f6368' }}/>;
-		  case 'video/mp4':
-		  case 'video/mpeg':
-			return <MovieIcon style={{ color: '#ea4335' }} />;
-		  default:
-			return <DescriptionIcon />;
-		} 
-	  };
-    const getFolderIcon = (folderName) => {
-      // Add logic to determine the appropriate folder icon based on the folder name or any other criteria
-      // For example:
-      if (folderName.toLowerCase().includes("project")) {
-        return <FolderIcon style={{ color: "#444746" }} />;
-      } else {
-        return <FolderIcon />;
-      }
-    };
+    switch (mime_type) {
+      case 'application/pdf':
+        return <PictureAsPdfIcon style={{color: '#ea4335'}}/>;
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      case 'application/msword':
+      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        return <ArticleIcon style={{color: '#4285f4'}}/>;
+      case 'text/plain':
+        return <DescriptionIcon style={{color: '#34a853'}}/>;
+      case 'application/zip':
+      case 'application/x-rar-compressed':
+        return <FolderZipIcon style={{color: '#5f6368'}}/>;
+      case 'video/mp4':
+      case 'video/mpeg':
+        return <MovieIcon style={{color: '#ea4335'}}/>;
+      default:
+        return <DescriptionIcon/>;
+    }
+  };
+  const getFolderIcon = (folderName) => {
+    // Add logic to determine the appropriate folder icon based on the folder name or any other criteria
+    // For example:
+    if (folderName.toLowerCase().includes("project")) {
+      return <FolderIcon style={{color: "#444746"}}/>;
+    } else {
+      return <FolderIcon/>;
+    }
+  };
 
   const handleAdvancedSearchClick = () => {
     setIsAdvancedSearchOpen(!isAdvancedSearchOpen); // Toggle the advanced search modal
@@ -569,7 +646,7 @@ const Dashboard = () => {
   const profilePictureRef = useRef(null);
 
   const handleInputChange = (event) => {
-    const { name, value, checked, type } = event.target;
+    const {name, value, checked, type} = event.target;
 
     setSearchParams((prevParams) => ({
       ...prevParams,
@@ -579,33 +656,33 @@ const Dashboard = () => {
 
   const renderGrid = () => {
     const classes = useStyles();
-  
+
     return (
-      <div className={classes.gridContainer}>
-        {selectedItemType === 'files'
-          ? files.map((file) => (
-              <div key={file.file_id} className={classes.gridItem}>
-                <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
-                <div className={classes.gridDetails}>
-                  <div className={classes.gridName}>{file.name}</div>
-                </div>
-                <IconButton className={classes.kebabMenu} onClick={handleClick}>
-                  <MoreVertIcon />
-                </IconButton>
-              </div>
-            ))
-          : folders.map((folder) => (
-              <div key={folder.folder_id} className={classes.gridItem}>
-                <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
-                <div className={classes.gridDetails}>
-                  <div className={classes.gridName}>{folder.name}</div>
-                </div>
-                <IconButton className={classes.kebabMenu} onClick={handleClick}>
-                  <MoreVertIcon />
-                </IconButton>
-              </div>
-            ))}
-      </div>
+        <div className={classes.gridContainer}>
+          {selectedItemType === 'files'
+              ? files.map((file) => (
+                  <div key={file.file_id} className={classes.gridItem}>
+                    <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
+                    <div className={classes.gridDetails}>
+                      <div className={classes.gridName}>{file.name}</div>
+                    </div>
+                    <IconButton className={classes.kebabMenu} onClick={handleClick}>
+                      <MoreVertIcon/>
+                    </IconButton>
+                  </div>
+              ))
+              : folders.map((folder) => (
+                  <div key={folder.folder_id} className={classes.gridItem}>
+                    <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
+                    <div className={classes.gridDetails}>
+                      <div className={classes.gridName}>{folder.name}</div>
+                    </div>
+                    <IconButton className={classes.kebabMenu} onClick={handleClick}>
+                      <MoreVertIcon/>
+                    </IconButton>
+                  </div>
+              ))}
+        </div>
     );
   };
 
@@ -629,7 +706,7 @@ const Dashboard = () => {
       sharedWith: [],
       size: 2048, // 2 KB
       mime_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  },
+    },
     {
       name: "ReadMe.txt",
       uploadedAt: "2024-04-10T14:00:00.123Z",
@@ -648,9 +725,9 @@ const Dashboard = () => {
       sharedWith: ["507f191e810c19729de860ed"],
       size: 20485760, // 20 MB
       mime_type: "video/mp4",
-  },
-  // New ZIP/RAR file
-  {
+    },
+    // New ZIP/RAR file
+    {
       name: "Archive.zip",
       uploadedAt: "2024-04-15T08:15:00.123Z",
       lastEdited: "2024-04-17T09:45:00.123Z",
@@ -658,7 +735,7 @@ const Dashboard = () => {
       sharedWith: [],
       size: 1024000, // 1 MB
       mime_type: "application/zip",
-  }
+    }
   ];
 
   const [files, setFiles] = useState(initialFiles);
@@ -679,15 +756,15 @@ const Dashboard = () => {
 
   const [folders, setFolders] = useState(initialFolders);
 
-  
+
   useEffect(() => {
     const filteredFiles = initialFiles.filter((file) =>
-      file.name.toLowerCase().includes(searchTerm.toLowerCase())
+        file.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFiles(filteredFiles);
-  
+
     const filteredFolders = initialFolders.filter((folder) =>
-      folder.name.toLowerCase().includes(searchTerm.toLowerCase())
+        folder.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFolders(filteredFolders);
   }, [searchTerm]);
@@ -697,554 +774,554 @@ const Dashboard = () => {
   }; // Every time the search input changes, set it as the new search term and it will filter out
 
   return (
-    <div className={classes.root}>
-      <Drawer
-        className={classes.drawer}
-        variant="permanent"
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-      >
-        <div className={classes.logo}>
-          <img src={logo} alt="Drive Logo" className={classes.logoIcon} />
-          <Typography variant="h5">Drive</Typography>
-        </div>
-
-        <input
-          type="file"
-          style={{ display: "none" }} // Hide the file input element
-          ref={fileInputRef}
-          onChange={(event) => {
-            const file = event.target.files[0];
-            console.log(file); // Log the selected file, or handle it as needed
-          }}
-        />
-        <Button
-          variant="contained"
-          color="default"
-          className={classes.addButton}
-          startIcon={<AddIcon className={classes.newIcon} />}
-          onClick={handleButtonClick}
+      <div className={classes.root}>
+        <Drawer
+            className={classes.drawer}
+            variant="permanent"
+            classes={{
+              paper: classes.drawerPaper,
+            }}
         >
-          <Typography variant="body2" style={{ fontSize: "18px" }}>
-            New
-          </Typography>
-        </Button>
-        <List>
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "home" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => handleListButtonClick("home")}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "home" ? (
-                <HomeIcon />
-              ) : (
-                <HomeOutlinedIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Home" />
-          </ListItem>
+          <div className={classes.logo}>
+            <img src={logo} alt="Drive Logo" className={classes.logoIcon}/>
+            <Typography variant="h5">Drive</Typography>
+          </div>
 
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "myDrive" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => handleListButtonClick("myDrive")}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "myDrive" ? (
-                <AddToDriveOutlinedIcon />
-              ) : (
-                <AddToDriveIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="My Drive" />
-          </ListItem>
-
-          {/* Add margin to create a gap between groups */}
-          <div style={{ margin: "24px 0" }}></div>
-
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "sharedWithMe" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => handleListButtonClick("sharedWithMe")}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "sharedWithMe" ? (
-                <PeopleAltIcon />
-              ) : (
-                <PeopleAltOutlinedIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Shared with me" />
-          </ListItem>
-
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "starred" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => handleListButtonClick("starred")}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "starred" ? (
-                <StarOutlinedIcon />
-              ) : (
-                <StarOutlineOutlinedIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Starred" />
-          </ListItem>
-
-          {/* Add margin to create a gap between groups */}
-          <div style={{ margin: "24px 0" }}></div>
-
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor: activeListButton === "bin" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => handleListButtonClick("bin")}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "bin" ? (
-                <DeleteIcon />
-              ) : (
-                <DeleteOutlinedIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Bin" />
-          </ListItem>
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "storage" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => handleListButtonClick("storage")}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "storage" ? (
-                <CloudIcon />
-              ) : (
-                <CloudQueueIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Storage" />
-          </ListItem>
-
-          {/* Add storage bar directly under the "Storage" button */}
-          <div className={classes.storageInfo}>
-            <div
-              style={{
-                width: "100%",
-                marginTop: -6,
-                marginBottom: 6,
-                height: 5,
-                backgroundColor: "#e1e3e1",
-                borderRadius: "5px",
+          <input
+              type="file"
+              style={{display: "none"}} // Hide the file input element
+              ref={fileInputRef}
+              onChange={(event) => {
+                const file = event.target.files[0];
+                handleUploadFile(file).then(r => console.log(r));
               }}
-            >
-              <div
-                style={{
-                  width: "60%",
-                  height: "100%",
-                  backgroundColor: "#0b57d0",
-                  borderRadius: "5px",
-                }}
-              ></div>
-            </div>
-            <Typography variant="subtitle1">10 GB of 15 GB used</Typography>
-          </div>
-        </List>
-      </Drawer>
-
-      <main className={classes.content}>
-      <Avatar
-  className={classes.avatar}
-  onClick={handleProfileClick}
-  ref={profilePictureRef}
->
-  JD
-</Avatar>
-<Dialog
-  open={isProfileModalOpen}
-  onClose={handleProfileModalClose}
-  anchorEl={profilePictureRef.current}
-  transformOrigin={{
-    vertical: 'top',
-    horizontal: 'right',
-  }}
-  getContentAnchorEl={null}
->
-  <DialogContent className={classes.modalContainer}>
-    <IconButton
-      className={classes.closeButton}
-      onClick={handleProfileModalClose}
-    >
-      <CloseIcon />
-    </IconButton>
-    <h2 className={classes.email}>nourzamel35@gmail.com</h2>
-    <Avatar className={classes.profilePicture}>NZ</Avatar>
-    <p className={classes.greeting}>Hi, Nour Zamel!</p>
-  </DialogContent>
-</Dialog>
-
-        <Typography variant="h4" className={classes.centeredText}>
-          Welcome to Drive
-        </Typography>
-        <TextField
-          className={classes.searchBar}
-          placeholder="Search in Drive"
-          variant="outlined"
-          onChange={handleChangeSearch}
-          value={searchTerm}
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton>
-                  <FilterListIcon onClick={handleAdvancedSearchClick} />
-                </IconButton>
-              </InputAdornment>
-            ),
-            style: {
-              borderRadius: "25px", // Set the border radius to your desired value (e.g., '25px')
-            },
-          }}
-        />
-        <div className={classes.buttonContainer}>
+          />
           <Button
-            variant="outlined"
-            startIcon={<InsertDriveFileOutlinedIcon />} // Icon on the left side
-            endIcon={<ArrowDropDownOutlinedIcon />} // Arrow icon on the right side
-            className={classes.button}
+              variant="contained"
+              color="default"
+              className={classes.addButton}
+              startIcon={<AddIcon className={classes.newIcon}/>}
+              onClick={handleButtonClick}
           >
-            Type
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<PermIdentityOutlinedIcon />} // Icon on the left side
-            endIcon={<ArrowDropDownOutlinedIcon />} // Arrow icon on the right side
-            className={classes.button}
-          >
-            People
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<CalendarTodayOutlinedIcon />} // Icon on the left side
-            endIcon={<ArrowDropDownOutlinedIcon />} // Arrow icon on the right side
-            className={classes.button}
-          >
-            Modified
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<FolderOpenOutlinedIcon />} // Icon on the left side
-            endIcon={<ArrowDropDownOutlinedIcon />} // Arrow icon on the right side
-            className={classes.button}
-          >
-            Location
-          </Button>
-        </div>
-
-        {/* This is the Modal for the Advanced Search Fields */}
-        <Dialog open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClick}>
-          <DialogTitle>Advanced Search</DialogTitle>
-          <DialogContent>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Type</InputLabel>
-              <Select
-                name="type" // Each text field gets a name attribute that corresponds to a key in the searchParams object
-                value={searchParams.type}
-                onChange={handleInputChange}
-                label="Type"
-              >
-                <MenuItem value="office-doc">
-                  Office Document (Word, Excel)
-                </MenuItem>
-                <MenuItem value="text-file">Text File</MenuItem>
-                <MenuItem value="archive">Zip/Rar File</MenuItem>
-                <MenuItem value="pdf">PDF</MenuItem>
-                <MenuItem value="video">Video</MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="owner-select-label">Owner</InputLabel>
-              <Select
-                labelId="owner-select-label"
-                name="owner"
-                value={searchParams.owner}
-                onChange={handleInputChange}
-                label="Owner"
-              >
-                <MenuItem></MenuItem>
-              </Select>
-            </FormControl>
-
-            <TextField
-              name="hasTheWords"
-              label="Has the words"
-              fullWidth
-              margin="normal"
-              value={searchParams.hasTheWords}
-              onChange={handleInputChange}
-            />
-
-            <TextField
-              name="itemName"
-              label="Item name"
-              fullWidth
-              margin="normal"
-              value={searchParams.itemName}
-              onChange={handleInputChange}
-            />
-
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="location-select-label">Location</InputLabel>
-              <Select
-                labelId="location-select-label"
-                name="location"
-                value={searchParams.location}
-                onChange={handleInputChange}
-                label="Location"
-              >
-                <MenuItem></MenuItem>
-              </Select>
-            </FormControl>
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="starred"
-                  checked={searchParams.starred}
-                  onChange={handleInputChange}
-                />
-              }
-              label="Starred"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="inTrash"
-                  checked={searchParams.inTrash}
-                  onChange={handleInputChange}
-                />
-              }
-              label="In trash"
-            />
-
-            <Box mt={2} display="flex" justifyContent="space-between">
-              <Button variant="outlined" onClick={handleReset}>
-                Reset
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSearch}
-              >
-                Search
-              </Button>
-            </Box>
-          </DialogContent>
-        </Dialog>
-
-        <br />
-
-        <div className={classes.filterOptions}>
-          <div className={classes.suggestedContainer}>
-            <Typography className={classes.suggestedText}>Suggested</Typography>
-
-            {/* Files and Folders buttons */}
-            <ToggleButtonGroup exclusive aria-label="files and folders">
-              <ToggleButton
-                value="files"
-                aria-label="files"
-                className={classes.fileFolderButton}
-                style={{
-                  backgroundColor:
-                    activeButton === "files" ? "#c2e7ff" : "white",
-                }}
-                onClick={() => handleToggleButtonClick("files")}
-              >
-                {activeButton === "files" ? (
-                  <DoneIcon />
-                ) : (
-                  <ArticleOutlinedIcon />
-                )}
-                <Typography style={{ marginLeft: 8, textTransform: "none" }}>
-                  Files
-                </Typography>
-              </ToggleButton>
-
-              {/* Separator between Files and Folders buttons */}
-              <div className={classes.verticalSeparator}></div>
-
-              <ToggleButton
-                value="folders"
-                aria-label="folders"
-                className={classes.fileFolderButton}
-                style={{
-                  backgroundColor:
-                    activeButton === "folders" ? "#c2e7ff" : "white",
-                }}
-                onClick={() => handleToggleButtonClick("folders")}
-              >
-                {activeButton === "folders" ? (
-                  <DoneIcon />
-                ) : (
-                  <FolderOpenOutlinedIcon />
-                )}
-                <Typography style={{ marginLeft: 8, textTransform: "none" }}>
-                  Folders
-                </Typography>
-              </ToggleButton>
-            </ToggleButtonGroup>
-
-            {/* Layout buttons */}
-            <ToggleButtonGroup exclusive aria-label="layout buttons">
-              <ToggleButton
-                value="list"
-                aria-label="list"
-                className={classes.layoutButton}
-                style={{
-                  backgroundColor:
-                    activeLayout === "list" ? "#c2e7ff" : "white",
-                }}
-                onClick={() => handleLayoutButtonClick("list")}
-              >
-                {activeLayout === "list" && <DoneIcon />}
-                <MenuOutlinedIcon />
-              </ToggleButton>
-
-              {/* Separator between List and Module buttons */}
-              <div className={classes.verticalSeparator}></div>
-
-              <ToggleButton
-                value="module"
-                aria-label="module"
-                className={classes.layoutButton}
-                style={{
-                  backgroundColor:
-                    activeLayout === "module" ? "#c2e7ff" : "white",
-                }}
-                onClick={() => handleLayoutButtonClick("module")}
-              >
-                {activeLayout === "module" && <DoneIcon />}
-                <GridViewOutlinedIcon />
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </div>
-        </div>
-        {activeLayout === 'list' && (
-  <div className={classes.listLayout}>
-    <Typography className={classes.nameBold}>Name</Typography>
-    <div className={classes.listLayoutItems}>
-      <Typography className={classes.listLayoutItem}>Date Uploaded</Typography>
-      <Typography className={classes.listLayoutItem}>Owner</Typography>
-      <Typography className={classes.listLayoutItem}>Location</Typography>
-    </div>
-  </div>
-)}
-
-{activeLayout === 'list' ? (
-  <>
-    <div className={classes.fileList}>
-      {selectedItemType === "files" ? files.map(file => (
-        <div key={file.file_id} className={classes.fileItem}>
-          <div className={classes.fileIcon}>
-            {getFileIcon(file.mime_type)}
-          </div>
-          <Typography className={classes.fileName}>{file.name}</Typography>
-          <div className={classes.fileDetails}>
-            <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
-            <Typography>{file.sharedWith.length} people</Typography>
-            <Typography>{file.user_id}</Typography>
-          </div>
-          <IconButton onClick={handleClick}>
-            <MoreVertIcon />
-          </IconButton>
-        </div>
-      )) : folders.map((folder) => (
-        <div key={folder.folder_id} className={classes.fileItem}>
-          <div className={classes.fileIcon}>
-            {getFolderIcon(folder.name)}
-          </div>
-          <Typography className={classes.fileName}>{folder.name}</Typography>
-          <div className={classes.fileDetails}>
-            <Typography className={classes.fileDetailsItem}>
-              {folder.lastModified}
+            <Typography variant="body2" style={{fontSize: "18px"}}>
+              New
             </Typography>
-            <Typography>{folder.sharedWith.length} people</Typography>
-            <Typography>{folder.user_id}</Typography>
+          </Button>
+          <List>
+            <ListItem
+                button
+                className={classes.listButton}
+                style={{
+                  backgroundColor:
+                      activeListButton === "home" ? "#c2e7ff" : "white",
+                }}
+                onClick={() => handleListButtonClick("home")}
+            >
+              <ListItemIcon className={classes.icon}>
+                {activeListButton === "home" ? (
+                    <HomeIcon/>
+                ) : (
+                    <HomeOutlinedIcon/>
+                )}
+              </ListItemIcon>
+              <ListItemText primary="Home"/>
+            </ListItem>
+
+            <ListItem
+                button
+                className={classes.listButton}
+                style={{
+                  backgroundColor:
+                      activeListButton === "myDrive" ? "#c2e7ff" : "white",
+                }}
+                onClick={() => handleListButtonClick("myDrive")}
+            >
+              <ListItemIcon className={classes.icon}>
+                {activeListButton === "myDrive" ? (
+                    <AddToDriveOutlinedIcon/>
+                ) : (
+                    <AddToDriveIcon/>
+                )}
+              </ListItemIcon>
+              <ListItemText primary="My Drive"/>
+            </ListItem>
+
+            {/* Add margin to create a gap between groups */}
+            <div style={{margin: "24px 0"}}></div>
+
+            <ListItem
+                button
+                className={classes.listButton}
+                style={{
+                  backgroundColor:
+                      activeListButton === "sharedWithMe" ? "#c2e7ff" : "white",
+                }}
+                onClick={() => handleListButtonClick("sharedWithMe")}
+            >
+              <ListItemIcon className={classes.icon}>
+                {activeListButton === "sharedWithMe" ? (
+                    <PeopleAltIcon/>
+                ) : (
+                    <PeopleAltOutlinedIcon/>
+                )}
+              </ListItemIcon>
+              <ListItemText primary="Shared with me"/>
+            </ListItem>
+
+            <ListItem
+                button
+                className={classes.listButton}
+                style={{
+                  backgroundColor:
+                      activeListButton === "starred" ? "#c2e7ff" : "white",
+                }}
+                onClick={() => handleListButtonClick("starred")}
+            >
+              <ListItemIcon className={classes.icon}>
+                {activeListButton === "starred" ? (
+                    <StarOutlinedIcon/>
+                ) : (
+                    <StarOutlineOutlinedIcon/>
+                )}
+              </ListItemIcon>
+              <ListItemText primary="Starred"/>
+            </ListItem>
+
+            {/* Add margin to create a gap between groups */}
+            <div style={{margin: "24px 0"}}></div>
+
+            <ListItem
+                button
+                className={classes.listButton}
+                style={{
+                  backgroundColor: activeListButton === "bin" ? "#c2e7ff" : "white",
+                }}
+                onClick={() => handleListButtonClick("bin")}
+            >
+              <ListItemIcon className={classes.icon}>
+                {activeListButton === "bin" ? (
+                    <DeleteIcon/>
+                ) : (
+                    <DeleteOutlinedIcon/>
+                )}
+              </ListItemIcon>
+              <ListItemText primary="Bin"/>
+            </ListItem>
+            <ListItem
+                button
+                className={classes.listButton}
+                style={{
+                  backgroundColor:
+                      activeListButton === "storage" ? "#c2e7ff" : "white",
+                }}
+                onClick={() => handleListButtonClick("storage")}
+            >
+              <ListItemIcon className={classes.icon}>
+                {activeListButton === "storage" ? (
+                    <CloudIcon/>
+                ) : (
+                    <CloudQueueIcon/>
+                )}
+              </ListItemIcon>
+              <ListItemText primary="Storage"/>
+            </ListItem>
+
+            {/* Add storage bar directly under the "Storage" button */}
+            <div className={classes.storageInfo}>
+              <div
+                  style={{
+                    width: "100%",
+                    marginTop: -6,
+                    marginBottom: 6,
+                    height: 5,
+                    backgroundColor: "#e1e3e1",
+                    borderRadius: "5px",
+                  }}
+              >
+                <div
+                    style={{
+                      width: "60%",
+                      height: "100%",
+                      backgroundColor: "#0b57d0",
+                      borderRadius: "5px",
+                    }}
+                ></div>
+              </div>
+              <Typography variant="subtitle1">10 GB of 15 GB used</Typography>
+            </div>
+          </List>
+        </Drawer>
+
+        <main className={classes.content}>
+          <Avatar
+              className={classes.avatar}
+              onClick={handleProfileClick}
+              ref={profilePictureRef}
+          >
+            JD
+          </Avatar>
+          <Dialog
+              open={isProfileModalOpen}
+              onClose={handleProfileModalClose}
+              anchorEl={profilePictureRef.current}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              getContentAnchorEl={null}
+          >
+            <DialogContent className={classes.modalContainer}>
+              <IconButton
+                  className={classes.closeButton}
+                  onClick={handleProfileModalClose}
+              >
+                <CloseIcon/>
+              </IconButton>
+              <h2 className={classes.email}>nourzamel35@gmail.com</h2>
+              <Avatar className={classes.profilePicture}>NZ</Avatar>
+              <p className={classes.greeting}>Hi, Nour Zamel!</p>
+            </DialogContent>
+          </Dialog>
+
+          <Typography variant="h4" className={classes.centeredText}>
+            Welcome to Drive
+          </Typography>
+          <TextField
+              className={classes.searchBar}
+              placeholder="Search in Drive"
+              variant="outlined"
+              onChange={handleChangeSearch}
+              value={searchTerm}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon/>
+                    </InputAdornment>
+                ),
+                endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton>
+                        <FilterListIcon onClick={handleAdvancedSearchClick}/>
+                      </IconButton>
+                    </InputAdornment>
+                ),
+                style: {
+                  borderRadius: "25px", // Set the border radius to your desired value (e.g., '25px')
+                },
+              }}
+          />
+          <div className={classes.buttonContainer}>
+            <Button
+                variant="outlined"
+                startIcon={<InsertDriveFileOutlinedIcon/>} // Icon on the left side
+                endIcon={<ArrowDropDownOutlinedIcon/>} // Arrow icon on the right side
+                className={classes.button}
+            >
+              Type
+            </Button>
+            <Button
+                variant="outlined"
+                startIcon={<PermIdentityOutlinedIcon/>} // Icon on the left side
+                endIcon={<ArrowDropDownOutlinedIcon/>} // Arrow icon on the right side
+                className={classes.button}
+            >
+              People
+            </Button>
+            <Button
+                variant="outlined"
+                startIcon={<CalendarTodayOutlinedIcon/>} // Icon on the left side
+                endIcon={<ArrowDropDownOutlinedIcon/>} // Arrow icon on the right side
+                className={classes.button}
+            >
+              Modified
+            </Button>
+            <Button
+                variant="outlined"
+                startIcon={<FolderOpenOutlinedIcon/>} // Icon on the left side
+                endIcon={<ArrowDropDownOutlinedIcon/>} // Arrow icon on the right side
+                className={classes.button}
+            >
+              Location
+            </Button>
           </div>
-          <IconButton onClick={handleClick}>
-            <MoreVertIcon />
-          </IconButton>
-        </div>
-      ))}
-    </div>
-  </>
-) : (
-  <div className={classes.gridContainer}>
-    {selectedItemType === 'files'
-      ? files.map((file) => (
-          <div key={file.file_id} className={classes.gridItem}>
-            <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
-            <div className={classes.gridName}>{file.name}</div>
-            <IconButton onClick={handleClick}>
-              <MoreVertIcon />
-            </IconButton>
+
+          {/* This is the Modal for the Advanced Search Fields */}
+          <Dialog open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClick}>
+            <DialogTitle>Advanced Search</DialogTitle>
+            <DialogContent>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Type</InputLabel>
+                <Select
+                    name="type" // Each text field gets a name attribute that corresponds to a key in the searchParams object
+                    value={searchParams.type}
+                    onChange={handleInputChange}
+                    label="Type"
+                >
+                  <MenuItem value="office-doc">
+                    Office Document (Word, Excel)
+                  </MenuItem>
+                  <MenuItem value="text-file">Text File</MenuItem>
+                  <MenuItem value="archive">Zip/Rar File</MenuItem>
+                  <MenuItem value="pdf">PDF</MenuItem>
+                  <MenuItem value="video">Video</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="owner-select-label">Owner</InputLabel>
+                <Select
+                    labelId="owner-select-label"
+                    name="owner"
+                    value={searchParams.owner}
+                    onChange={handleInputChange}
+                    label="Owner"
+                >
+                  <MenuItem></MenuItem>
+                </Select>
+              </FormControl>
+
+              <TextField
+                  name="hasTheWords"
+                  label="Has the words"
+                  fullWidth
+                  margin="normal"
+                  value={searchParams.hasTheWords}
+                  onChange={handleInputChange}
+              />
+
+              <TextField
+                  name="itemName"
+                  label="Item name"
+                  fullWidth
+                  margin="normal"
+                  value={searchParams.itemName}
+                  onChange={handleInputChange}
+              />
+
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="location-select-label">Location</InputLabel>
+                <Select
+                    labelId="location-select-label"
+                    name="location"
+                    value={searchParams.location}
+                    onChange={handleInputChange}
+                    label="Location"
+                >
+                  <MenuItem></MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControlLabel
+                  control={
+                    <Checkbox
+                        name="starred"
+                        checked={searchParams.starred}
+                        onChange={handleInputChange}
+                    />
+                  }
+                  label="Starred"
+              />
+              <FormControlLabel
+                  control={
+                    <Checkbox
+                        name="inTrash"
+                        checked={searchParams.inTrash}
+                        onChange={handleInputChange}
+                    />
+                  }
+                  label="In trash"
+              />
+
+              <Box mt={2} display="flex" justifyContent="space-between">
+                <Button variant="outlined" onClick={handleReset}>
+                  Reset
+                </Button>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSearch}
+                >
+                  Search
+                </Button>
+              </Box>
+            </DialogContent>
+          </Dialog>
+
+          <br/>
+
+          <div className={classes.filterOptions}>
+            <div className={classes.suggestedContainer}>
+              <Typography className={classes.suggestedText}>Suggested</Typography>
+
+              {/* Files and Folders buttons */}
+              <ToggleButtonGroup exclusive aria-label="files and folders">
+                <ToggleButton
+                    value="files"
+                    aria-label="files"
+                    className={classes.fileFolderButton}
+                    style={{
+                      backgroundColor:
+                          activeButton === "files" ? "#c2e7ff" : "white",
+                    }}
+                    onClick={() => handleToggleButtonClick("files")}
+                >
+                  {activeButton === "files" ? (
+                      <DoneIcon/>
+                  ) : (
+                      <ArticleOutlinedIcon/>
+                  )}
+                  <Typography style={{marginLeft: 8, textTransform: "none"}}>
+                    Files
+                  </Typography>
+                </ToggleButton>
+
+                {/* Separator between Files and Folders buttons */}
+                <div className={classes.verticalSeparator}></div>
+
+                <ToggleButton
+                    value="folders"
+                    aria-label="folders"
+                    className={classes.fileFolderButton}
+                    style={{
+                      backgroundColor:
+                          activeButton === "folders" ? "#c2e7ff" : "white",
+                    }}
+                    onClick={() => handleToggleButtonClick("folders")}
+                >
+                  {activeButton === "folders" ? (
+                      <DoneIcon/>
+                  ) : (
+                      <FolderOpenOutlinedIcon/>
+                  )}
+                  <Typography style={{marginLeft: 8, textTransform: "none"}}>
+                    Folders
+                  </Typography>
+                </ToggleButton>
+              </ToggleButtonGroup>
+
+              {/* Layout buttons */}
+              <ToggleButtonGroup exclusive aria-label="layout buttons">
+                <ToggleButton
+                    value="list"
+                    aria-label="list"
+                    className={classes.layoutButton}
+                    style={{
+                      backgroundColor:
+                          activeLayout === "list" ? "#c2e7ff" : "white",
+                    }}
+                    onClick={() => handleLayoutButtonClick("list")}
+                >
+                  {activeLayout === "list" && <DoneIcon/>}
+                  <MenuOutlinedIcon/>
+                </ToggleButton>
+
+                {/* Separator between List and Module buttons */}
+                <div className={classes.verticalSeparator}></div>
+
+                <ToggleButton
+                    value="module"
+                    aria-label="module"
+                    className={classes.layoutButton}
+                    style={{
+                      backgroundColor:
+                          activeLayout === "module" ? "#c2e7ff" : "white",
+                    }}
+                    onClick={() => handleLayoutButtonClick("module")}
+                >
+                  {activeLayout === "module" && <DoneIcon/>}
+                  <GridViewOutlinedIcon/>
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </div>
           </div>
-        ))
-      : folders.map((folder) => (
-          <div key={folder.folder_id} className={classes.gridItem}>
-            <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
-            <div className={classes.gridName}>{folder.name}</div>
-            <IconButton onClick={handleClick}>
-              <MoreVertIcon />
-            </IconButton>
-          </div>
-        ))}
-  </div>
-)}
-      </main>
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={handleClose}>Share</MenuItem>
-        <MenuItem onClick={handleClose}>Download</MenuItem>
-        <MenuItem onClick={handleClose}>Rename</MenuItem>
-        <MenuItem onClick={handleClose}>Star</MenuItem>
-      </Menu>
-      <Menu
-        anchorEl={logoutAnchorEl}
-        open={Boolean(logoutAnchorEl)}
-        onClose={handleLogoutClose}
-      >
-        <MenuItem onClick={handleLogout}>Logout</MenuItem>
-      </Menu>
-    </div>
+          {activeLayout === 'list' && (
+              <div className={classes.listLayout}>
+                <Typography className={classes.nameBold}>Name</Typography>
+                <div className={classes.listLayoutItems}>
+                  <Typography className={classes.listLayoutItem}>Date Uploaded</Typography>
+                  <Typography className={classes.listLayoutItem}>Owner</Typography>
+                  <Typography className={classes.listLayoutItem}>Location</Typography>
+                </div>
+              </div>
+          )}
+
+          {activeLayout === 'list' ? (
+              <>
+                <div className={classes.fileList}>
+                  {selectedItemType === "files" ? files.map(file => (
+                      <div key={file.file_id} className={classes.fileItem}>
+                        <div className={classes.fileIcon}>
+                          {getFileIcon(file.mime_type)}
+                        </div>
+                        <Typography className={classes.fileName}>{file.name}</Typography>
+                        <div className={classes.fileDetails}>
+                          <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
+                          <Typography>{file.sharedWith.length} people</Typography>
+                          <Typography>{file.user_id}</Typography>
+                        </div>
+                        <IconButton onClick={handleClick}>
+                          <MoreVertIcon/>
+                        </IconButton>
+                      </div>
+                  )) : folders.map((folder) => (
+                      <div key={folder.folder_id} className={classes.fileItem}>
+                        <div className={classes.fileIcon}>
+                          {getFolderIcon(folder.name)}
+                        </div>
+                        <Typography className={classes.fileName}>{folder.name}</Typography>
+                        <div className={classes.fileDetails}>
+                          <Typography className={classes.fileDetailsItem}>
+                            {folder.lastModified}
+                          </Typography>
+                          <Typography>{folder.sharedWith.length} people</Typography>
+                          <Typography>{folder.user_id}</Typography>
+                        </div>
+                        <IconButton onClick={handleClick}>
+                          <MoreVertIcon/>
+                        </IconButton>
+                      </div>
+                  ))}
+                </div>
+              </>
+          ) : (
+              <div className={classes.gridContainer}>
+                {selectedItemType === 'files'
+                    ? files.map((file) => (
+                        <div key={file.file_id} className={classes.gridItem}>
+                          <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
+                          <div className={classes.gridName}>{file.name}</div>
+                          <IconButton onClick={handleClick}>
+                            <MoreVertIcon/>
+                          </IconButton>
+                        </div>
+                    ))
+                    : folders.map((folder) => (
+                        <div key={folder.folder_id} className={classes.gridItem}>
+                          <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
+                          <div className={classes.gridName}>{folder.name}</div>
+                          <IconButton onClick={handleClick}>
+                            <MoreVertIcon/>
+                          </IconButton>
+                        </div>
+                    ))}
+              </div>
+          )}
+        </main>
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+          <MenuItem onClick={handleClose}>Share</MenuItem>
+          <MenuItem onClick={handleClose}>Download</MenuItem>
+          <MenuItem onClick={handleClose}>Rename</MenuItem>
+          <MenuItem onClick={handleClose}>Star</MenuItem>
+        </Menu>
+        <Menu
+            anchorEl={logoutAnchorEl}
+            open={Boolean(logoutAnchorEl)}
+            onClose={handleLogoutClose}
+        >
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        </Menu>
+      </div>
   );
 };
 
