@@ -1,16 +1,39 @@
 const Folder = require('../models/Folder');
+const mongoose = require("mongoose");
 
 //When user logs in to website display his folders (This should be used with getFilesByUserId to get everything)
 exports.getFoldersByUserId = async (req, res) => {
     try{
-        const user_id = req.user.user_id;
-        const folders = await Folder.find({user_id: user_id});
-        res.status(200).json(folders);
+        const {parent_id} = req.query;
+        const query = { user_id: req.user.user_id };
+        if (parent_id) {
+            query.parent_id = parent_id;
+        }
+        const folders = await Folder.find(query);
+        return {
+            "status": 200,
+            "data": folders
+        }
     }
     catch  (err){
         res.status(500).json({message: "Internal server error"});
     }
 }
+
+exports.getRootFoldersByUserId = async (req, res) => {
+    try{
+        const query = { user_id: req.user.user_id, parent_id: null};
+        const folders = await Folder.find(query);
+        return {
+            "status": 200,
+            "data": folders
+        }
+    }
+    catch  (err){
+        res.status(500).json({message: "Internal server error"});
+    }
+}
+
 //This only creates the folder name and object which needs to be filled using another api.
 exports.createFolder = async (req, res) => {
     let user_id;
