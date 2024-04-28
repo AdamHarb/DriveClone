@@ -9,10 +9,10 @@ exports.uploadFile = async (req, res) => {
 
 		const fileCount = await File.countDocuments({ user_id: req.user._id });
 
-		const him = await User.findOne({ _id: req.user._id });
-		const newsize = him.storage_used + req.file.size;
-		const user = await User.updateOne({ _id: req.user._id }, { storage_used: newsize });
-    
+		// const him = await User.findOne({ _id: req.user._id });
+		// const newsize = him.storage_used + req.file.size;
+		// const user = await User.updateOne({ _id: req.user._id }, { storage_used: newsize });
+    //
 		const fileBuffer = req.file.buffer;
 
 		const bucket = await getGridFSBucket();
@@ -82,6 +82,29 @@ exports.getFileDetails = async (req, res) => {
 		res.status(500).json({ message: "Internal server error" });
 	}
 };
+
+exports.renameFile = async (req, res) => {
+	try {
+		const {newName, fileId, name} = req.body;
+
+		const ext = name.split('.').pop();
+		const newNameWithExt = newName + '.' + ext;
+
+		const file = await File.findOneAndUpdate(
+				{file_id: fileId, user_id: req.user._id},
+				{name: newNameWithExt},
+				{new: true}
+		);
+
+		if (!file) {
+			return res.status(404).json({message: "File not found"});
+		}
+
+		res.status(200).json(file);
+	} catch (e) {
+		res.status(500).json({message: "Internal server error"});
+	}
+}
 
 exports.updateFileDetails = async (req, res) => {
 	try {

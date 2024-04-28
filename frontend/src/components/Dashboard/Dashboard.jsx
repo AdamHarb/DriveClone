@@ -85,6 +85,7 @@ import NewMenuDropdown from './NewMenuDropdown';
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import RenameDialog from "./RenameDialog.jsx";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -439,7 +440,7 @@ const Dashboard = () => {
   const [activeListButton, setActiveListButton] = useState("home");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedItemType, setSelectedItemType] = useState("files");
   const [searchParams, setSearchParams] = useState({
@@ -453,6 +454,7 @@ const Dashboard = () => {
   });
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
+  const [selectedFile, setSelectedFile] = useState(null);
   let size_used = 0;
 
   useEffect(() => {
@@ -468,7 +470,7 @@ const Dashboard = () => {
     }
   }, [])
 
-  useEffect(() => {
+  const fetchFilesFolders = () => {
     handleDashboardApi().then((response) => {
       console.log("fetched");
       const data = response;
@@ -477,6 +479,7 @@ const Dashboard = () => {
       setFolders(data.userFolders);
     });
   });
+
   useEffect(async () => {
     fetchFilesFolders();
   }, [])
@@ -535,9 +538,7 @@ const Dashboard = () => {
 
   const handleCreateFolder = async (folderName) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/create-folder', {
-            name: folderName
-          }, {
+      const response = await axios.post('http://localhost:3000/api/create-folder', {}, {
             headers: {
               'Authorization': `Bearer ${cookies.token}`
             }
@@ -548,6 +549,22 @@ const Dashboard = () => {
       return response.data.folder_id;
     } catch (e) {
       console.error('Error during folder creation:', e);
+    }
+  }
+  const handleDeleteFile = async () => {
+    try {
+      const response = await axios.delete(`http://localhost:3000/api/delete-files/${selectedFile._id}`, {
+        headers: {
+            'Authorization': `Bearer ${cookies.token}`
+        }
+        }).then((r) => {
+          handleClose()
+          fetchFilesFolders();
+      });
+        console.log(response.data)
+    }
+    catch (error) {
+        console.error('Error during file deletion:', error);
     }
   }
 
@@ -586,6 +603,26 @@ const Dashboard = () => {
       console.error('Error during folder upload:', error);
     }
   }
+
+  const handleDownload = async () => {
+    try {
+       const response = await axios.get(`http://localhost:3000/api/download/${selectedFile.file_id}`, {}, {
+         headers: {
+           withCredentials: true,
+           'Authorization': `Bearer ${cookies.token}`
+         },
+       });
+      const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.setAttribute('download', selectedFile.name);
+      document.body.appendChild(link);
+      link.click();
+    } catch (e) {
+      console.error('Error during file download:', e);
+    }
+  }
+
   function handleSharedWith(file) {
     if (file.sharedWith){
       return file.sharedWith.length
@@ -604,12 +641,38 @@ const Dashboard = () => {
     setActiveLayout(layoutType);
   };
 
+  const handleRenameClick = () => {
+    setRenameDialogOpen(true);
+  };
 
+  const handleRenameClose = () => {
+    setRenameDialogOpen(false);
+  };
 
-const handleMenuClose = () => {
-  setAnchorEl(null);
-  setIsMenuOpen(false);
-};
+  const handleRename = async (newName) => {
+    try {
+      const response = await axios.post(`http://localhost:3000/api/rename-file`, {
+        newName,
+        name: selectedFile.name,
+        fileId: selectedFile.file_id
+      }, {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        },
+      }).then((r) => {
+        fetchFilesFolders();
+        console.log(response.data);
+      });
+    } catch (e) {
+      console.error('Error during file renaming:', e);
+    }
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setIsMenuOpen(false);
+  };
 
 
 const newButtonRef = useRef(null);
@@ -630,16 +693,22 @@ const handleTypeClose = () => {
     setActiveListButton(buttonType);
   };
 
+  const handleClick = (file) => (event) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedFile(file);
+  };
 
   const handleTypeSelect = (type) => {
     if (type === null) {
       setSelectedType(null);
       fetchFilesFolders(); // Fetch files and folders when type is deselected
+
     } else {
       setSelectedType(type);
     }
     handleTypeClose();
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -693,7 +762,7 @@ const handleTypeClose = () => {
 			return <MovieIcon style={{ color: '#ea4335' }} />;
 		  default:
 			return <DescriptionIcon />;
-		} 
+		}
 	  };
     const getFolderIcon = (folderName) => {
       // Add logic to determine the appropriate folder icon based on the folder name or any other criteria
@@ -720,24 +789,24 @@ const handleTypeClose = () => {
   };
   const renderGrid = () => {
     const classes = useStyles();
-  
+
     const handleGridItemClick = (event) => {
       // Check if the click event target is the "New" button
       if (event.target.tagName.toLowerCase() === 'button') {
         // If it is, do nothing (prevent the kebab menu from opening)
         return;
       }
-  
+
       // Otherwise, open the kebab menu as usual
       setAnchorEl(event.currentTarget);
     };
-  
+
     useEffect(() => {
       return () => {
         setAnchorEl(null);
       };
     }, []);
-  
+
     return (
       <div className={classes.gridContainer}>
         {selectedItemType === 'files'
@@ -747,7 +816,7 @@ const handleTypeClose = () => {
                 <div className={classes.gridDetails}>
                   <div className={classes.gridName}>{file.name}</div>
                 </div>
-                <IconButton className={classes.kebabMenu} onClick={handleGridItemClick}>
+                <IconButton className={classes.kebabMenu} onClick={handleClick(file)}>
                   <MoreVertIcon />
                 </IconButton>
               </div>
@@ -767,7 +836,7 @@ const handleTypeClose = () => {
     );
   };
 
- 
+
   const [files, setFiles] = useState([]);
   const [folders, setFolders] = useState([]);
   const fileTypeMap = {
@@ -783,25 +852,25 @@ const handleTypeClose = () => {
   };
 
   const [searchTerm, setSearchTerm] = useState("");
-  
 
- 
+
+
   useEffect(() => {
     const filteredFiles = files.filter(
-      (file) =>
-        file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (selectedType === null || file.mime_type === selectedType)
+        (file) =>
+            file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (selectedType === null || file.mime_type === selectedType)
     );
-  
+
     const filteredFolders = folders.filter((folder) =>
-      folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
+        folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  
+
     setFiles(filteredFiles);
     setFolders(filteredFolders);
   }, [searchTerm, selectedType]);
 
-  
+
   const handleChangeSearch = (event) => {
     setSearchTerm(event.target.value);
   }; // Every time the search input changes, set it as the new search term and it will filter out
@@ -834,7 +903,11 @@ const handleTypeClose = () => {
         id="file-input"
         style={{ display: 'none' }}
         ref={fileInputRef}
-        onChange={handleUploadFile}
+        onChange={(event) => {
+          handleUploadFile(event.target.files[0]).then(r => {
+                fetchFilesFolders();
+              })
+        }}
       />
       <input
         type="file"
@@ -1349,7 +1422,7 @@ const handleTypeClose = () => {
             <Typography>{handleSharedWith(file)} people</Typography>
             <Typography>{file.user_id}</Typography>
           </div>
-          <IconButton onClick={handleClick}>
+          <IconButton onClick={handleClick(file)}>
             <MoreVertIcon />
           </IconButton>
         </div>
@@ -1380,7 +1453,7 @@ const handleTypeClose = () => {
           <div key={file.file_id} className={classes.gridItem}>
             <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
             <div className={classes.gridName}>{file.name}</div>
-            <IconButton onClick={handleClick}>
+            <IconButton onClick={handleClick(file)}>
               <MoreVertIcon />
             </IconButton>
           </div>
@@ -1396,16 +1469,18 @@ const handleTypeClose = () => {
         ))}
   </div>
 )}
-
-       
-        
       </main>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={handleClose}>Share</MenuItem>
-        <MenuItem onClick={handleClose}>Download</MenuItem>
-        <MenuItem onClick={handleClose}>Rename</MenuItem>
+        <MenuItem onClick={handleDownload}>Download</MenuItem>
+        <MenuItem onClick={handleRenameClick}>Rename</MenuItem>
+        <RenameDialog
+            open={renameDialogOpen}
+            handleClose={handleRenameClose}
+            handleRename={handleRename}
+        />
         <MenuItem onClick={handleClose}>Star</MenuItem>
-        <MenuItem onClick={handleClose}>Delete</MenuItem>
+        <MenuItem onClick={handleDeleteFile}>Delete</MenuItem>
       </Menu>
       <Menu
         anchorEl={logoutAnchorEl}
