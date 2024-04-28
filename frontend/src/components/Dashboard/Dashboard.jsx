@@ -77,6 +77,7 @@ import MovieIcon from '@mui/icons-material/Movie';
 import FolderZipIcon from '@mui/icons-material/FolderZip';
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
+import axios from "axios";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -404,11 +405,35 @@ const Dashboard = () => {
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
 
+  let data;
+
   useEffect(() => {
     if (!cookies.token) {
       navigate('/login');
     }
   }, [])
+
+  useEffect(() => {
+    handleDashboardApi().then((response) => {
+      console.log("fetched")
+      data = response;
+    });
+  }, [])
+
+  const handleDashboardApi = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/dashboard', {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        }
+      });
+      console.log(response.data)
+      return response.data;
+    } catch (error) {
+        console.error('Error during login:', error);
+    }
+  }
 
   const handleButtonClick = () => {
     fileInputRef.current.click();
@@ -497,7 +522,6 @@ const Dashboard = () => {
 
   // This creates a new object with all the current searchParams, but with the value for the property named name updated to the new value that came from the text field.
   // The new object is then set as the new state.
-
   const initialFiles = [
     {
       name: "Proposal.pdf",
@@ -549,6 +573,7 @@ const Dashboard = () => {
   ];
 
   const [files, setFiles] = useState(initialFiles);
+
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
