@@ -42,19 +42,15 @@ exports.createFolder = async (req, res) => {
         user_id = req.user._id;
         const {folder_name, parent_id} = req.body;
 
-        if (!folder_name) {
-            return res.status(400).json({message: "Missing required field: folder_name"});
-        }
-
         const folder = new Folder({
             user_id,
-            folder_name,
+            folder_name: folder_name || `Folder ${Folder.countDocuments({}) + 1}`,
             parent_id
         });
 
         await folder.save();
         console.log(folder);
-        res.status(201).json({message: "Folder created successfully"});
+        res.status(201).json({message: "Folder created successfully", folder_id: folder._id});
     } catch (err) {
         console.error(err);
         res.status(500).json({message: "Internal server error"});
@@ -79,6 +75,3 @@ exports.deleteFolder = async (req, res) => {
         res.status(500).json({message: "Internal server error"});
     }
 }
-
-
-

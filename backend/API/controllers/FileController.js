@@ -5,16 +5,18 @@ const {ObjectId} = require("mongodb");
 
 exports.uploadFile = async (req, res) => {
 	try {
-		const { parent_id, name, size } = req.body;
+		const { parent_id } = req.body;
 
 		const fileCount = await File.countDocuments({ user_id: req.user._id });
+
 		const him = await User.findOne({ _id: req.user._id });
 		const newsize = him.storage_used + size;
 		const user = await User.updateOne({ _id: req.user._id }, { storage_used: newsize });
+    
 		const fileBuffer = req.file.buffer;
 
 		const bucket = await getGridFSBucket();
-		const uploadStream = bucket.openUploadStream(name || `File ${fileCount + 1}`, {
+		const uploadStream = bucket.openUploadStream(req.file.originalname, {
 			contentType: req.file.mimetype
 		});
 		uploadStream.end(fileBuffer);
@@ -24,9 +26,9 @@ exports.uploadFile = async (req, res) => {
 		const file = new File({
 			user_id: req.user._id,
 			parent_id,
-			name: name || `File ${fileCount + 1}`,
+			name: req.file.originalname,
 			mime_type: req.file.mimetype,
-			size,
+			size: req.file.size,
 			file_id: fileId
 		});
 
