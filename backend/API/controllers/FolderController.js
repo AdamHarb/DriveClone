@@ -42,9 +42,11 @@ exports.createFolder = async (req, res) => {
         user_id = req.user._id;
         const {folder_name, parent_id} = req.body;
 
+        const folderCount = await Folder.countDocuments({user_id: user_id});
+
         const folder = new Folder({
             user_id,
-            folder_name: folder_name || `Folder ${Folder.countDocuments({}) + 1}`,
+            folder_name: folder_name || `Folder ${folderCount + 1} `,
             parent_id
         });
 
