@@ -13,7 +13,12 @@ const FileSchema = new mongoose.Schema({
     mime_type: { type: String, required: true },
     size: { type: Number, required: true },
     uploaded_at: { type: Date, required: false, default: Date.now },
-    updated_at: { type: Date, required: false, default: Date.now }
+    updated_at: { type: Date, required: false, default: Date.now },
+    role: {
+        type: String,
+        enum: ['starred', 'trashed', 'normal'],
+        default: 'normal'
+    }
 });
 
 FileSchema.pre('save', function (next) {
