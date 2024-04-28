@@ -449,6 +449,14 @@ const Dashboard = () => {
   });
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
+  let size_used = 0;
+
+  useEffect(() => {
+    handleSizeApi().then((response) => {
+      size_used = response.storage_used;
+      console.log(size_used)
+    });
+  }, []);
 
   useEffect(() => {
     if (!cookies.token) {
@@ -466,6 +474,20 @@ const Dashboard = () => {
     });
   }, [])
 
+  const handleSizeApi = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/profile', {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        }
+      });
+      console.log(response.data)
+      return response.data;
+    } catch (error) {
+        console.error('Error during login:', error);
+    }
+  }
   const handleDashboardApi = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/dashboard', {
