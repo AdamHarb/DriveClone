@@ -3,12 +3,14 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useState } from 'react';
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
+import {useCookies} from "react-cookie";
 
 const Signup = () => {
-
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword1, setShowPassword1] = useState(false);
-
+    const navigate = useNavigate();
+    const [cookies, setCookie, removeCookie] = useCookies(['token']);
 
     const  togglePasswordVisibility = () => {
         event.preventDefault();
@@ -34,7 +36,8 @@ const Signup = () => {
             console.log(response.data);
             // Handle successful response
             if (response.data.success) {
-                // Handle successful signup (e.g., redirect to another page)
+                setCookie('token', response.data.token);
+                navigate('/');
                 console.log('Signup successful!'); // Replace with your desired action
             } else {
                 // Handle signup errors (e.g., display error messages)
