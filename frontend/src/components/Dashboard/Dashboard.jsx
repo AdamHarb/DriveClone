@@ -85,6 +85,7 @@ import NewMenuDropdown from './NewMenuDropdown';
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
+import RenameDialog from "./RenameDialog.jsx";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -439,7 +440,7 @@ const Dashboard = () => {
   const [activeListButton, setActiveListButton] = useState("home");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedItemType, setSelectedItemType] = useState("files");
   const [searchParams, setSearchParams] = useState({
@@ -537,9 +538,7 @@ const Dashboard = () => {
 
   const handleCreateFolder = async (folderName) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/create-folder', {
-            name: folderName
-          }, {
+      const response = await axios.post('http://localhost:3000/api/create-folder', {}, {
             headers: {
               'Authorization': `Bearer ${cookies.token}`
             }
@@ -559,6 +558,7 @@ const Dashboard = () => {
             'Authorization': `Bearer ${cookies.token}`
         }
         }).then((r) => {
+          handleClose()
           fetchFilesFolders();
       });
         console.log(response.data)
@@ -641,12 +641,38 @@ const Dashboard = () => {
     setActiveLayout(layoutType);
   };
 
+  const handleRenameClick = () => {
+    setRenameDialogOpen(true);
+  };
 
+  const handleRenameClose = () => {
+    setRenameDialogOpen(false);
+  };
 
-const handleMenuClose = () => {
-  setAnchorEl(null);
-  setIsMenuOpen(false);
-};
+  const handleRename = async (newName) => {
+    try {
+      const response = await axios.post(`http://localhost:3000/api/rename-file`, {
+        newName,
+        name: selectedFile.name,
+        fileId: selectedFile.file_id
+      }, {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        },
+      }).then((r) => {
+        fetchFilesFolders();
+        console.log(response.data);
+      });
+    } catch (e) {
+      console.error('Error during file renaming:', e);
+    }
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setIsMenuOpen(false);
+  };
 
 
 const newButtonRef = useRef(null);
@@ -1443,7 +1469,12 @@ const handleTypeClose = () => {
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={handleClose}>Share</MenuItem>
         <MenuItem onClick={handleDownload}>Download</MenuItem>
-        <MenuItem onClick={handleClose}>Rename</MenuItem>
+        <MenuItem onClick={handleRenameClick}>Rename</MenuItem>
+        <RenameDialog
+            open={renameDialogOpen}
+            handleClose={handleRenameClose}
+            handleRename={handleRename}
+        />
         <MenuItem onClick={handleClose}>Star</MenuItem>
         <MenuItem onClick={handleDeleteFile}>Delete</MenuItem>
       </Menu>
