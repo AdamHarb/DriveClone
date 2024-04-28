@@ -34,7 +34,7 @@ const loginUser = async (req, res) => {
 const getProfileByUsername = async (req, res) => {
     try {
         const username = req.user.username;
-        const user = await User.findOne({ username: username });
+        const user = await User.findOne({ username });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -52,6 +52,10 @@ const getProfileByUsername = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
+const getCurrentUser = async (req, res) => {
+    res.status(200).json({user: req.user});
+}
 
 const createUser = async (req, res) => {
     try {
@@ -85,5 +89,6 @@ const createUser = async (req, res) => {
 module.exports = {
     loginUser,
     getProfileByUsername,
-    createUser
+    createUser,
+    getCurrentUser
 };

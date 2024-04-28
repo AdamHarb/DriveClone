@@ -461,13 +461,12 @@ const Dashboard = () => {
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState(null);
-  let size_used = 0;
+  const [user, setUser] = useState({
+    storage_used: 0
+  });
 
-  useEffect(() => {
-    handleSizeApi().then((response) => {
-      size_used = response.storage_used;
-      console.log(size_used)
-    });
+  useEffect(async () => {
+    await fetchUser();
   }, []);
 
   useEffect(() => {
@@ -475,6 +474,16 @@ const Dashboard = () => {
       navigate('/login');
     }
   }, [])
+
+  const fetchUser = async () => {
+    const res = await axios.get('http://localhost:3000/api/current-user', {
+      headers: {
+        'Authorization': `Bearer ${cookies.token}`
+      }
+    });
+    setUser(res.data.user);
+  }
+
   const fetchFilesFolders = () => {
     handleDashboardApi().then((response) => {
       console.log("fetched");
@@ -533,8 +542,10 @@ const Dashboard = () => {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${cookies.token}`
         }
+      }).then((r) => {
+        fetchFilesFolders()
+        fetchUser()
       });
-      console.log(response.data);
     } catch (error) {
       console.error('Error during file upload:', error);
     }
@@ -1006,9 +1017,7 @@ const handleTypeClose = () => {
         style={{ display: 'none' }}
         ref={fileInputRef}
         onChange={(event) => {
-          handleUploadFile(event.target.files[0]).then(r => {
-                fetchFilesFolders();
-              })
+          handleUploadFile(event.target.files[0])
         }}
       />
       <input
@@ -1160,7 +1169,6 @@ const handleTypeClose = () => {
             <ListItemText primary="Storage" />
           </ListItem>
 
-          {/* Add storage bar directly under the "Storage" button */}
           <div className={classes.storageInfo}>
             <div
               style={{
@@ -1174,14 +1182,14 @@ const handleTypeClose = () => {
             >
               <div
                 style={{
-                  width: "60%",
+                  width: user.storage_used / 10000 * 100 + "%",
                   height: "100%",
                   backgroundColor: "#0b57d0",
                   borderRadius: "5px",
                 }}
               ></div>
             </div>
-            <Typography variant="subtitle1">10 GB of 15 GB used</Typography>
+            <Typography variant="subtitle1">{Math.round(user.storage_used / 1024).toFixed(2)} GB of 15 GB used</Typography>
           </div>
         </List>
       </Drawer>

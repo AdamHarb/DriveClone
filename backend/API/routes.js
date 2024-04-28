@@ -24,6 +24,7 @@ router.post('/login', userController.loginUser);
 router.post('/create-user', userController.createUser);
 router.get('/login', userController.loginUser);
 router.post('/create-user', userController.createUser);
+router.get('/current-user', userAuth, userController.getCurrentUser);
 
 // Folder Routes
 router.post('/create-folder', userAuth, folderController.createFolder);
