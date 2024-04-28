@@ -1,3 +1,17 @@
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+#two-options {
+    display:flex;
+    justify-content: space-between;
+}
+
+#forgot-password {
+    margin-top: 25px;
+}
+
+
 #loginpage {
     display: flex;
     align-items: center;
