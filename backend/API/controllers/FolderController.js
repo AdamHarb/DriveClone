@@ -3,8 +3,12 @@ const Folder = require('../models/Folder');
 //When user logs in to website display his folders (This should be used with getFilesByUserId to get everything)
 exports.getFoldersByUserId = async (req, res) => {
     try{
-        const user_id = req.user.user_id;
-        const folders = await Folder.find({user_id: user_id});
+        const {parent_id} = req.query;
+        const query = { user_id: req.user.user_id };
+        if (parent_id) {
+            query.parent_id = parent_id;
+        }
+        const folders = await Folder.find(query);
         return {
             "status": 200,
             "data": folders

@@ -46,14 +46,16 @@ router.get('/list-files', userAuth, async function (req, res) {
 //Dashboard Routes
 router.get('/dashboard', userAuth, async function (req, res) {
 	try {
-		req.parent_id = null; // To get root folders
 		const [userFolders, userFiles] = await Promise.all([
 			folderController.getFoldersByUserId(req,res),
 			fileController.listFiles(req,res)
 		]);
+		if(userFolders.status !== 200 || userFiles.status !== 200){
+			res.status(500).json({ message: "Internal server error" });
+		}
 		res.status(200).json({
-			userFolders,
-			userFiles
+			userFolders: userFolders.data,
+			userFiles: userFiles.data
 		});
 	} catch (err) {
 		console.error(err);
