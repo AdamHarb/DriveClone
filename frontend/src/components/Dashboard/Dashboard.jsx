@@ -395,10 +395,7 @@ const Dashboard = () => {
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
 
-  const data = {
-    file:[],
-    folders: []
-  }
+  let data;
 
   useEffect(() => {
     if (!cookies.token) {
@@ -407,17 +404,15 @@ const Dashboard = () => {
   }, [])
 
   useEffect(() => {
-
     handleDashboardApi().then((response) => {
-     data.file = response.userFiles;
-     data.folders = response.userFolders;
+      console.log("fetched")
+      data = response;
     });
-
   }, [])
 
   const handleDashboardApi = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/profile', {
+      const response = await axios.get('http://localhost:3000/api/dashboard', {
         headers: {
           withCredentials: true,
           'Authorization': `Bearer ${cookies.token}`
@@ -429,6 +424,7 @@ const Dashboard = () => {
         console.error('Error during login:', error);
     }
   }
+
   const handleButtonClick = () => {
     fileInputRef.current.click();
   };
