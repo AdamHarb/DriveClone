@@ -70,6 +70,11 @@ import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import AddToDriveOutlinedIcon from "@mui/icons-material/AddToDriveOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import CloseIcon from "@mui/icons-material/Close";
+import DescriptionIcon from '@mui/icons-material/Description'; // default icon
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'; // for PDFs
+import ArticleIcon from '@mui/icons-material/Article';
+import MovieIcon from '@mui/icons-material/Movie';
+import FolderZipIcon from '@mui/icons-material/FolderZip';
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -291,6 +296,11 @@ const useStyles = makeStyles((theme) => ({
     color: "black",
     marginRight: theme.spacing(-2),
   },
+  fileIcon: {
+    verticalAlign: 'middle', // Adjust this as needed to lower the icons
+    marginRight: theme.spacing(1),
+    marginTop: theme.spacing(1), // Optional: Adjust spacing between icon and file name
+  },
   verticalSeparator: {
     borderLeft: "1px solid #ccc", // Thin vertical line
     height: "40px", // Match the height of the buttons
@@ -440,6 +450,27 @@ const Dashboard = () => {
     performSearch(); // Function to perform the advanced search
   };
 
+  const getFileIcon = (mime_type) => {
+		switch (mime_type) {
+		  case 'application/pdf':
+			return <PictureAsPdfIcon style={{ color: '#ea4335' }} />;
+		  case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+		  case 'application/msword':
+		  case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+			return <ArticleIcon style={{ color: '#4285f4' }}/>;
+		  case 'text/plain':
+			return <DescriptionIcon  style={{ color: '#34a853' }}/>;
+		  case 'application/zip':
+		  case 'application/x-rar-compressed':
+			return <FolderZipIcon  style={{ color: '#5f6368' }}/>;
+		  case 'video/mp4':
+		  case 'video/mpeg':
+			return <MovieIcon style={{ color: '#ea4335' }} />;
+		  default:
+			return <DescriptionIcon />;
+		} 
+	  };
+
   const handleAdvancedSearchClick = () => {
     setIsAdvancedSearchOpen(!isAdvancedSearchOpen); // Toggle the advanced search modal
   };
@@ -459,7 +490,7 @@ const Dashboard = () => {
 
   const initialFiles = [
     {
-      name: "ProposaljahkwrjwehfljwhefjkhwelkfhklwehfkwefkwflkwNKCLKAEFJKSLJFKLWEFRJL.pdf",
+      name: "Proposal.pdf",
       uploadedAt: "2024-04-12T07:20:50.123Z",
       lastEdited: "2024-04-15T09:30:00.123Z",
       user_id: "507f1f77bcf86cd799439011",
@@ -468,24 +499,43 @@ const Dashboard = () => {
       mime_type: "application/pdf",
     },
     {
-      name: "Budget.xlsx",
+      name: "ProjectPlan.docx",
       uploadedAt: "2024-03-27T05:24:30.123Z",
       lastEdited: "2024-04-05T11:45:30.123Z",
       user_id: "507f1f77bcf86cd799439012",
       sharedWith: [],
-      size: 55843,
-      mime_type:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    },
+      size: 2048, // 2 KB
+      mime_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  },
     {
-      name: "LogoDesign.ai",
-      uploadedAt: "2024-02-18T12:00:00.123Z",
-      lastEdited: "2024-02-20T08:50:00.123Z",
+      name: "ReadMe.txt",
+      uploadedAt: "2024-04-10T14:00:00.123Z",
+      lastEdited: "2024-04-12T15:30:00.123Z",
       user_id: "507f1f77bcf86cd799439013",
       sharedWith: ["507f191e810c19729de860ec"],
-      size: 102400,
-      mime_type: "application/illustrator",
+      size: 1024, // 1 KB
+      mime_type: "text/plain",
     },
+    // New video file (MP4)
+    {
+      name: "SampleVideo.mp4",
+      uploadedAt: "2024-04-18T12:30:00.123Z",
+      lastEdited: "2024-04-19T14:00:00.123Z",
+      user_id: "507f1f77bcf86cd799439014",
+      sharedWith: ["507f191e810c19729de860ed"],
+      size: 20485760, // 20 MB
+      mime_type: "video/mp4",
+  },
+  // New ZIP/RAR file
+  {
+      name: "Archive.zip",
+      uploadedAt: "2024-04-15T08:15:00.123Z",
+      lastEdited: "2024-04-17T09:45:00.123Z",
+      user_id: "507f1f77bcf86cd799439015",
+      sharedWith: [],
+      size: 1024000, // 1 MB
+      mime_type: "application/zip",
+  }
   ];
 
   const [files, setFiles] = useState(initialFiles);
@@ -976,22 +1026,23 @@ const Dashboard = () => {
           </div>
         </div>
         <div className={classes.fileList}>
-          {files.map((file) => (
-            <div key={file.file_id} className={classes.fileItem}>
-              <Typography className={classes.fileName}>{file.name}</Typography>
-              <div className={classes.fileDetails}>
-                <Typography className={classes.fileDetailsItem}>
-                  {file.lastEdited}
-                </Typography>
-                <Typography>{file.sharedWith.length} people</Typography>
-                <Typography>{file.user_id}</Typography>
-              </div>
-              <IconButton onClick={handleClick}>
-                <MoreVertIcon />
-              </IconButton>
-            </div>
-          ))}
-        </div>
+                    {files.map(file => (
+                        <div key={file.file_id} className={classes.fileItem}>
+                        <div className={classes.fileIcon}>
+                            {getFileIcon(file.mime_type)} {/* Apply the fileIcon class to the icon */}
+                        </div>
+                        <Typography className={classes.fileName}>{file.name}</Typography>
+                        <div className={classes.fileDetails}>
+                            <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
+                            <Typography>{file.sharedWith.length} people</Typography>
+                            <Typography>{file.user_id}</Typography>
+                        </div>
+                        <IconButton onClick={handleClick}>
+                            <MoreVertIcon />
+                        </IconButton>
+                    </div>
+                    ))}
+                </div>
       </main>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={handleClose}>Share</MenuItem>
