@@ -455,6 +455,38 @@ const Dashboard = () => {
     }
   }, [])
 
+  useEffect(() => {
+    handleDashboardApi().then((response) => {
+      console.log("fetched")
+      data = response
+      console.log(data)
+      setFiles(data.userFiles);
+      setFolders(data.userFolders)
+    });
+  }, [])
+
+  const handleDashboardApi = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/dashboard', {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        }
+      });
+      console.log(response.data)
+      return response.data;
+    } catch (error) {
+        console.error('Error during login:', error);
+    }
+  }
+
+  function handleSharedWith(file) {
+    if (file.sharedWith){
+      return file.sharedWith.length
+    }
+    else return 0
+  }
+
   const handleButtonClick = () => {
     fileInputRef.current.click();
   };
@@ -586,9 +618,9 @@ const handleTypeClose = () => {
             ))
           : folders.map((folder) => (
               <div key={folder.folder_id} className={classes.gridItem}>
-                <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
+                <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
                 <div className={classes.gridDetails}>
-                  <div className={classes.gridName}>{folder.name}</div>
+                  <div className={classes.gridName}>{folder.folder_name}</div>
                 </div>
                 <IconButton className={classes.kebabMenu} onClick={handleClick}>
                   <MoreVertIcon />
@@ -598,7 +630,8 @@ const handleTypeClose = () => {
       </div>
     );
   };
-
+  const [files, setFiles] = useState([]);
+  const [folders, setFolders] = useState([]);
   const fileTypeMap = {
     'application/pdf': { icon: <PictureAsPdfIcon style={{ color: '#ea4335' }} />, displayName: 'PDF' },
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': { icon: <ArticleIcon style={{ color: '#4285f4' }} />, displayName: 'Word Document' },
@@ -611,77 +644,10 @@ const handleTypeClose = () => {
     'video/mpeg': { icon: <MovieIcon style={{ color: '#ea4335' }} />, displayName: 'MPEG Video' },
   };
 
-  // This creates a new object with all the current searchParams, but with the value for the property named name updated to the new value that came from the text field.
-  // The new object is then set as the new state.
-
-  const initialFiles = [
-    {
-      name: "Proposal.pdf",
-      uploadedAt: "2024-04-12T07:20:50.123Z",
-      lastEdited: "2024-04-15T09:30:00.123Z",
-      user_id: "507f1f77bcf86cd799439011",
-      sharedWith: ["507f191e810c19729de860ea", "507f191e810c19729de860eb"],
-      size: 153402,
-      mime_type: "application/pdf",
-    },
-    {
-      name: "ProjectPlan.docx",
-      uploadedAt: "2024-03-27T05:24:30.123Z",
-      lastEdited: "2024-04-05T11:45:30.123Z",
-      user_id: "507f1f77bcf86cd799439012",
-      sharedWith: [],
-      size: 2048, // 2 KB
-      mime_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  },
-    {
-      name: "ReadMe.txt",
-      uploadedAt: "2024-04-10T14:00:00.123Z",
-      lastEdited: "2024-04-12T15:30:00.123Z",
-      user_id: "507f1f77bcf86cd799439013",
-      sharedWith: ["507f191e810c19729de860ec"],
-      size: 1024, // 1 KB
-      mime_type: "text/plain",
-    },
-    // New video file (MP4)
-    {
-      name: "SampleVideo.mp4",
-      uploadedAt: "2024-04-18T12:30:00.123Z",
-      lastEdited: "2024-04-19T14:00:00.123Z",
-      user_id: "507f1f77bcf86cd799439014",
-      sharedWith: ["507f191e810c19729de860ed"],
-      size: 20485760, // 20 MB
-      mime_type: "video/mp4",
-  },
-  // New ZIP/RAR file
-  {
-      name: "Archive.zip",
-      uploadedAt: "2024-04-15T08:15:00.123Z",
-      lastEdited: "2024-04-17T09:45:00.123Z",
-      user_id: "507f1f77bcf86cd799439015",
-      sharedWith: [],
-      size: 1024000, // 1 MB
-      mime_type: "application/zip",
-  }
-  ];
-
-  const [files, setFiles] = useState(initialFiles);
   const [searchTerm, setSearchTerm] = useState("");
-
-
-  const initialFolders = [
-    {
-      name: "Project Documents",
-      createdAt: "2024-04-10T09:00:00.123Z",
-      lastModified: "2024-04-15T14:30:00.123Z",
-      user_id: "507f1f77bcf86cd799439011",
-      sharedWith: ["507f191e810c19729de860ea", "507f191e810c19729de860eb"],
-    },
-
-  ];
-
-  const [folders, setFolders] = useState(initialFolders);
-
   
+
+ 
   useEffect(() => {
     const filteredFiles = initialFiles.filter(
       (file) =>
@@ -689,8 +655,8 @@ const handleTypeClose = () => {
         (selectedType === null || file.mime_type === selectedType)
     );
   
-    const filteredFolders = initialFolders.filter((folder) =>
-      folder.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredFolders = folders.filter((folder) =>
+      folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   
     setFiles(filteredFiles);
@@ -1214,8 +1180,8 @@ const handleTypeClose = () => {
           </div>
           <Typography className={classes.fileName}>{file.name}</Typography>
           <div className={classes.fileDetails}>
-            <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
-            <Typography>{file.sharedWith.length} people</Typography>
+            <Typography className={classes.fileDetailsItem}>{file.updated_at}</Typography>
+            <Typography>{handleSharedWith(file)} people</Typography>
             <Typography>{file.user_id}</Typography>
           </div>
           <IconButton onClick={handleClick}>
@@ -1225,14 +1191,14 @@ const handleTypeClose = () => {
       )) : folders.map((folder) => (
         <div key={folder.folder_id} className={classes.fileItem}>
           <div className={classes.fileIcon}>
-            {getFolderIcon(folder.name)}
+            {getFolderIcon(folder.folder_name)}
           </div>
-          <Typography className={classes.fileName}>{folder.name}</Typography>
+          <Typography className={classes.fileName}>{folder.folder_name}</Typography>
           <div className={classes.fileDetails}>
             <Typography className={classes.fileDetailsItem}>
-              {folder.lastModified}
+              {folder.created_at}
             </Typography>
-            <Typography>{folder.sharedWith.length} people</Typography>
+            <Typography>{handleSharedWith(folder)} people</Typography>
             <Typography>{folder.user_id}</Typography>
           </div>
           <IconButton onClick={handleClick}>
@@ -1256,8 +1222,8 @@ const handleTypeClose = () => {
         ))
       : folders.map((folder) => (
           <div key={folder.folder_id} className={classes.gridItem}>
-            <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
-            <div className={classes.gridName}>{folder.name}</div>
+            <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
+            <div className={classes.gridName}>{folder.folder_name}</div>
             <IconButton onClick={handleClick}>
               <MoreVertIcon />
             </IconButton>
