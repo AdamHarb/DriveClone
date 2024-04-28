@@ -481,6 +481,84 @@ const Dashboard = () => {
     }
   }
 
+  const handleUploadFile = async (file) => {
+    try {
+      if (!file) {
+        return;
+      }
+
+      console.log(file);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post('http://localhost:3000/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${cookies.token}`
+        }
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.error('Error during file upload:', error);
+    }
+  };
+
+  const handleCreateFolder = async (folderName) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/create-folder', {
+            name: folderName
+          }, {
+            headers: {
+              'Authorization': `Bearer ${cookies.token}`
+            }
+          }
+      );
+      console.log(response.data)
+
+      return response.data.folder_id;
+    } catch (e) {
+      console.error('Error during folder creation:', e);
+    }
+  }
+
+  // Use: <input type="file" webkitdirectory="" directory="" onChange={handleFileChange} />
+  const handleUploadFolder = async (folder) => {
+    try {
+      if (!folder) {
+        return;
+      }
+
+      const files = Array.from(folder.target.files);
+      const directoryName = files[0].webkitRelativePath.split('/').slice(0, -1).join('/');
+
+      const folder_id = await handleCreateFolder(directoryName);
+
+      const uploadPromises = files.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('parent_id', folder_id);
+
+        try {
+          const response = await axios.post('http://localhost:3000/api/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${cookies.token}`
+            }
+          });
+          console.log(response.data);
+        } catch (error) {
+          console.error('Error during file upload:', error);
+        }
+      });
+
+      await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error('Error during folder upload:', error);
+    }
+  }
+
+
   function handleSharedWith(file) {
     if (file.sharedWith){
       return file.sharedWith.length
