@@ -5,7 +5,7 @@ const fileController = require("./controllers/FileController");
 const multer = require('multer');
 const upload = multer();
 const folderController = require("./controllers/FolderController");
-
+const driveController = require("./controllers/DriveController");
 const router = express.Router();
 
 // Base Routes
@@ -36,43 +36,7 @@ router.put('/update/:fileId', userAuth, fileController.updateFileDetails);
 router.delete('/delete/:fileId', userAuth, fileController.deleteFile);
 
 //Dashboard Routes
-router.get('/dashboard/:folderId', userAuth, async function (req, res) {
-	try {
-		const [userFolders, userFiles] = await Promise.all([
-			folderController.getFoldersByUserId(req,res),
-			fileController.listFiles(req,res)
-		]);
-		if(userFolders.status !== 200 || userFiles.status !== 200){
-			res.status(500).json({ message: "Internal server error" });
-		}
-		res.status(200).json({
-			userFolders: userFolders.data,
-			userFiles: userFiles.data
-		});
-	} catch (err) {
-		console.error(err);
-		res.status(500).json({ message: "Internal server error" });
-	}
-
-});
-
-router.get('/dashboard', userAuth, async function (req, res) {
-	try {
-		const [userFolders, userFiles] = await Promise.all([
-			folderController.getRootFoldersByUserId(req,res),
-			fileController.listRootFiles(req,res)
-		]);
-		if(userFolders.status !== 200 || userFiles.status !== 200){
-			res.status(500).json({ message: "Internal server error" });
-		}
-		res.status(200).json({
-			userFolders: userFolders.data,
-			userFiles: userFiles.data
-		});
-	} catch (err) {
-		console.error(err);
-		res.status(500).json({ message: "Internal server error" });
-	}
-});
+router.get('/dashboard/:folderId', userAuth, driveController.getFolderStuff);
+router.get('/dashboard', userAuth, driveController.getRootStuff);
 
 module.exports = router;
