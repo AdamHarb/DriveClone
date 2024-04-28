@@ -19,16 +19,15 @@ router.post('/test-middleware', userAuth, (req, res) => {
 });
 
 // User Routes
-router.get('/profile/:username', userController.getProfileByUsername);
+router.get('/profile', userAuth ,userController.getProfileByUsername);
 router.post('/login', userController.loginUser);
+router.post('/create-user', userController.createUser);
+router.get('/login', userController.loginUser);
 router.post('/create-user', userController.createUser);
 
 // Folder Routes
-router.get('/homepage', userAuth, folderController.getFoldersByUserId);
+router.get('/dashboard', userAuth, folderController.getFoldersByUserId);
 router.post('/create-folder', userAuth, folderController.createFolder);
-router.get('/profile', userAuth ,userController.getProfileByUsername);
-router.get('/login', userController.loginUser);
-router.post('/create-user', userController.createUser);
 
 // File Routes
 router.post('/upload', userAuth, upload.single('file'), fileController.uploadFile);
