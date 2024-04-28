@@ -77,8 +77,10 @@ import MovieIcon from '@mui/icons-material/Movie';
 import FolderZipIcon from '@mui/icons-material/FolderZip';
 
 
-import TypeDropdown from "./TypeDropdown";
 
+
+import TypeDropdown from "./TypeDropdown";
+import NewMenuDropdown from './NewMenuDropdown';
 
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
@@ -428,12 +430,14 @@ const useStyles = makeStyles((theme) => ({
 const Dashboard = () => {
   const classes = useStyles();
   const fileInputRef = useRef(null);
+  const folderInputRef = useRef(null);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false); // Handling the advanced search modal
   const [anchorEl, setAnchorEl] = useState(null);
   const [logoutAnchorEl, setLogoutAnchorEl] = useState(null);
   const [activeButton, setActiveButton] = useState("files");
   const [activeLayout, setActiveLayout] = useState("list");
   const [activeListButton, setActiveListButton] = useState("home");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const [selectedType, setSelectedType] = useState(null);
@@ -579,17 +583,15 @@ const Dashboard = () => {
       console.error('Error during folder upload:', error);
     }
   }
-
-
   function handleSharedWith(file) {
     if (file.sharedWith){
       return file.sharedWith.length
     }
     else return 0
   }
-
-  const handleButtonClick = () => {
-    fileInputRef.current.click();
+  const handleButtonClick = (event) => {
+    event.stopPropagation(); // Stop event propagation
+    setIsMenuOpen(true);
   };
   const handleToggleButtonClick = (buttonType) => {
     setActiveButton(buttonType);
@@ -598,6 +600,16 @@ const Dashboard = () => {
   const handleLayoutButtonClick = (layoutType) => {
     setActiveLayout(layoutType);
   };
+
+
+
+const handleMenuClose = () => {
+  setAnchorEl(null);
+  setIsMenuOpen(false);
+};
+
+
+const newButtonRef = useRef(null);
 
 
 const [typeAnchorEl, setTypeAnchorEl] = useState(null);
@@ -615,9 +627,6 @@ const handleTypeClose = () => {
     setActiveListButton(buttonType);
   };
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
 
   const handleTypeSelect = (type) => {
     setSelectedType(type);
@@ -699,9 +708,25 @@ const handleTypeClose = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
   const renderGrid = () => {
     const classes = useStyles();
+  
+    const handleGridItemClick = (event) => {
+      // Check if the click event target is the "New" button
+      if (event.target.tagName.toLowerCase() === 'button') {
+        // If it is, do nothing (prevent the kebab menu from opening)
+        return;
+      }
+  
+      // Otherwise, open the kebab menu as usual
+      setAnchorEl(event.currentTarget);
+    };
+  
+    useEffect(() => {
+      return () => {
+        setAnchorEl(null);
+      };
+    }, []);
   
     return (
       <div className={classes.gridContainer}>
@@ -712,7 +737,7 @@ const handleTypeClose = () => {
                 <div className={classes.gridDetails}>
                   <div className={classes.gridName}>{file.name}</div>
                 </div>
-                <IconButton className={classes.kebabMenu} onClick={handleClick}>
+                <IconButton className={classes.kebabMenu} onClick={handleGridItemClick}>
                   <MoreVertIcon />
                 </IconButton>
               </div>
@@ -723,7 +748,7 @@ const handleTypeClose = () => {
                 <div className={classes.gridDetails}>
                   <div className={classes.gridName}>{folder.folder_name}</div>
                 </div>
-                <IconButton className={classes.kebabMenu} onClick={handleClick}>
+                <IconButton className={classes.kebabMenu} onClick={handleGridItemClick}>
                   <MoreVertIcon />
                 </IconButton>
               </div>
@@ -731,6 +756,8 @@ const handleTypeClose = () => {
       </div>
     );
   };
+
+ 
   const [files, setFiles] = useState([]);
   const [folders, setFolders] = useState([]);
   const fileTypeMap = {
@@ -792,17 +819,43 @@ const handleTypeClose = () => {
             console.log(file); // Log the selected file, or handle it as needed
           }}
         />
+        <input
+        type="file"
+        id="file-input"
+        style={{ display: 'none' }}
+        ref={fileInputRef}
+        onChange={handleUploadFile}
+      />
+      <input
+        type="file"
+        id="folder-input"
+        webkitdirectory=""
+        directory=""
+        style={{ display: 'none' }}
+        ref={folderInputRef}
+        onChange={handleUploadFolder}
+      />
         <Button
-          variant="contained"
-          color="default"
-          className={classes.addButton}
-          startIcon={<AddIcon className={classes.newIcon} />}
-          onClick={handleButtonClick}
-        >
-          <Typography variant="body2" style={{ fontSize: "18px" }}>
-            New
-          </Typography>
-        </Button>
+  variant="contained"
+  color="default"
+  className={classes.addButton}
+  startIcon={<AddIcon className={classes.newIcon} />}
+  onClick={handleButtonClick}
+  ref={newButtonRef}
+>
+  <Typography variant="body2" style={{ fontSize: '18px' }}>
+    New
+  </Typography>
+</Button>
+<NewMenuDropdown
+  anchorEl={anchorEl}
+  open={isMenuOpen}
+  handleClose={handleMenuClose}
+  handleUploadFile={() => fileInputRef.current.click()}
+  handleUploadFolder={() => folderInputRef.current.click()}
+  handleCreateFolder={handleCreateFolder}
+/>
+
         <List>
           <ListItem
             button
@@ -1008,6 +1061,7 @@ const handleTypeClose = () => {
           }}
         />
         <div className={classes.buttonContainer}>
+
         <Button
   variant="outlined"
   className={classes.button}
@@ -1341,6 +1395,7 @@ const handleTypeClose = () => {
         <MenuItem onClick={handleClose}>Download</MenuItem>
         <MenuItem onClick={handleClose}>Rename</MenuItem>
         <MenuItem onClick={handleClose}>Star</MenuItem>
+        <MenuItem onClick={handleClose}>Delete</MenuItem>
       </Menu>
       <Menu
         anchorEl={logoutAnchorEl}
