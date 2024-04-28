@@ -460,7 +460,7 @@ const Dashboard = () => {
   });
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedObj, setSelectedObj] = useState(null);
   const [user, setUser] = useState({
     storage_used: 0
   });
@@ -570,7 +570,7 @@ const Dashboard = () => {
   }
   const handleDeleteFile = async () => {
     try {
-      const response = await axios.delete(`http://localhost:3000/api/delete-files/${selectedFile._id}`, {
+      const response = await axios.delete(`http://localhost:3000/api/delete-files/${selectedObj._id}`, {
         headers: {
             'Authorization': `Bearer ${cookies.token}`
         }
@@ -623,7 +623,7 @@ const Dashboard = () => {
 
   const handleDownload = async () => {
     try {
-       const response = await axios.get(`http://localhost:3000/api/download/${selectedFile.file_id}`, {}, {
+       const response = await axios.get(`http://localhost:3000/api/download/${selectedObj.file_id}`, {}, {
          headers: {
            withCredentials: true,
            'Authorization': `Bearer ${cookies.token}`
@@ -632,7 +632,7 @@ const Dashboard = () => {
       const fileURL = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = fileURL;
-      link.setAttribute('download', selectedFile.name);
+      link.setAttribute('download', selectedObj.name);
       document.body.appendChild(link);
       link.click();
     } catch (e) {
@@ -702,8 +702,8 @@ const Dashboard = () => {
     try {
       const response = await axios.post(`http://localhost:3000/api/rename-file`, {
         newName,
-        name: selectedFile.name,
-        fileId: selectedFile.file_id
+        name: selectedObj.name,
+        fileId: selectedObj.file_id
       }, {
         headers: {
           withCredentials: true,
@@ -748,9 +748,9 @@ const handleTypeClose = () => {
     setActiveListButton(buttonType);
   };
 
-  const handleClick = (file) => (event) => {
+  const handleClick = (obj) => (event) => {
     setAnchorEl(event.currentTarget);
-    setSelectedFile(file);
+    setSelectedObj(obj);
   };
 
   const handleTypeSelect = (type) => {
@@ -993,7 +993,7 @@ const handleTypeClose = () => {
   const handleStar = async () => {
     try {
       await axios.post(`http://localhost:3000/api/star-file`, {
-        fileId: selectedFile._id
+        fileId: selectedObj._id
       }, {
         headers: {
           withCredentials: true,
@@ -1669,7 +1669,7 @@ const handleTypeClose = () => {
                   <Typography>{handleSharedWith(folder)} people</Typography>
                   <Typography>{folder.user_id}</Typography>
                 </div>
-                <IconButton onClick={handleClick}>
+                <IconButton onClick={handleClick(folder)}>
                   <MoreVertIcon />
                 </IconButton>
               </div>
@@ -1694,7 +1694,7 @@ const handleTypeClose = () => {
           <div key={folder.folder_id} className={classes.gridItem}>
             <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
             <div className={classes.gridName}>{folder.folder_name}</div>
-            <IconButton onClick={handleClick}>
+            <IconButton onClick={handleClick(folder)}>
               <MoreVertIcon />
             </IconButton>
           </div>
