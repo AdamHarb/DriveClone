@@ -75,6 +75,8 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'; // for PDFs
 import ArticleIcon from '@mui/icons-material/Article';
 import MovieIcon from '@mui/icons-material/Movie';
 import FolderZipIcon from '@mui/icons-material/FolderZip';
+
+
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
@@ -84,6 +86,7 @@ const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
+    fontFamily: "Roboto, sans-serif",
   },
   drawer: {
     width: drawerWidth,
@@ -145,7 +148,7 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "#f5f5f5", // Change to your preferred shade of gray
     },
     borderBottom: "1px solid #e0e0e0", // Add border at the bottom of each file item
-    paddingBottom: theme.spacing(1),
+    paddingBottom: theme.spacing(0.5),
     paddingTop: theme.spacing(1),
   },
   // Putting the 2 divs as flex items: name AND (locations, reason, owner)
@@ -381,6 +384,42 @@ const useStyles = makeStyles((theme) => ({
   greeting: {
     textAlign: "center",
   },
+  gridContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    marginTop: theme.spacing(2),
+  },
+  gridItem: {
+    width: '22.75%', // Adjust the width as needed
+    marginRight: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    display: 'flex',
+    alignItems: 'center',
+    background: '#f0f4f9', // Default background color
+    borderRadius: '15px',
+    padding: theme.spacing(1.25),
+    transition: 'background-color 0.3s', // Add transition for smooth color change
+    '&:hover': {
+      backgroundColor: '#dfe3e7', // Change background color on hover
+    },
+  },
+  gridIcon: {
+    fontSize: '2rem',
+    marginRight: theme.spacing(1),
+    marginLeft: theme.spacing(1),
+  
+  },
+  gridName: {
+    wordBreak: 'break-word',
+    flexGrow: 1, // Allow the name to take remaining space
+    marginLeft: 7,
+    fontSize: 18,
+  },
+  gridDetails: {
+    display: 'flex', // Add flex display
+    alignItems: 'center', // Center items vertically
+    flexGrow: 1, // Allow the details to take remaining space
+  },
 }));
 
 const Dashboard = () => {
@@ -393,6 +432,7 @@ const Dashboard = () => {
   const [activeLayout, setActiveLayout] = useState("list");
   const [activeListButton, setActiveListButton] = useState("home");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedItemType, setSelectedItemType] = useState("files");
   const [searchParams, setSearchParams] = useState({
     type: "",
     owner: "",
@@ -447,6 +487,7 @@ const Dashboard = () => {
   };
   const handleToggleButtonClick = (buttonType) => {
     setActiveButton(buttonType);
+    setSelectedItemType(buttonType);
   };
   const handleLayoutButtonClick = (layoutType) => {
     setActiveLayout(layoutType);
@@ -512,6 +553,15 @@ const Dashboard = () => {
 			return <DescriptionIcon />;
 		} 
 	  };
+    const getFolderIcon = (folderName) => {
+      // Add logic to determine the appropriate folder icon based on the folder name or any other criteria
+      // For example:
+      if (folderName.toLowerCase().includes("project")) {
+        return <FolderIcon style={{ color: "#444746" }} />;
+      } else {
+        return <FolderIcon />;
+      }
+    };
 
   const handleAdvancedSearchClick = () => {
     setIsAdvancedSearchOpen(!isAdvancedSearchOpen); // Toggle the advanced search modal
@@ -525,6 +575,38 @@ const Dashboard = () => {
       ...prevParams,
       [name]: type === "checkbox" ? checked : value,
     }));
+  };
+
+  const renderGrid = () => {
+    const classes = useStyles();
+  
+    return (
+      <div className={classes.gridContainer}>
+        {selectedItemType === 'files'
+          ? files.map((file) => (
+              <div key={file.file_id} className={classes.gridItem}>
+                <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
+                <div className={classes.gridDetails}>
+                  <div className={classes.gridName}>{file.name}</div>
+                </div>
+                <IconButton className={classes.kebabMenu} onClick={handleClick}>
+                  <MoreVertIcon />
+                </IconButton>
+              </div>
+            ))
+          : folders.map((folder) => (
+              <div key={folder.folder_id} className={classes.gridItem}>
+                <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
+                <div className={classes.gridDetails}>
+                  <div className={classes.gridName}>{folder.name}</div>
+                </div>
+                <IconButton className={classes.kebabMenu} onClick={handleClick}>
+                  <MoreVertIcon />
+                </IconButton>
+              </div>
+            ))}
+      </div>
+    );
   };
 
   // This creates a new object with all the current searchParams, but with the value for the property named name updated to the new value that came from the text field.
@@ -583,11 +665,31 @@ const Dashboard = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
 
+
+  const initialFolders = [
+    {
+      name: "Project Documents",
+      createdAt: "2024-04-10T09:00:00.123Z",
+      lastModified: "2024-04-15T14:30:00.123Z",
+      user_id: "507f1f77bcf86cd799439011",
+      sharedWith: ["507f191e810c19729de860ea", "507f191e810c19729de860eb"],
+    },
+
+  ];
+
+  const [folders, setFolders] = useState(initialFolders);
+
+  
   useEffect(() => {
     const filteredFiles = initialFiles.filter((file) =>
-      file.name.toLowerCase().includes(searchTerm.toLowerCase()),
+      file.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFiles(filteredFiles);
+  
+    const filteredFolders = initialFolders.filter((folder) =>
+      folder.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFolders(filteredFolders);
   }, [searchTerm]);
 
   const handleChangeSearch = (event) => {
@@ -1056,35 +1158,78 @@ const Dashboard = () => {
             </ToggleButtonGroup>
           </div>
         </div>
+        {activeLayout === 'list' && (
+  <div className={classes.listLayout}>
+    <Typography className={classes.nameBold}>Name</Typography>
+    <div className={classes.listLayoutItems}>
+      <Typography className={classes.listLayoutItem}>Date Uploaded</Typography>
+      <Typography className={classes.listLayoutItem}>Owner</Typography>
+      <Typography className={classes.listLayoutItem}>Location</Typography>
+    </div>
+  </div>
+)}
 
-        <div className={classes.listLayout}>
-          <Typography className={classes.nameBold}>Name</Typography>
-          <div className={classes.listLayoutItems}>
-            <Typography className={classes.listLayoutItem}>
-              Date Uploaded
-            </Typography>
-            <Typography className={classes.listLayoutItem}>Owner</Typography>
-            <Typography className={classes.listLayoutItem}>Location</Typography>
+{activeLayout === 'list' ? (
+  <>
+    <div className={classes.fileList}>
+      {selectedItemType === "files" ? files.map(file => (
+        <div key={file.file_id} className={classes.fileItem}>
+          <div className={classes.fileIcon}>
+            {getFileIcon(file.mime_type)}
           </div>
+          <Typography className={classes.fileName}>{file.name}</Typography>
+          <div className={classes.fileDetails}>
+            <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
+            <Typography>{file.sharedWith.length} people</Typography>
+            <Typography>{file.user_id}</Typography>
+          </div>
+          <IconButton onClick={handleClick}>
+            <MoreVertIcon />
+          </IconButton>
         </div>
-        <div className={classes.fileList}>
-                    {files.map(file => (
-                        <div key={file.file_id} className={classes.fileItem}>
-                        <div className={classes.fileIcon}>
-                            {getFileIcon(file.mime_type)} {/* Apply the fileIcon class to the icon */}
-                        </div>
-                        <Typography className={classes.fileName}>{file.name}</Typography>
-                        <div className={classes.fileDetails}>
-                            <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
-                            <Typography>{handleSharedWith(file)} people</Typography>
-                            <Typography>{file.user_id}</Typography>
-                        </div>
-                        <IconButton onClick={handleClick}>
-                            <MoreVertIcon />
-                        </IconButton>
-                    </div>
-                    ))}
-                </div>
+      )) : folders.map((folder) => (
+        <div key={folder.folder_id} className={classes.fileItem}>
+          <div className={classes.fileIcon}>
+            {getFolderIcon(folder.name)}
+          </div>
+          <Typography className={classes.fileName}>{folder.name}</Typography>
+          <div className={classes.fileDetails}>
+            <Typography className={classes.fileDetailsItem}>
+              {folder.lastModified}
+            </Typography>
+            <Typography>{folder.sharedWith.length} people</Typography>
+            <Typography>{folder.user_id}</Typography>
+          </div>
+          <IconButton onClick={handleClick}>
+            <MoreVertIcon />
+          </IconButton>
+        </div>
+      ))}
+    </div>
+  </>
+) : (
+  <div className={classes.gridContainer}>
+    {selectedItemType === 'files'
+      ? files.map((file) => (
+          <div key={file.file_id} className={classes.gridItem}>
+            <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
+            <div className={classes.gridName}>{file.name}</div>
+            <IconButton onClick={handleClick}>
+              <MoreVertIcon />
+            </IconButton>
+          </div>
+        ))
+      : folders.map((folder) => (
+          <div key={folder.folder_id} className={classes.gridItem}>
+            <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
+            <div className={classes.gridName}>{folder.name}</div>
+            <IconButton onClick={handleClick}>
+              <MoreVertIcon />
+            </IconButton>
+          </div>
+        ))}
+  </div>
+)}
       </main>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={handleClose}>Share</MenuItem>
