@@ -9,10 +9,10 @@ exports.uploadFile = async (req, res) => {
 
 		const fileCount = await File.countDocuments({ user_id: req.user._id });
 
-		const him = await User.findOne({ _id: req.user._id });
-		const newsize = him.storage_used + req.file.size;
-		const user = await User.updateOne({ _id: req.user._id }, { storage_used: newsize });
-    
+		// const him = await User.findOne({ _id: req.user._id });
+		// const newsize = him.storage_used + req.file.size;
+		// const user = await User.updateOne({ _id: req.user._id }, { storage_used: newsize });
+    //
 		const fileBuffer = req.file.buffer;
 
 		const bucket = await getGridFSBucket();
