@@ -443,6 +443,12 @@ const Dashboard = () => {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [selectedItemType, setSelectedItemType] = useState("files");
+  const [selectedPerson, setSelectedPerson] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locationAnchorEl, setLocationAnchorEl] = useState(null);
+  const [selectedModifiedDate, setSelectedModifiedDate] = useState(null);
+  const [modifiedAnchorEl, setModifiedAnchorEl] = useState(null);
+  const [personAnchorEl, setPersonAnchorEl] = useState(null);
   const [searchParams, setSearchParams] = useState({
     type: "",
     owner: "",
@@ -638,6 +644,18 @@ const Dashboard = () => {
     }
     else return 0
   }
+  const handlePersonClose = () => {
+    setPersonAnchorEl(null);
+  };
+  const handlePersonSelect = (person) => {
+    if (person === null) {
+      setSelectedPerson(null);
+      fetchFilesFolders(); // Fetch files and folders when person is deselected
+    } else {
+      setSelectedPerson(person);
+    }
+    handlePersonClose();
+  };
   const handleButtonClick = (event) => {
     event.stopPropagation(); // Stop event propagation
     setIsMenuOpen(true);
@@ -658,6 +676,26 @@ const Dashboard = () => {
     setRenameDialogOpen(false);
   };
 
+
+  const handleLocationClick = (event) => {
+    if (!selectedLocation) {
+      setLocationAnchorEl(event.currentTarget);
+    }
+  };
+  const handleLocationClose = () => {
+    setLocationAnchorEl(null);
+  };
+  const handleLocationSelect = (location) => {
+    if (location === null) {
+      setSelectedLocation(null);
+      fetchFilesFolders(); // Fetch files and folders when location is deselected
+    } else {
+      setSelectedLocation(location);
+    }
+    handleLocationClose();
+  };
+
+
   const handleRename = async (newName) => {
     try {
       const response = await axios.post(`http://localhost:3000/api/rename-file`, {
@@ -675,6 +713,12 @@ const Dashboard = () => {
       });
     } catch (e) {
       console.error('Error during file renaming:', e);
+    }
+  };
+
+  const handlePersonClick = (event) => {
+    if (!selectedPerson) {
+      setPersonAnchorEl(event.currentTarget);
     }
   };
 
@@ -722,6 +766,26 @@ const handleTypeClose = () => {
 
   const handleLogoutClick = (event) => {
     setLogoutAnchorEl(event.currentTarget);
+  };
+
+
+
+  const handleModifiedClick = (event) => {
+    if (!selectedModifiedDate) {
+      setModifiedAnchorEl(event.currentTarget);
+    }
+  };
+  const handleModifiedClose = () => {
+    setModifiedAnchorEl(null);
+  };
+  const handleModifiedSelect = (modifiedDate) => {
+    if (modifiedDate === null) {
+      setSelectedModifiedDate(null);
+      fetchFilesFolders(); // Fetch files and folders when modified date is deselected
+    } else {
+      setSelectedModifiedDate(modifiedDate);
+    }
+    handleModifiedClose();
   };
 
   const handleLogoutClose = () => {
@@ -778,6 +842,38 @@ const handleTypeClose = () => {
       } else {
         return <FolderIcon />;
       }
+    };
+    const isToday = (date) => {
+      const today = new Date();
+      return (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+      );
+    };
+    
+    const isLast7Days = (date) => {
+      const today = new Date();
+      const last7Days = new Date(today);
+      last7Days.setDate(today.getDate() - 7);
+      return date >= last7Days && date <= today;
+    };
+    
+    const isLast30Days = (date) => {
+      const today = new Date();
+      const last30Days = new Date(today);
+      last30Days.setDate(today.getDate() - 30);
+      return date >= last30Days && date <= today;
+    };
+    
+    const isThisYear = (date) => {
+      const today = new Date();
+      return date.getFullYear() === today.getFullYear();
+    };
+    
+    const isLastYear = (date) => {
+      const today = new Date();
+      return date.getFullYear() === today.getFullYear() - 1;
     };
 
   const handleAdvancedSearchClick = () => {
@@ -863,18 +959,29 @@ const handleTypeClose = () => {
 
   useEffect(() => {
     const filteredFiles = files.filter(
-        (file) =>
-            file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (selectedType === null || file.mime_type === selectedType)
+      (file) =>
+        file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedType === null || file.mime_type === selectedType) &&
+        (selectedPerson === null || file.sharedWith?.includes(selectedPerson)) &&
+        (selectedLocation === null ||
+          selectedLocation === "Anywhere in Drive" ||
+          (selectedLocation === "My Drive" && file.location === "My Drive") ||
+          (selectedLocation === "Shared with me" && file.sharedWith?.length > 0)) &&
+        (selectedModifiedDate === null ||
+          (selectedModifiedDate === "Today" && isToday(new Date(file.updated_at))) ||
+          (selectedModifiedDate === "Last 7 days" && isLast7Days(new Date(file.updated_at))) ||
+          (selectedModifiedDate === "Last 30 days" && isLast30Days(new Date(file.updated_at))) ||
+          (selectedModifiedDate === "This year" && isThisYear(new Date(file.updated_at))) ||
+          (selectedModifiedDate === "Last year" && isLastYear(new Date(file.updated_at))))
     );
-
+  
     const filteredFolders = folders.filter((folder) =>
-        folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
+      folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
+  
     setFiles(filteredFiles);
     setFolders(filteredFolders);
-  }, [searchTerm, selectedType]);
+  }, [searchTerm, selectedType, selectedPerson, selectedLocation, selectedModifiedDate]);
 
 
   const handleChangeSearch = (event) => {
@@ -1172,30 +1279,78 @@ const handleTypeClose = () => {
 >
   {selectedType ? fileTypeMap[selectedType]?.displayName || selectedType : "Type"}
 </Button>
+<Button
+  variant="outlined"
+  className={classes.button}
+  onClick={handlePersonClick}
+  startIcon={selectedPerson ? null : <PermIdentityOutlinedIcon />}
+  endIcon={
+    selectedPerson ? (
+      <CloseIcon
+        className={classes.closeIcon}
+        onClick={(event) => {
+          event.stopPropagation();
+          handlePersonSelect(null);
+        }}
+      />
+    ) : (
+      <ArrowDropDownOutlinedIcon />
+    )
+  }
+  style={{
+    backgroundColor: selectedPerson ? "#c2e7ff" : undefined,
+  }}
+>
+  {selectedPerson || "People"}
+</Button>
+<Button
+  variant="outlined"
+  className={classes.button}
+  onClick={handleModifiedClick}
+  startIcon={selectedModifiedDate ? null : <CalendarTodayOutlinedIcon />}
+  endIcon={
+    selectedModifiedDate ? (
+      <CloseIcon
+        className={classes.closeIcon}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleModifiedSelect(null);
+        }}
+      />
+    ) : (
+      <ArrowDropDownOutlinedIcon />
+    )
+  }
+  style={{
+    backgroundColor: selectedModifiedDate ? "#c2e7ff" : undefined,
+  }}
+>
+  {selectedModifiedDate || "Modified"}
+</Button>
           <Button
-            variant="outlined"
-            startIcon={<PermIdentityOutlinedIcon />} // Icon on the left side
-            endIcon={<ArrowDropDownOutlinedIcon />} // Arrow icon on the right side
-            className={classes.button}
-          >
-            People
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<CalendarTodayOutlinedIcon />} // Icon on the left side
-            endIcon={<ArrowDropDownOutlinedIcon />} // Arrow icon on the right side
-            className={classes.button}
-          >
-            Modified
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<FolderOpenOutlinedIcon />} // Icon on the left side
-            endIcon={<ArrowDropDownOutlinedIcon />} // Arrow icon on the right side
-            className={classes.button}
-          >
-            Location
-          </Button>
+  variant="outlined"
+  className={classes.button}
+  onClick={handleLocationClick}
+  startIcon={selectedLocation ? null : <FolderOpenOutlinedIcon />}
+  endIcon={
+    selectedLocation ? (
+      <CloseIcon
+        className={classes.closeIcon}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleLocationSelect(null);
+        }}
+      />
+    ) : (
+      <ArrowDropDownOutlinedIcon />
+    )
+  }
+  style={{
+    backgroundColor: selectedLocation ? "#c2e7ff" : undefined,
+  }}
+>
+  {selectedLocation || "Location"}
+</Button>
         </div>
         <Menu
   anchorEl={typeAnchorEl}
@@ -1209,6 +1364,50 @@ const handleTypeClose = () => {
       <Typography style={{ marginLeft: 8 }}>{fileTypeMap[type]?.displayName || type}</Typography>
     </MenuItem>
   ))}
+</Menu>
+<Menu
+  anchorEl={personAnchorEl}
+  keepMounted
+  open={Boolean(personAnchorEl)}
+  onClose={handlePersonClose}
+>
+  {[...new Set(files.flatMap((file) => file.sharedWith))].map((person) => (
+    <MenuItem key={person} onClick={() => handlePersonSelect(person)}>
+      {person}
+    </MenuItem>
+  ))}
+</Menu>
+<Menu
+  anchorEl={locationAnchorEl}
+  keepMounted
+  open={Boolean(locationAnchorEl)}
+  onClose={handleLocationClose}
+>
+  <MenuItem onClick={() => handleLocationSelect("Anywhere in Drive")}>
+    Anywhere in Drive
+  </MenuItem>
+  <MenuItem onClick={() => handleLocationSelect("My Drive")}>
+    My Drive
+  </MenuItem>
+  <MenuItem onClick={() => handleLocationSelect("Shared with me")}>
+    Shared with me
+  </MenuItem>
+</Menu>
+<Menu
+  anchorEl={modifiedAnchorEl}
+  keepMounted
+  open={Boolean(modifiedAnchorEl)}
+  onClose={handleModifiedClose}
+>
+  <MenuItem onClick={() => handleModifiedSelect("Today")}>Today</MenuItem>
+  <MenuItem onClick={() => handleModifiedSelect("Last 7 days")}>
+    Last 7 days
+  </MenuItem>
+  <MenuItem onClick={() => handleModifiedSelect("Last 30 days")}>
+    Last 30 days
+  </MenuItem>
+  <MenuItem onClick={() => handleModifiedSelect("This year")}>This year</MenuItem>
+  <MenuItem onClick={() => handleModifiedSelect("Last year")}>Last year</MenuItem>
 </Menu>
 
         {/* This is the Modal for the Advanced Search Fields */}
