@@ -140,3 +140,18 @@ exports.listFiles = async (req, res) => {
 		res.status(500).json({ message: "Internal server error" });
 	}
 };
+
+exports.listRootFiles = async (req, res) => {
+	try {
+		const query = { user_id: req.user._id, parent_id: null};
+
+		const files = await File.find(query);
+		return {
+			"status": 200,
+			"data": files
+		}
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ message: "Internal server error" });
+	}
+};
