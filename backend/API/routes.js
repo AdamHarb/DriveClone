@@ -27,16 +27,18 @@ router.post('/create-user', userController.createUser);
 
 // Folder Routes
 router.post('/create-folder', userAuth, folderController.createFolder);
+router.delete('/delete-folder/:folderId', userAuth, folderController.deleteFolder);
 
 // File Routes
 router.post('/upload', userAuth, upload.single('file'), fileController.uploadFile);
 router.get('/download/:fileId', fileController.downloadFile);
 router.get('/details/:fileId', userAuth, fileController.getFileDetails);
 router.put('/update/:fileId', userAuth, fileController.updateFileDetails);
-router.delete('/delete/:fileId', userAuth, fileController.deleteFile);
+router.delete('/delete-files/:fileId', userAuth, fileController.deleteFile);
 
 //Dashboard Routes
 router.get('/dashboard/:folderId', userAuth, driveController.getFolderStuff);
 router.get('/dashboard', userAuth, driveController.getRootStuff);
+
 
 module.exports = router;
