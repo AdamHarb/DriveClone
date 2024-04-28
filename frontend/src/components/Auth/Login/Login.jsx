@@ -41,6 +41,16 @@ const Login = () => {
                             <label for="password"> Password</label>
                             <input type="password" id="password" name="password" />
                         </div>
+                        <button class="button" id="loginbutton"> Log In</button>
+                        <div id="two-options">
+                            <div id="remember-me">
+                                <input type="checkbox" id="rememberMe" name="rememberMe" />
+                                <label htmlFor="rememberMe">Remember me</label>
+                            </div>
+                            <div id="forgot-password">
+                                <a href="/forgot-password">Forgot Password?</a>
+                            </div>
+                        </div>
                         <button class="button" id="loginbutton" onClick={handleLogin}> Log In</button>
                     </div>
                 </form>
