@@ -5,7 +5,7 @@ const FolderSchema = new mongoose.Schema({
     folder_id: {
         type: Number
     },
-    user_id: { type: Number, ref: 'User', required: true },
+    user_id: { type: mongoose.Schema.Types.ObjectId , ref: 'User', required: true },
     folder_name: { type: String, required: true },
     parent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', required: false },
     created_at: { type: Date, required: false, default: Date.now },
