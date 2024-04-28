@@ -77,9 +77,11 @@ import MovieIcon from '@mui/icons-material/Movie';
 import FolderZipIcon from '@mui/icons-material/FolderZip';
 
 
+import TypeDropdown from "./TypeDropdown";
+
+
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
-import axios from "axios";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -432,6 +434,8 @@ const Dashboard = () => {
   const [activeLayout, setActiveLayout] = useState("list");
   const [activeListButton, setActiveListButton] = useState("home");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const [selectedType, setSelectedType] = useState(null);
   const [selectedItemType, setSelectedItemType] = useState("files");
   const [searchParams, setSearchParams] = useState({
     type: "",
@@ -445,8 +449,6 @@ const Dashboard = () => {
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
 
-  let data;
-
   useEffect(() => {
     if (!cookies.token) {
       navigate('/login');
@@ -457,6 +459,9 @@ const Dashboard = () => {
     handleDashboardApi().then((response) => {
       console.log("fetched")
       data = response
+      console.log(data)
+      setFiles(data.userFiles);
+      setFolders(data.userFolders)
     });
   }, [])
 
@@ -492,6 +497,19 @@ const Dashboard = () => {
   const handleLayoutButtonClick = (layoutType) => {
     setActiveLayout(layoutType);
   };
+
+
+const [typeAnchorEl, setTypeAnchorEl] = useState(null);
+
+const handleTypeClick = (event) => {
+  if (!selectedType) {
+    setTypeAnchorEl(event.currentTarget);
+  }
+};
+
+const handleTypeClose = () => {
+  setTypeAnchorEl(null);
+};
   const handleListButtonClick = (buttonType) => {
     setActiveListButton(buttonType);
   };
@@ -500,6 +518,10 @@ const Dashboard = () => {
     setAnchorEl(event.currentTarget);
   };
 
+  const handleTypeSelect = (type) => {
+    setSelectedType(type);
+    handleTypeClose();
+  };
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -596,9 +618,9 @@ const Dashboard = () => {
             ))
           : folders.map((folder) => (
               <div key={folder.folder_id} className={classes.gridItem}>
-                <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
+                <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
                 <div className={classes.gridDetails}>
-                  <div className={classes.gridName}>{folder.name}</div>
+                  <div className={classes.gridName}>{folder.folder_name}</div>
                 </div>
                 <IconButton className={classes.kebabMenu} onClick={handleClick}>
                   <MoreVertIcon />
@@ -608,90 +630,40 @@ const Dashboard = () => {
       </div>
     );
   };
-
-  // This creates a new object with all the current searchParams, but with the value for the property named name updated to the new value that came from the text field.
-  // The new object is then set as the new state.
-  const initialFiles = [
-    {
-      name: "Proposal.pdf",
-      uploadedAt: "2024-04-12T07:20:50.123Z",
-      lastEdited: "2024-04-15T09:30:00.123Z",
-      user_id: "507f1f77bcf86cd799439011",
-      sharedWith: ["507f191e810c19729de860ea", "507f191e810c19729de860eb"],
-      size: 153402,
-      mime_type: "application/pdf",
-    },
-    {
-      name: "ProjectPlan.docx",
-      uploadedAt: "2024-03-27T05:24:30.123Z",
-      lastEdited: "2024-04-05T11:45:30.123Z",
-      user_id: "507f1f77bcf86cd799439012",
-      sharedWith: [],
-      size: 2048, // 2 KB
-      mime_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  },
-    {
-      name: "ReadMe.txt",
-      uploadedAt: "2024-04-10T14:00:00.123Z",
-      lastEdited: "2024-04-12T15:30:00.123Z",
-      user_id: "507f1f77bcf86cd799439013",
-      sharedWith: ["507f191e810c19729de860ec"],
-      size: 1024, // 1 KB
-      mime_type: "text/plain",
-    },
-    // New video file (MP4)
-    {
-      name: "SampleVideo.mp4",
-      uploadedAt: "2024-04-18T12:30:00.123Z",
-      lastEdited: "2024-04-19T14:00:00.123Z",
-      user_id: "507f1f77bcf86cd799439014",
-      sharedWith: ["507f191e810c19729de860ed"],
-      size: 20485760, // 20 MB
-      mime_type: "video/mp4",
-  },
-  // New ZIP/RAR file
-  {
-      name: "Archive.zip",
-      uploadedAt: "2024-04-15T08:15:00.123Z",
-      lastEdited: "2024-04-17T09:45:00.123Z",
-      user_id: "507f1f77bcf86cd799439015",
-      sharedWith: [],
-      size: 1024000, // 1 MB
-      mime_type: "application/zip",
-  }
-  ];
-
-  const [files, setFiles] = useState(initialFiles);
+  const [files, setFiles] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const fileTypeMap = {
+    'application/pdf': { icon: <PictureAsPdfIcon style={{ color: '#ea4335' }} />, displayName: 'PDF' },
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': { icon: <ArticleIcon style={{ color: '#4285f4' }} />, displayName: 'Word Document' },
+    'application/msword': { icon: <ArticleIcon style={{ color: '#4285f4' }} />, displayName: 'Word Document' },
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': { icon: <ArticleIcon style={{ color: '#4285f4' }} />, displayName: 'Excel Spreadsheet' },
+    'text/plain': { icon: <DescriptionIcon style={{ color: '#34a853' }} />, displayName: 'Text File' },
+    'application/zip': { icon: <FolderZipIcon style={{ color: '#5f6368' }} />, displayName: 'ZIP Archive' },
+    'application/x-rar-compressed': { icon: <FolderZipIcon style={{ color: '#5f6368' }} />, displayName: 'RAR Archive' },
+    'video/mp4': { icon: <MovieIcon style={{ color: '#ea4335' }} />, displayName: 'MP4 Video' },
+    'video/mpeg': { icon: <MovieIcon style={{ color: '#ea4335' }} />, displayName: 'MPEG Video' },
+  };
 
   const [searchTerm, setSearchTerm] = useState("");
-
-
-  const initialFolders = [
-    {
-      name: "Project Documents",
-      createdAt: "2024-04-10T09:00:00.123Z",
-      lastModified: "2024-04-15T14:30:00.123Z",
-      user_id: "507f1f77bcf86cd799439011",
-      sharedWith: ["507f191e810c19729de860ea", "507f191e810c19729de860eb"],
-    },
-
-  ];
-
-  const [folders, setFolders] = useState(initialFolders);
-
   
+
+ 
   useEffect(() => {
-    const filteredFiles = initialFiles.filter((file) =>
-      file.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredFiles = initialFiles.filter(
+      (file) =>
+        file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedType === null || file.mime_type === selectedType)
     );
-    setFiles(filteredFiles);
   
-    const filteredFolders = initialFolders.filter((folder) =>
-      folder.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredFolders = folders.filter((folder) =>
+      folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+  
+    setFiles(filteredFiles);
     setFolders(filteredFolders);
-  }, [searchTerm]);
+  }, [searchTerm, selectedType]);
 
+  
   const handleChangeSearch = (event) => {
     setSearchTerm(event.target.value);
   }; // Every time the search input changes, set it as the new search term and it will filter out
@@ -935,14 +907,30 @@ const Dashboard = () => {
           }}
         />
         <div className={classes.buttonContainer}>
-          <Button
-            variant="outlined"
-            startIcon={<InsertDriveFileOutlinedIcon />} // Icon on the left side
-            endIcon={<ArrowDropDownOutlinedIcon />} // Arrow icon on the right side
-            className={classes.button}
-          >
-            Type
-          </Button>
+        <Button
+  variant="outlined"
+  className={classes.button}
+  onClick={handleTypeClick}
+  startIcon={selectedType ? null : <InsertDriveFileOutlinedIcon />}
+  endIcon={
+    selectedType ? (
+      <CloseIcon
+        className={classes.closeIcon}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleTypeSelect(null);
+        }}
+      />
+    ) : (
+      <ArrowDropDownOutlinedIcon />
+    )
+  }
+  style={{
+    backgroundColor: selectedType ? "#c2e7ff" : undefined,
+  }}
+>
+  {selectedType ? fileTypeMap[selectedType]?.displayName || selectedType : "Type"}
+</Button>
           <Button
             variant="outlined"
             startIcon={<PermIdentityOutlinedIcon />} // Icon on the left side
@@ -968,6 +956,19 @@ const Dashboard = () => {
             Location
           </Button>
         </div>
+        <Menu
+  anchorEl={typeAnchorEl}
+  keepMounted
+  open={Boolean(typeAnchorEl)}
+  onClose={handleTypeClose}
+>
+  {[...new Set(files.map((file) => file.mime_type))].map((type) => (
+    <MenuItem key={type} onClick={() => handleTypeSelect(type)}>
+      {fileTypeMap[type]?.icon}
+      <Typography style={{ marginLeft: 8 }}>{fileTypeMap[type]?.displayName || type}</Typography>
+    </MenuItem>
+  ))}
+</Menu>
 
         {/* This is the Modal for the Advanced Search Fields */}
         <Dialog open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClick}>
@@ -1179,8 +1180,8 @@ const Dashboard = () => {
           </div>
           <Typography className={classes.fileName}>{file.name}</Typography>
           <div className={classes.fileDetails}>
-            <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
-            <Typography>{file.sharedWith.length} people</Typography>
+            <Typography className={classes.fileDetailsItem}>{file.updated_at}</Typography>
+            <Typography>{handleSharedWith(file)} people</Typography>
             <Typography>{file.user_id}</Typography>
           </div>
           <IconButton onClick={handleClick}>
@@ -1190,14 +1191,14 @@ const Dashboard = () => {
       )) : folders.map((folder) => (
         <div key={folder.folder_id} className={classes.fileItem}>
           <div className={classes.fileIcon}>
-            {getFolderIcon(folder.name)}
+            {getFolderIcon(folder.folder_name)}
           </div>
-          <Typography className={classes.fileName}>{folder.name}</Typography>
+          <Typography className={classes.fileName}>{folder.folder_name}</Typography>
           <div className={classes.fileDetails}>
             <Typography className={classes.fileDetailsItem}>
-              {folder.lastModified}
+              {folder.created_at}
             </Typography>
-            <Typography>{folder.sharedWith.length} people</Typography>
+            <Typography>{handleSharedWith(folder)} people</Typography>
             <Typography>{folder.user_id}</Typography>
           </div>
           <IconButton onClick={handleClick}>
@@ -1221,8 +1222,8 @@ const Dashboard = () => {
         ))
       : folders.map((folder) => (
           <div key={folder.folder_id} className={classes.gridItem}>
-            <div className={classes.gridIcon}>{getFolderIcon(folder.name)}</div>
-            <div className={classes.gridName}>{folder.name}</div>
+            <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
+            <div className={classes.gridName}>{folder.folder_name}</div>
             <IconButton onClick={handleClick}>
               <MoreVertIcon />
             </IconButton>
@@ -1230,6 +1231,9 @@ const Dashboard = () => {
         ))}
   </div>
 )}
+
+       
+        
       </main>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={handleClose}>Share</MenuItem>
