@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 //When user logs in to website display his folders (This should be used with getFilesByUserId to get everything)
 exports.getFoldersByUserId = async (req, res) => {
     try{
-        const {parent_id} = req.query;
+        const parent_id = req.params.folderId;
         const query = { user_id: req.user.user_id };
         if (parent_id) {
             query.parent_id = parent_id;
