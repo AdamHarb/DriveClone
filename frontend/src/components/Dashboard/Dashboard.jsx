@@ -40,7 +40,7 @@ import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ShareIcon from "@mui/icons-material/Share";
 import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
-import { Dialog, DialogTitle, DialogContent } from "@mui/material";
+import {Dialog, DialogTitle, DialogContent, Skeleton} from "@mui/material";
 import {
   FormControl,
   InputLabel,
@@ -469,6 +469,7 @@ const Dashboard = () => {
   const [user, setUser] = useState({
     storage_used: 0
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(async () => {
     await fetchUser();
@@ -496,6 +497,7 @@ const Dashboard = () => {
       console.log(data);
       setFiles(data.userFiles);
       setFolders(data.userFolders);
+      setLoading(false);
     });
   };
   useEffect(async () => {
@@ -992,6 +994,21 @@ const handleTypeClose = () => {
   const handleChangeSearch = (event) => {
     setSearchTerm(event.target.value);
   }; // Every time the search input changes, set it as the new search term and it will filter out
+
+  const handleStar = async () => {
+    try {
+      await axios.post(`http://localhost:3000/api/star-file`, {
+        fileId: selectedFile._id
+      }, {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        },
+      })
+    } catch(e) {
+      console.log('Error starring file:', e);
+    }
+  }
 
   return (
     <div className={classes.root}>
@@ -1622,39 +1639,52 @@ const handleTypeClose = () => {
 {activeLayout === 'list' ? (
   <>
     <div className={classes.fileList}>
-      {selectedItemType === "files" ? files.map(file => (
-        <div key={file.file_id} className={classes.fileItem}>
-          <div className={classes.fileIcon}>
-            {getFileIcon(file.mime_type)}
-          </div>
-          <Typography className={classes.fileName}>{file.name}</Typography>
-          <div className={classes.fileDetails}>
-            <Typography className={classes.fileDetailsItem}>{file.updated_at}</Typography>
-            <Typography>{handleSharedWith(file)} people</Typography>
-            <Typography>{file.user_id}</Typography>
-          </div>
-          <IconButton onClick={handleClick(file)}>
-            <MoreVertIcon />
-          </IconButton>
+      {
+        loading ? <div>
+          <Skeleton height={"80px"} />
+          <Skeleton height={"80px"} />
+          <Skeleton height={"80px"} width={"700px"} />
+        </div> : <div>
+          {selectedItemType === "files" ? files.length === 0 ? <Typography>
+            No files have been created yet, feel free to create some!
+                  </Typography> :
+                  files.map(file => (
+                      <div key={file.file_id} className={classes.fileItem}>
+                        <div className={classes.fileIcon}>
+                          {getFileIcon(file.mime_type)}
+                        </div>
+                        <Typography className={classes.fileName}>{file.name}</Typography>
+                        <div className={classes.fileDetails}>
+                          <Typography className={classes.fileDetailsItem}>{file.updated_at}</Typography>
+                          <Typography>{handleSharedWith(file)} people</Typography>
+                          <Typography>{file.user_id}</Typography>
+                        </div>
+                        <IconButton onClick={handleClick(file)}>
+                          <MoreVertIcon />
+                        </IconButton>
+                      </div>
+                  ))
+              :
+              folders.map((folder) => (
+              <div key={folder.folder_id} className={classes.fileItem}>
+                <div className={classes.fileIcon}>
+                  {getFolderIcon(folder.folder_name)}
+                </div>
+                <Typography className={classes.fileName}>{folder.folder_name}</Typography>
+                <div className={classes.fileDetails}>
+                  <Typography className={classes.fileDetailsItem}>
+                    {folder.created_at}
+                  </Typography>
+                  <Typography>{handleSharedWith(folder)} people</Typography>
+                  <Typography>{folder.user_id}</Typography>
+                </div>
+                <IconButton onClick={handleClick}>
+                  <MoreVertIcon />
+                </IconButton>
+              </div>
+          ))}
         </div>
-      )) : folders.map((folder) => (
-        <div key={folder.folder_id} className={classes.fileItem}>
-          <div className={classes.fileIcon}>
-            {getFolderIcon(folder.folder_name)}
-          </div>
-          <Typography className={classes.fileName}>{folder.folder_name}</Typography>
-          <div className={classes.fileDetails}>
-            <Typography className={classes.fileDetailsItem}>
-              {folder.created_at}
-            </Typography>
-            <Typography>{handleSharedWith(folder)} people</Typography>
-            <Typography>{folder.user_id}</Typography>
-          </div>
-          <IconButton onClick={handleClick}>
-            <MoreVertIcon />
-          </IconButton>
-        </div>
-      ))}
+      }
     </div>
   </>
 ) : (
@@ -1690,7 +1720,7 @@ const handleTypeClose = () => {
             handleClose={handleRenameClose}
             handleRename={handleRename}
         />
-        <MenuItem onClick={handleClose}>Star</MenuItem>
+        <MenuItem onClick={handleStar}>Star</MenuItem>
         <MenuItem onClick={handleDeleteFile}>Delete</MenuItem>
       </Menu>
       <Menu

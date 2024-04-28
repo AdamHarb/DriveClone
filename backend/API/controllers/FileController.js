@@ -183,3 +183,22 @@ exports.listRootFiles = async (req, res) => {
 		res.status(500).json({ message: "Internal server error" });
 	}
 };
+
+exports.starFile = async (req, res) => {
+	try {
+		const fileId = req.body.fileId;
+
+		const file = await File.findOneAndUpdate({ _id: fileId }, { type: 'starred' }, { new: true });
+
+		if (!file) {
+			return res.status(404).json({ message: "File not found" });
+		}
+
+		console.log(file)
+
+		res.status(200).json(file);
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ message: "Internal server error" });
+	}
+}
