@@ -469,7 +469,7 @@ const Dashboard = () => {
     }
   }, [])
 
-  useEffect(() => {
+  const fetchFilesFolders = () => {
     handleDashboardApi().then((response) => {
       console.log("fetched")
       const data = response
@@ -477,6 +477,10 @@ const Dashboard = () => {
       setFiles(data.userFiles);
       setFolders(data.userFolders)
     });
+  }
+  
+  useEffect(async () => {
+    fetchFilesFolders();
   }, [])
 
   const handleSizeApi = async () => {
@@ -554,7 +558,9 @@ const Dashboard = () => {
         headers: {
             'Authorization': `Bearer ${cookies.token}`
         }
-        });
+        }).then((r) => {
+          fetchFilesFolders();
+      });
         console.log(response.data)
     }
     catch (error) {
@@ -667,9 +673,14 @@ const handleTypeClose = () => {
   };
 
   const handleTypeSelect = (type) => {
-    setSelectedType(type);
+    if (type === null) {
+      setSelectedType(null);
+    } else {
+      setSelectedType(type);
+    }
     handleTypeClose();
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -721,7 +732,7 @@ const handleTypeClose = () => {
 			return <MovieIcon style={{ color: '#ea4335' }} />;
 		  default:
 			return <DescriptionIcon />;
-		} 
+		}
 	  };
     const getFolderIcon = (folderName) => {
       // Add logic to determine the appropriate folder icon based on the folder name or any other criteria
@@ -748,24 +759,24 @@ const handleTypeClose = () => {
   };
   const renderGrid = () => {
     const classes = useStyles();
-  
+
     const handleGridItemClick = (event) => {
       // Check if the click event target is the "New" button
       if (event.target.tagName.toLowerCase() === 'button') {
         // If it is, do nothing (prevent the kebab menu from opening)
         return;
       }
-  
+
       // Otherwise, open the kebab menu as usual
       setAnchorEl(event.currentTarget);
     };
-  
+
     useEffect(() => {
       return () => {
         setAnchorEl(null);
       };
     }, []);
-  
+
     return (
       <div className={classes.gridContainer}>
         {selectedItemType === 'files'
@@ -795,7 +806,7 @@ const handleTypeClose = () => {
     );
   };
 
- 
+
   const [files, setFiles] = useState([]);
   const [folders, setFolders] = useState([]);
   const fileTypeMap = {
@@ -811,25 +822,25 @@ const handleTypeClose = () => {
   };
 
   const [searchTerm, setSearchTerm] = useState("");
-  
 
- 
+
+
   useEffect(() => {
     const filteredFiles = files.filter(
-      (file) =>
-        file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (selectedType === null || file.mime_type === selectedType)
+        (file) =>
+            file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (selectedType === null || file.mime_type === selectedType)
     );
-  
+
     const filteredFolders = folders.filter((folder) =>
-      folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
+        folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  
+
     setFiles(filteredFiles);
     setFolders(filteredFolders);
   }, [searchTerm, selectedType]);
 
-  
+
   const handleChangeSearch = (event) => {
     setSearchTerm(event.target.value);
   }; // Every time the search input changes, set it as the new search term and it will filter out
@@ -862,7 +873,11 @@ const handleTypeClose = () => {
         id="file-input"
         style={{ display: 'none' }}
         ref={fileInputRef}
-        onChange={handleUploadFile}
+        onChange={(event) => {
+          handleUploadFile(event.target.files[0]).then(r => {
+                fetchFilesFolders();
+              })
+        }}
       />
       <input
         type="file"
