@@ -107,10 +107,6 @@ exports.deleteFile = async (req, res) => {
 			return res.status(404).json({ message: "File not found" });
 		}
 
-		if (!fileContent) {
-			return res.status(404).json({ message: "File not found" });
-		}
-
 		const bucket = await getGridFSBucket();
 		await bucket.delete(file.file_id);
 
