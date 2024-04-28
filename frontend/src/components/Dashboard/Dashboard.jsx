@@ -40,7 +40,7 @@ import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ShareIcon from "@mui/icons-material/Share";
 import EditIcon from "@mui/icons-material/Edit";
 import InfoIcon from "@mui/icons-material/Info";
-import { Dialog, DialogTitle, DialogContent } from "@mui/material";
+import {Dialog, DialogTitle, DialogContent, Skeleton} from "@mui/material";
 import {
   FormControl,
   InputLabel,
@@ -464,6 +464,7 @@ const Dashboard = () => {
   const [user, setUser] = useState({
     storage_used: 0
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(async () => {
     await fetchUser();
@@ -491,6 +492,7 @@ const Dashboard = () => {
       console.log(data);
       setFiles(data.userFiles);
       setFolders(data.userFolders);
+      setLoading(false);
     });
   };
   useEffect(async () => {
@@ -1613,39 +1615,47 @@ const handleTypeClose = () => {
 {activeLayout === 'list' ? (
   <>
     <div className={classes.fileList}>
-      {selectedItemType === "files" ? files.map(file => (
-        <div key={file.file_id} className={classes.fileItem}>
-          <div className={classes.fileIcon}>
-            {getFileIcon(file.mime_type)}
-          </div>
-          <Typography className={classes.fileName}>{file.name}</Typography>
-          <div className={classes.fileDetails}>
-            <Typography className={classes.fileDetailsItem}>{file.updated_at}</Typography>
-            <Typography>{handleSharedWith(file)} people</Typography>
-            <Typography>{file.user_id}</Typography>
-          </div>
-          <IconButton onClick={handleClick(file)}>
-            <MoreVertIcon />
-          </IconButton>
+      {
+        loading ? <div>
+          <Skeleton height={"80px"} />
+          <Skeleton height={"80px"} />
+          <Skeleton height={"80px"} width={"700px"} />
+        </div> : <div>
+          {selectedItemType === "files" ? files.map(file => (
+              <div key={file.file_id} className={classes.fileItem}>
+                <div className={classes.fileIcon}>
+                  {getFileIcon(file.mime_type)}
+                </div>
+                <Typography className={classes.fileName}>{file.name}</Typography>
+                <div className={classes.fileDetails}>
+                  <Typography className={classes.fileDetailsItem}>{file.updated_at}</Typography>
+                  <Typography>{handleSharedWith(file)} people</Typography>
+                  <Typography>{file.user_id}</Typography>
+                </div>
+                <IconButton onClick={handleClick(file)}>
+                  <MoreVertIcon />
+                </IconButton>
+              </div>
+          )) : folders.map((folder) => (
+              <div key={folder.folder_id} className={classes.fileItem}>
+                <div className={classes.fileIcon}>
+                  {getFolderIcon(folder.folder_name)}
+                </div>
+                <Typography className={classes.fileName}>{folder.folder_name}</Typography>
+                <div className={classes.fileDetails}>
+                  <Typography className={classes.fileDetailsItem}>
+                    {folder.created_at}
+                  </Typography>
+                  <Typography>{handleSharedWith(folder)} people</Typography>
+                  <Typography>{folder.user_id}</Typography>
+                </div>
+                <IconButton onClick={handleClick}>
+                  <MoreVertIcon />
+                </IconButton>
+              </div>
+          ))}
         </div>
-      )) : folders.map((folder) => (
-        <div key={folder.folder_id} className={classes.fileItem}>
-          <div className={classes.fileIcon}>
-            {getFolderIcon(folder.folder_name)}
-          </div>
-          <Typography className={classes.fileName}>{folder.folder_name}</Typography>
-          <div className={classes.fileDetails}>
-            <Typography className={classes.fileDetailsItem}>
-              {folder.created_at}
-            </Typography>
-            <Typography>{handleSharedWith(folder)} people</Typography>
-            <Typography>{folder.user_id}</Typography>
-          </div>
-          <IconButton onClick={handleClick}>
-            <MoreVertIcon />
-          </IconButton>
-        </div>
-      ))}
+      }
     </div>
   </>
 ) : (
