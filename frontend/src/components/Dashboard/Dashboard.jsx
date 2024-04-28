@@ -77,9 +77,11 @@ import MovieIcon from '@mui/icons-material/Movie';
 import FolderZipIcon from '@mui/icons-material/FolderZip';
 
 
+import TypeDropdown from "./TypeDropdown";
+
+
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
-import axios from "axios";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -432,6 +434,8 @@ const Dashboard = () => {
   const [activeLayout, setActiveLayout] = useState("list");
   const [activeListButton, setActiveListButton] = useState("home");
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const [selectedType, setSelectedType] = useState(null);
   const [selectedItemType, setSelectedItemType] = useState("files");
   const [searchParams, setSearchParams] = useState({
     type: "",
@@ -444,8 +448,6 @@ const Dashboard = () => {
   });
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
-
-  let data;
 
   useEffect(() => {
     if (!cookies.token) {
@@ -495,6 +497,19 @@ const Dashboard = () => {
   const handleLayoutButtonClick = (layoutType) => {
     setActiveLayout(layoutType);
   };
+
+
+const [typeAnchorEl, setTypeAnchorEl] = useState(null);
+
+const handleTypeClick = (event) => {
+  if (!selectedType) {
+    setTypeAnchorEl(event.currentTarget);
+  }
+};
+
+const handleTypeClose = () => {
+  setTypeAnchorEl(null);
+};
   const handleListButtonClick = (buttonType) => {
     setActiveListButton(buttonType);
   };
@@ -503,6 +518,10 @@ const Dashboard = () => {
     setAnchorEl(event.currentTarget);
   };
 
+  const handleTypeSelect = (type) => {
+    setSelectedType(type);
+    handleTypeClose();
+  };
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -612,24 +631,39 @@ const Dashboard = () => {
     );
   };
   const [files, setFiles] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const fileTypeMap = {
+    'application/pdf': { icon: <PictureAsPdfIcon style={{ color: '#ea4335' }} />, displayName: 'PDF' },
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': { icon: <ArticleIcon style={{ color: '#4285f4' }} />, displayName: 'Word Document' },
+    'application/msword': { icon: <ArticleIcon style={{ color: '#4285f4' }} />, displayName: 'Word Document' },
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': { icon: <ArticleIcon style={{ color: '#4285f4' }} />, displayName: 'Excel Spreadsheet' },
+    'text/plain': { icon: <DescriptionIcon style={{ color: '#34a853' }} />, displayName: 'Text File' },
+    'application/zip': { icon: <FolderZipIcon style={{ color: '#5f6368' }} />, displayName: 'ZIP Archive' },
+    'application/x-rar-compressed': { icon: <FolderZipIcon style={{ color: '#5f6368' }} />, displayName: 'RAR Archive' },
+    'video/mp4': { icon: <MovieIcon style={{ color: '#ea4335' }} />, displayName: 'MP4 Video' },
+    'video/mpeg': { icon: <MovieIcon style={{ color: '#ea4335' }} />, displayName: 'MPEG Video' },
+  };
 
   const [searchTerm, setSearchTerm] = useState("");
-
-  const [folders, setFolders] = useState([]);
-
   
+
+ 
   useEffect(() => {
-    const filteredFiles = files.filter((file) =>
-      file.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredFiles = initialFiles.filter(
+      (file) =>
+        file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (selectedType === null || file.mime_type === selectedType)
     );
-    setFiles(filteredFiles);
   
     const filteredFolders = folders.filter((folder) =>
       folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+  
+    setFiles(filteredFiles);
     setFolders(filteredFolders);
-  }, [searchTerm]);
+  }, [searchTerm, selectedType]);
 
+  
   const handleChangeSearch = (event) => {
     setSearchTerm(event.target.value);
   }; // Every time the search input changes, set it as the new search term and it will filter out
@@ -873,14 +907,30 @@ const Dashboard = () => {
           }}
         />
         <div className={classes.buttonContainer}>
-          <Button
-            variant="outlined"
-            startIcon={<InsertDriveFileOutlinedIcon />} // Icon on the left side
-            endIcon={<ArrowDropDownOutlinedIcon />} // Arrow icon on the right side
-            className={classes.button}
-          >
-            Type
-          </Button>
+        <Button
+  variant="outlined"
+  className={classes.button}
+  onClick={handleTypeClick}
+  startIcon={selectedType ? null : <InsertDriveFileOutlinedIcon />}
+  endIcon={
+    selectedType ? (
+      <CloseIcon
+        className={classes.closeIcon}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleTypeSelect(null);
+        }}
+      />
+    ) : (
+      <ArrowDropDownOutlinedIcon />
+    )
+  }
+  style={{
+    backgroundColor: selectedType ? "#c2e7ff" : undefined,
+  }}
+>
+  {selectedType ? fileTypeMap[selectedType]?.displayName || selectedType : "Type"}
+</Button>
           <Button
             variant="outlined"
             startIcon={<PermIdentityOutlinedIcon />} // Icon on the left side
@@ -906,6 +956,19 @@ const Dashboard = () => {
             Location
           </Button>
         </div>
+        <Menu
+  anchorEl={typeAnchorEl}
+  keepMounted
+  open={Boolean(typeAnchorEl)}
+  onClose={handleTypeClose}
+>
+  {[...new Set(files.map((file) => file.mime_type))].map((type) => (
+    <MenuItem key={type} onClick={() => handleTypeSelect(type)}>
+      {fileTypeMap[type]?.icon}
+      <Typography style={{ marginLeft: 8 }}>{fileTypeMap[type]?.displayName || type}</Typography>
+    </MenuItem>
+  ))}
+</Menu>
 
         {/* This is the Modal for the Advanced Search Fields */}
         <Dialog open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClick}>
@@ -1168,6 +1231,9 @@ const Dashboard = () => {
         ))}
   </div>
 )}
+
+       
+        
       </main>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={handleClose}>Share</MenuItem>
