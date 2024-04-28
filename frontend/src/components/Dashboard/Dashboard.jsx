@@ -469,17 +469,15 @@ const Dashboard = () => {
       navigate('/login');
     }
   }, [])
-
   const fetchFilesFolders = () => {
     handleDashboardApi().then((response) => {
-      console.log("fetched")
-      const data = response
-      console.log(data)
+      console.log("fetched");
+      const data = response;
+      console.log(data);
       setFiles(data.userFiles);
-      setFolders(data.userFolders)
+      setFolders(data.userFolders);
     });
-  }
-  
+  };
   useEffect(async () => {
     fetchFilesFolders();
   }, [])
@@ -701,12 +699,12 @@ const handleTypeClose = () => {
   const handleTypeSelect = (type) => {
     if (type === null) {
       setSelectedType(null);
+      fetchFilesFolders(); // Fetch files and folders when type is deselected
     } else {
       setSelectedType(type);
     }
     handleTypeClose();
   };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -739,6 +737,7 @@ const handleTypeClose = () => {
   const handleSearch = () => {
     performSearch(); // Function to perform the advanced search
   };
+  
 
   const getFileIcon = (mime_type) => {
 		switch (mime_type) {
