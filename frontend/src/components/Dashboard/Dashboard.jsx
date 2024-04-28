@@ -69,6 +69,7 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import AddToDriveOutlinedIcon from "@mui/icons-material/AddToDriveOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import CloseIcon from "@mui/icons-material/Close";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -299,6 +300,9 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "25px",
     padding: theme.spacing(0.5, 3),
     textTransform: "none",
+    width: "85%", // Adjusted width for the buttons
+    marginLeft: theme.spacing(2), // Adjusted margin for spacing
+    marginRight: theme.spacing(2), // Adjusted margin for spacing
     "&:hover": {
       backgroundColor: "#e7e8eb", // Set the hover background color to #e7e8eb
     },
@@ -329,6 +333,41 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: "#f0f0f0", // Optional: Light gray background on hover
     },
   },
+  modalContainer: {
+    position: "relative",
+    padding: theme.spacing(3),
+    maxWidth: 600,
+    width: 550,
+    height: 350,
+    background: '#e9eef6',
+    
+
+    margin: "0 auto", // Center the modal horizontally
+
+  },
+  closeButton: {
+    position: "absolute",
+    top: theme.spacing(1),
+    right: theme.spacing(1),
+    color: 'black',
+    "&:hover": {
+      color: theme.palette.error.main,
+    },
+  },
+  email: {
+    textAlign: "center",
+    marginBottom: theme.spacing(2),
+    fontFamily: 'productSans',
+  },
+  profilePicture: {
+    width: 100,
+    height: 100,
+    margin: "0 auto",
+    marginBottom: theme.spacing(2),
+  },
+  greeting: {
+    textAlign: "center",
+  },
 }));
 
 const Dashboard = () => {
@@ -340,6 +379,7 @@ const Dashboard = () => {
   const [activeButton, setActiveButton] = useState("files");
   const [activeLayout, setActiveLayout] = useState("list");
   const [activeListButton, setActiveListButton] = useState("home");
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [searchParams, setSearchParams] = useState({
     type: "",
     owner: "",
@@ -384,6 +424,13 @@ const Dashboard = () => {
     console.log("Logout clicked");
     handleLogoutClose();
   };
+  const handleProfileClick = () => {
+    setIsProfileModalOpen(true);
+    profilePictureRef.current = event.currentTarget;
+  };
+  const handleProfileModalClose = () => {
+    setIsProfileModalOpen(false);
+  };
 
   const handleReset = () => {
     resetForm(); // Function to reset the advanced search form
@@ -396,6 +443,7 @@ const Dashboard = () => {
   const handleAdvancedSearchClick = () => {
     setIsAdvancedSearchOpen(!isAdvancedSearchOpen); // Toggle the advanced search modal
   };
+  const profilePictureRef = useRef(null);
 
   const handleInputChange = (event) => {
     const { name, value, checked, type } = event.target;
@@ -634,9 +682,36 @@ const Dashboard = () => {
       </Drawer>
 
       <main className={classes.content}>
-        <Avatar className={classes.avatar} onClick={handleLogoutClick}>
-          JD
-        </Avatar>
+      <Avatar
+  className={classes.avatar}
+  onClick={handleProfileClick}
+  ref={profilePictureRef}
+>
+  JD
+</Avatar>
+<Dialog
+  open={isProfileModalOpen}
+  onClose={handleProfileModalClose}
+  anchorEl={profilePictureRef.current}
+  transformOrigin={{
+    vertical: 'top',
+    horizontal: 'right',
+  }}
+  getContentAnchorEl={null}
+>
+  <DialogContent className={classes.modalContainer}>
+    <IconButton
+      className={classes.closeButton}
+      onClick={handleProfileModalClose}
+    >
+      <CloseIcon />
+    </IconButton>
+    <h2 className={classes.email}>nourzamel35@gmail.com</h2>
+    <Avatar className={classes.profilePicture}>NZ</Avatar>
+    <p className={classes.greeting}>Hi, Nour Zamel!</p>
+  </DialogContent>
+</Dialog>
+
         <Typography variant="h4" className={classes.centeredText}>
           Welcome to Drive
         </Typography>
