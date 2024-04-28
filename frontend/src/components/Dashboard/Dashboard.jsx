@@ -416,6 +416,7 @@ const Dashboard = () => {
   useEffect(() => {
     handleDashboardApi().then((response) => {
       console.log("fetched")
+      data = response
     });
   }, [])
 
