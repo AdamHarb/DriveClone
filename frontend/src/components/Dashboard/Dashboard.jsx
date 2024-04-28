@@ -416,7 +416,7 @@ const Dashboard = () => {
   useEffect(() => {
     handleDashboardApi().then((response) => {
       console.log("fetched")
-      data = response;
+      data = response
     });
   }, [])
 
@@ -433,6 +433,13 @@ const Dashboard = () => {
     } catch (error) {
         console.error('Error during login:', error);
     }
+  }
+
+  function handleSharedWith(file) {
+    if (file.sharedWith){
+      return file.sharedWith.length
+    }
+    else return 0
   }
 
   const handleButtonClick = () => {
@@ -1069,7 +1076,7 @@ const Dashboard = () => {
                         <Typography className={classes.fileName}>{file.name}</Typography>
                         <div className={classes.fileDetails}>
                             <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
-                            <Typography>{file.sharedWith.length} people</Typography>
+                            <Typography>{handleSharedWith(file)} people</Typography>
                             <Typography>{file.user_id}</Typography>
                         </div>
                         <IconButton onClick={handleClick}>
