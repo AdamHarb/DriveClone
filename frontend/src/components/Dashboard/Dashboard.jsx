@@ -449,6 +449,7 @@ const Dashboard = () => {
   });
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     if (!cookies.token) {
@@ -558,6 +559,24 @@ const Dashboard = () => {
     }
   }
 
+  const handleDownload = async () => {
+    try {
+       const response = await axios.get(`http://localhost:3000/api/download/${selectedFile.file_id}`, {}, {
+         headers: {
+           withCredentials: true,
+           'Authorization': `Bearer ${cookies.token}`
+         },
+       });
+      const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.setAttribute('download', selectedFile.name);
+      document.body.appendChild(link);
+      link.click();
+    } catch (e) {
+      console.error('Error during file download:', e);
+    }
+  }
 
   function handleSharedWith(file) {
     if (file.sharedWith){
@@ -593,8 +612,9 @@ const handleTypeClose = () => {
     setActiveListButton(buttonType);
   };
 
-  const handleClick = (event) => {
+  const handleClick = (file) => (event) => {
     setAnchorEl(event.currentTarget);
+    setSelectedFile(file);
   };
 
   const handleTypeSelect = (type) => {
@@ -690,7 +710,7 @@ const handleTypeClose = () => {
                 <div className={classes.gridDetails}>
                   <div className={classes.gridName}>{file.name}</div>
                 </div>
-                <IconButton className={classes.kebabMenu} onClick={handleClick}>
+                <IconButton className={classes.kebabMenu} onClick={handleClick(file)}>
                   <MoreVertIcon />
                 </IconButton>
               </div>
@@ -1263,7 +1283,7 @@ const handleTypeClose = () => {
             <Typography>{handleSharedWith(file)} people</Typography>
             <Typography>{file.user_id}</Typography>
           </div>
-          <IconButton onClick={handleClick}>
+          <IconButton onClick={handleClick(file)}>
             <MoreVertIcon />
           </IconButton>
         </div>
@@ -1294,7 +1314,7 @@ const handleTypeClose = () => {
           <div key={file.file_id} className={classes.gridItem}>
             <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
             <div className={classes.gridName}>{file.name}</div>
-            <IconButton onClick={handleClick}>
+            <IconButton onClick={handleClick(file)}>
               <MoreVertIcon />
             </IconButton>
           </div>
@@ -1310,13 +1330,10 @@ const handleTypeClose = () => {
         ))}
   </div>
 )}
-
-       
-        
       </main>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={handleClose}>Share</MenuItem>
-        <MenuItem onClick={handleClose}>Download</MenuItem>
+        <MenuItem onClick={handleDownload}>Download</MenuItem>
         <MenuItem onClick={handleClose}>Rename</MenuItem>
         <MenuItem onClick={handleClose}>Star</MenuItem>
       </Menu>
