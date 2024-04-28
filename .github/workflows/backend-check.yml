@@ -1,0 +1,42 @@
+name: Backend Check
+
+on: [ push, pull_request ]
+
+jobs:
+  run-check:
+    env:
+      ATLAS_URI: ${{ secrets.ATLAS_URI }}
+    name: Backend Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.18.1'
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: Start the backend & check for a duration
+        run: |
+          cd backend
+          node server.js > backend.log 2>&1 &
+          BACKEND_PID=$!
+          sleep 15
+          
+          if ! kill -0 $BACKEND_PID 2>/dev/null; then
+            echo "The backend exited prematurely with errors. Here's the output:"
+            cat backend.log
+            exit 1
+          fi
+
+      - name: Stop the backend
+        if: always()
+        run: |
+          kill $BACKEND_PID || echo "Backend already stopped."

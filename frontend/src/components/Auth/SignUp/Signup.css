@@ -91,10 +91,6 @@ label {
     margin-left: 10px;
 }
 
-#firstnamefield input, #lastnamefield input {
-    width: 140px;
-}
-
 .password-container {
     display:flex;
     justify-content: space-between;
