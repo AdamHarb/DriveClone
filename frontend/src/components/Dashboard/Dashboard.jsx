@@ -548,6 +548,19 @@ const Dashboard = () => {
       console.error('Error during folder creation:', e);
     }
   }
+  const handleDeleteFile = async () => {
+    try {
+      const response = await axios.delete(`http://localhost:3000/api/delete-files/${selectedFile._id}`, {
+        headers: {
+            'Authorization': `Bearer ${cookies.token}`
+        }
+        });
+        console.log(response.data)
+    }
+    catch (error) {
+        console.error('Error during file deletion:', error);
+    }
+  }
 
   // Use: <input type="file" webkitdirectory="" directory="" onChange={handleFileChange} />
   const handleUploadFolder = async (folder) => {
@@ -1417,7 +1430,7 @@ const handleTypeClose = () => {
         <MenuItem onClick={handleDownload}>Download</MenuItem>
         <MenuItem onClick={handleClose}>Rename</MenuItem>
         <MenuItem onClick={handleClose}>Star</MenuItem>
-        <MenuItem onClick={handleClose}>Delete</MenuItem>
+        <MenuItem onClick={handleDeleteFile}>Delete</MenuItem>
       </Menu>
       <Menu
         anchorEl={logoutAnchorEl}
