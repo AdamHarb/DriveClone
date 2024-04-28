@@ -70,6 +70,8 @@ import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import AddToDriveOutlinedIcon from "@mui/icons-material/AddToDriveOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import CloseIcon from "@mui/icons-material/Close";
+import {useCookies} from "react-cookie";
+import {useNavigate} from "react-router-dom";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -389,6 +391,14 @@ const Dashboard = () => {
     inTrash: false,
     starred: false,
   });
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!cookies.token) {
+      navigate('/login');
+    }
+  }, [])
 
   const handleButtonClick = () => {
     fileInputRef.current.click();
