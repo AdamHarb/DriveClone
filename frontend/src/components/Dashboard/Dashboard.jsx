@@ -82,6 +82,7 @@ import TypeDropdown from "./TypeDropdown";
 
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
+import axios from "axios";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -458,7 +459,7 @@ const Dashboard = () => {
   useEffect(() => {
     handleDashboardApi().then((response) => {
       console.log("fetched")
-      data = response
+      const data = response
       console.log(data)
       setFiles(data.userFiles);
       setFolders(data.userFolders)
@@ -726,7 +727,7 @@ const handleTypeClose = () => {
 
  
   useEffect(() => {
-    const filteredFiles = initialFiles.filter(
+    const filteredFiles = files.filter(
       (file) =>
         file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (selectedType === null || file.mime_type === selectedType)
