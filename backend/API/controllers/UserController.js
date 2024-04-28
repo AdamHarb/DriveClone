@@ -34,9 +34,7 @@ const loginUser = async (req, res) => {
 const getProfileByUsername = async (req, res) => {
     try {
         const username = req.user.username;
-        console.log(username);
         const user = await User.findOne({ username: username });
-        console.log(user);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -68,7 +66,6 @@ const createUser = async (req, res) => {
             password,
             username,
         });
-        console.log(user)
         await user.save();
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
