@@ -45,6 +45,7 @@ const getProfileByUsername = async (req, res) => {
             email: user.email,
             username :user.username,
             avatar: user.avatar,
+            storage_used: user.storage_used
         };
 
         res.status(200).json(profileInfo);

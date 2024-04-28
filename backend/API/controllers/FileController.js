@@ -1,4 +1,5 @@
 const File = require('../models/File');
+const User = require('../models/User');
 const { getGridFSBucket, getDB} = require('../../db/db');
 const {ObjectId} = require("mongodb");
 
@@ -8,8 +9,10 @@ exports.uploadFile = async (req, res) => {
 
 		const fileCount = await File.countDocuments({ user_id: req.user._id });
 
-		console.log(req.file)
-
+		const him = await User.findOne({ _id: req.user._id });
+		const newsize = him.storage_used + req.file.size;
+		const user = await User.updateOne({ _id: req.user._id }, { storage_used: newsize });
+    
 		const fileBuffer = req.file.buffer;
 
 		const bucket = await getGridFSBucket();
@@ -28,6 +31,8 @@ exports.uploadFile = async (req, res) => {
 			size: req.file.size,
 			file_id: fileId
 		});
+
+
 
 		await file.save();
 		res.status(201).json({ message: "File uploaded successfully", fileId });
@@ -106,10 +111,6 @@ exports.deleteFile = async (req, res) => {
 		const file = await File.findOneAndDelete({ _id: fileId, user_id: req.user._id });
 
 		if (!file) {
-			return res.status(404).json({ message: "File not found" });
-		}
-
-		if (!fileContent) {
 			return res.status(404).json({ message: "File not found" });
 		}
 
