@@ -123,7 +123,7 @@ exports.deleteFile = async (req, res) => {
 
 exports.listFiles = async (req, res) => {
 	try {
-		const { parent_id } = req.query;
+		const parent_id = req.params.folderId;
 		const query = { user_id: req.user._id };
 
 		if (parent_id) {
@@ -131,7 +131,25 @@ exports.listFiles = async (req, res) => {
 		}
 
 		const files = await File.find(query);
-		res.status(200).json(files);
+		return {
+			"status": 200,
+			"data": files
+		}
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ message: "Internal server error" });
+	}
+};
+
+exports.listRootFiles = async (req, res) => {
+	try {
+		const query = { user_id: req.user._id, parent_id: null};
+
+		const files = await File.find(query);
+		return {
+			"status": 200,
+			"data": files
+		}
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ message: "Internal server error" });

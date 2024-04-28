@@ -24,7 +24,7 @@ const loginUser = async (req, res) => {
             maxAge: 24 * 60 * 60 * 1000,
         });
 
-        return res.status(200).json({ message: 'Login successful' });
+        return res.status(200).json({ message: 'Login successful', token });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: 'Internal server error' });
@@ -69,7 +69,15 @@ const createUser = async (req, res) => {
         });
         console.log(user)
         await user.save();
-        res.status(201).json({ message: "User created successfully",success:true });
+
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY);
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
+        res.status(201).json({ message: "User created successfully",success:true, token });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Internal server error",success:false });

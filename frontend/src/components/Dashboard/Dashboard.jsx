@@ -75,6 +75,8 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'; // for PDFs
 import ArticleIcon from '@mui/icons-material/Article';
 import MovieIcon from '@mui/icons-material/Movie';
 import FolderZipIcon from '@mui/icons-material/FolderZip';
+import {useCookies} from "react-cookie";
+import {useNavigate} from "react-router-dom";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -399,6 +401,14 @@ const Dashboard = () => {
     inTrash: false,
     starred: false,
   });
+  const [cookies, setCookie, removeCookie] = useCookies(['token']);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!cookies.token) {
+      navigate('/login');
+    }
+  }, [])
 
   const handleButtonClick = () => {
     fileInputRef.current.click();
