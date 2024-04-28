@@ -31,7 +31,7 @@ router.delete('/delete-folder/:folderId', userAuth, folderController.deleteFolde
 
 // File Routes
 router.post('/upload', userAuth, upload.single('file'), fileController.uploadFile);
-router.get('/download/:fileId', userAuth, fileController.downloadFile);
+router.get('/download/:fileId', fileController.downloadFile);
 router.get('/details/:fileId', userAuth, fileController.getFileDetails);
 router.put('/update/:fileId', userAuth, fileController.updateFileDetails);
 router.delete('/delete-files/:fileId', userAuth, fileController.deleteFile);
