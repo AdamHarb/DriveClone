@@ -72,6 +72,7 @@ import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
+import axios from "axios";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -394,12 +395,40 @@ const Dashboard = () => {
   const [cookies, setCookie, removeCookie] = useCookies(['token']);
   const navigate = useNavigate();
 
+  const data = {
+    file:[],
+    folders: []
+  }
+
   useEffect(() => {
     if (!cookies.token) {
       navigate('/login');
     }
   }, [])
 
+  useEffect(() => {
+
+    handleDashboardApi().then((response) => {
+     data.file = response.userFiles;
+     data.folders = response.userFolders;
+    });
+
+  }, [])
+
+  const handleDashboardApi = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/profile', {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        }
+      });
+      console.log(response.data)
+      return response.data;
+    } catch (error) {
+        console.error('Error during login:', error);
+    }
+  }
   const handleButtonClick = () => {
     fileInputRef.current.click();
   };
@@ -466,39 +495,39 @@ const Dashboard = () => {
 
   // This creates a new object with all the current searchParams, but with the value for the property named name updated to the new value that came from the text field.
   // The new object is then set as the new state.
-
   const initialFiles = [
-    {
-      name: "ProposaljahkwrjwehfljwhefjkhwelkfhklwehfkwefkwflkwNKCLKAEFJKSLJFKLWEFRJL.pdf",
-      uploadedAt: "2024-04-12T07:20:50.123Z",
-      lastEdited: "2024-04-15T09:30:00.123Z",
-      user_id: "507f1f77bcf86cd799439011",
-      sharedWith: ["507f191e810c19729de860ea", "507f191e810c19729de860eb"],
-      size: 153402,
-      mime_type: "application/pdf",
-    },
-    {
-      name: "Budget.xlsx",
-      uploadedAt: "2024-03-27T05:24:30.123Z",
-      lastEdited: "2024-04-05T11:45:30.123Z",
-      user_id: "507f1f77bcf86cd799439012",
-      sharedWith: [],
-      size: 55843,
-      mime_type:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    },
-    {
-      name: "LogoDesign.ai",
-      uploadedAt: "2024-02-18T12:00:00.123Z",
-      lastEdited: "2024-02-20T08:50:00.123Z",
-      user_id: "507f1f77bcf86cd799439013",
-      sharedWith: ["507f191e810c19729de860ec"],
-      size: 102400,
-      mime_type: "application/illustrator",
-    },
+      {
+          name: "ProposaljahkwrjwehfljwhefjkhwelkfhklwehfkwefkwflkwNKCLKAEFJKSLJFKLWEFRJL.pdf",
+            uploadedAt: "2024-04-12T07:20:50.123Z",
+            lastEdited: "2024-04-15T09:30:00.123Z",
+            user_id: "507f1f77bcf86cd799439011",
+            sharedWith: ["507f191e810c19729de860ea", "507f191e810c19729de860eb"],
+            size: 153402,
+            mime_type: "application/pdf",
+          },
+     {
+        name: "Budget.xlsx",
+            uploadedAt: "2024-03-27T05:24:30.123Z",
+            lastEdited: "2024-04-05T11:45:30.123Z",
+            user_id: "507f1f77bcf86cd799439012",
+            sharedWith: [],
+            size: 55843,
+            mime_type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+      {
+        name: "LogoDesign.ai",
+            uploadedAt: "2024-02-18T12:00:00.123Z",
+            lastEdited: "2024-02-20T08:50:00.123Z",
+            user_id: "507f1f77bcf86cd799439013",
+            sharedWith: ["507f191e810c19729de860ec"],
+            size: 102400,
+            mime_type: "application/illustrator",
+      },
   ];
 
   const [files, setFiles] = useState(initialFiles);
+
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
