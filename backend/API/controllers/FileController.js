@@ -83,6 +83,29 @@ exports.getFileDetails = async (req, res) => {
 	}
 };
 
+exports.renameFile = async (req, res) => {
+	try {
+		const {newName, fileId, name} = req.body;
+
+		const ext = name.split('.').pop();
+		const newNameWithExt = newName + '.' + ext;
+
+		const file = await File.findOneAndUpdate(
+				{file_id: fileId, user_id: req.user._id},
+				{name: newNameWithExt},
+				{new: true}
+		);
+
+		if (!file) {
+			return res.status(404).json({message: "File not found"});
+		}
+
+		res.status(200).json(file);
+	} catch (e) {
+		res.status(500).json({message: "Internal server error"});
+	}
+}
+
 exports.updateFileDetails = async (req, res) => {
 	try {
 		const fileId = req.params.fileId;
