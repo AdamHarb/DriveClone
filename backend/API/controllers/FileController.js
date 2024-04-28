@@ -131,7 +131,10 @@ exports.listFiles = async (req, res) => {
 		}
 
 		const files = await File.find(query);
-		res.status(200).json(files);
+		return {
+			"status": 200,
+			"data": files
+		}
 	} catch (err) {
 		console.error(err);
 		res.status(500).json({ message: "Internal server error" });
