@@ -75,8 +75,8 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'; // for PDFs
 import ArticleIcon from '@mui/icons-material/Article';
 import MovieIcon from '@mui/icons-material/Movie';
 import FolderZipIcon from '@mui/icons-material/FolderZip';
-import {useCookies} from "react-cookie";
-import {useNavigate} from "react-router-dom";
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -352,7 +352,7 @@ const useStyles = makeStyles((theme) => ({
     width: 550,
     height: 350,
     background: '#e9eef6',
-    
+
 
     margin: "0 auto", // Center the modal horizontally
 
@@ -385,6 +385,7 @@ const useStyles = makeStyles((theme) => ({
 const Dashboard = () => {
   const classes = useStyles();
   const fileInputRef = useRef(null);
+  const folderInputRef = useRef(null);
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false); // Handling the advanced search modal
   const [anchorEl, setAnchorEl] = useState(null);
   const [logoutAnchorEl, setLogoutAnchorEl] = useState(null);
@@ -452,6 +453,27 @@ const Dashboard = () => {
     setIsProfileModalOpen(false);
   };
 
+  const [anchorElNew, setAnchorElNew] = useState(null);
+
+  const handleNewButtonClick = (event) => {
+    setAnchorElNew(event.currentTarget);
+  };
+
+  
+  const handleCloseNew = () => {
+    setAnchorElNew(null);
+  }
+
+  const handleFileUpload = () => {
+    fileInputRef.current.click();
+    handleCloseNew();
+  };
+
+  const handleFolderUpload = () => {
+    folderInputRef.current.click();
+    handleCloseNew();
+  };
+
   const handleReset = () => {
     resetForm(); // Function to reset the advanced search form
   };
@@ -461,25 +483,25 @@ const Dashboard = () => {
   };
 
   const getFileIcon = (mime_type) => {
-		switch (mime_type) {
-		  case 'application/pdf':
-			return <PictureAsPdfIcon style={{ color: '#ea4335' }} />;
-		  case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-		  case 'application/msword':
-		  case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-			return <ArticleIcon style={{ color: '#4285f4' }}/>;
-		  case 'text/plain':
-			return <DescriptionIcon  style={{ color: '#34a853' }}/>;
-		  case 'application/zip':
-		  case 'application/x-rar-compressed':
-			return <FolderZipIcon  style={{ color: '#5f6368' }}/>;
-		  case 'video/mp4':
-		  case 'video/mpeg':
-			return <MovieIcon style={{ color: '#ea4335' }} />;
-		  default:
-			return <DescriptionIcon />;
-		} 
-	  };
+    switch (mime_type) {
+      case 'application/pdf':
+        return <PictureAsPdfIcon style={{ color: '#ea4335' }} />;
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      case 'application/msword':
+      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        return <ArticleIcon style={{ color: '#4285f4' }} />;
+      case 'text/plain':
+        return <DescriptionIcon style={{ color: '#34a853' }} />;
+      case 'application/zip':
+      case 'application/x-rar-compressed':
+        return <FolderZipIcon style={{ color: '#5f6368' }} />;
+      case 'video/mp4':
+      case 'video/mpeg':
+        return <MovieIcon style={{ color: '#ea4335' }} />;
+      default:
+        return <DescriptionIcon />;
+    }
+  };
 
   const handleAdvancedSearchClick = () => {
     setIsAdvancedSearchOpen(!isAdvancedSearchOpen); // Toggle the advanced search modal
@@ -516,7 +538,7 @@ const Dashboard = () => {
       sharedWith: [],
       size: 2048, // 2 KB
       mime_type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  },
+    },
     {
       name: "ReadMe.txt",
       uploadedAt: "2024-04-10T14:00:00.123Z",
@@ -535,9 +557,9 @@ const Dashboard = () => {
       sharedWith: ["507f191e810c19729de860ed"],
       size: 20485760, // 20 MB
       mime_type: "video/mp4",
-  },
-  // New ZIP/RAR file
-  {
+    },
+    // New ZIP/RAR file
+    {
       name: "Archive.zip",
       uploadedAt: "2024-04-15T08:15:00.123Z",
       lastEdited: "2024-04-17T09:45:00.123Z",
@@ -545,7 +567,7 @@ const Dashboard = () => {
       sharedWith: [],
       size: 1024000, // 1 MB
       mime_type: "application/zip",
-  }
+    }
   ];
 
   const [files, setFiles] = useState(initialFiles);
@@ -585,17 +607,39 @@ const Dashboard = () => {
             console.log(file); // Log the selected file, or handle it as needed
           }}
         />
+        <input
+        type="file"
+        style={{ display: 'none' }}
+        ref={folderInputRef}
+        webkitdirectory="true"
+        directory="true"
+        onChange={(event) => {
+          const folder = event.target.files; 
+          console.log(folder); // Handle folder upload
+        }}
+      />
         <Button
           variant="contained"
           color="default"
           className={classes.addButton}
           startIcon={<AddIcon className={classes.newIcon} />}
-          onClick={handleButtonClick}
+          onClick={handleNewButtonClick}
         >
           <Typography variant="body2" style={{ fontSize: "18px" }}>
             New
           </Typography>
         </Button>
+        {/* Opens the menu : either file upload of folder upload */}
+        <Menu
+          id="simple-menu"
+          anchorElNew={anchorElNew}
+          keepMounted
+          open={Boolean(anchorElNew)}
+          onClose={handleCloseNew}
+        >
+          <MenuItem onClick={handleFileUpload}>File upload</MenuItem>
+          <MenuItem onClick={handleFolderUpload}>Folder upload</MenuItem>
+        </Menu>
         <List>
           <ListItem
             button
@@ -742,35 +786,35 @@ const Dashboard = () => {
       </Drawer>
 
       <main className={classes.content}>
-      <Avatar
-  className={classes.avatar}
-  onClick={handleProfileClick}
-  ref={profilePictureRef}
->
-  JD
-</Avatar>
-<Dialog
-  open={isProfileModalOpen}
-  onClose={handleProfileModalClose}
-  anchorEl={profilePictureRef.current}
-  transformOrigin={{
-    vertical: 'top',
-    horizontal: 'right',
-  }}
-  getContentAnchorEl={null}
->
-  <DialogContent className={classes.modalContainer}>
-    <IconButton
-      className={classes.closeButton}
-      onClick={handleProfileModalClose}
-    >
-      <CloseIcon />
-    </IconButton>
-    <h2 className={classes.email}>nourzamel35@gmail.com</h2>
-    <Avatar className={classes.profilePicture}>NZ</Avatar>
-    <p className={classes.greeting}>Hi, Nour Zamel!</p>
-  </DialogContent>
-</Dialog>
+        <Avatar
+          className={classes.avatar}
+          onClick={handleProfileClick}
+          ref={profilePictureRef}
+        >
+          JD
+        </Avatar>
+        <Dialog
+          open={isProfileModalOpen}
+          onClose={handleProfileModalClose}
+          anchorEl={profilePictureRef.current}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          getContentAnchorEl={null}
+        >
+          <DialogContent className={classes.modalContainer}>
+            <IconButton
+              className={classes.closeButton}
+              onClick={handleProfileModalClose}
+            >
+              <CloseIcon />
+            </IconButton>
+            <h2 className={classes.email}>nourzamel35@gmail.com</h2>
+            <Avatar className={classes.profilePicture}>NZ</Avatar>
+            <p className={classes.greeting}>Hi, Nour Zamel!</p>
+          </DialogContent>
+        </Dialog>
 
         <Typography variant="h4" className={classes.centeredText}>
           Welcome to Drive
@@ -1036,23 +1080,23 @@ const Dashboard = () => {
           </div>
         </div>
         <div className={classes.fileList}>
-                    {files.map(file => (
-                        <div key={file.file_id} className={classes.fileItem}>
-                        <div className={classes.fileIcon}>
-                            {getFileIcon(file.mime_type)} {/* Apply the fileIcon class to the icon */}
-                        </div>
-                        <Typography className={classes.fileName}>{file.name}</Typography>
-                        <div className={classes.fileDetails}>
-                            <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
-                            <Typography>{file.sharedWith.length} people</Typography>
-                            <Typography>{file.user_id}</Typography>
-                        </div>
-                        <IconButton onClick={handleClick}>
-                            <MoreVertIcon />
-                        </IconButton>
-                    </div>
-                    ))}
-                </div>
+          {files.map(file => (
+            <div key={file.file_id} className={classes.fileItem}>
+              <div className={classes.fileIcon}>
+                {getFileIcon(file.mime_type)} {/* Apply the fileIcon class to the icon */}
+              </div>
+              <Typography className={classes.fileName}>{file.name}</Typography>
+              <div className={classes.fileDetails}>
+                <Typography className={classes.fileDetailsItem}>{file.lastEdited}</Typography>
+                <Typography>{file.sharedWith.length} people</Typography>
+                <Typography>{file.user_id}</Typography>
+              </div>
+              <IconButton onClick={handleClick}>
+                <MoreVertIcon />
+              </IconButton>
+            </div>
+          ))}
+        </div>
       </main>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
         <MenuItem onClick={handleClose}>Share</MenuItem>
