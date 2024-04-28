@@ -123,7 +123,7 @@ exports.deleteFile = async (req, res) => {
 
 exports.listFiles = async (req, res) => {
 	try {
-		const parent_id = req.params.folderId;
+		const { parent_id } = req.query;
 		const query = { user_id: req.user._id };
 
 		if (parent_id) {

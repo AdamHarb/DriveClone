@@ -26,6 +26,10 @@ router.get('/login', userController.loginUser);
 router.post('/create-user', userController.createUser);
 
 // Folder Routes
+router.get('/list-folders', userAuth, async function (req, res) {
+		const folders = await folderController.getFoldersByUserId(req, res);
+		res.status(folders.status).json(folders.data);
+});
 router.post('/create-folder', userAuth, folderController.createFolder);
 
 // File Routes
@@ -34,28 +38,12 @@ router.get('/download/:fileId', userAuth, fileController.downloadFile);
 router.get('/details/:fileId', userAuth, fileController.getFileDetails);
 router.put('/update/:fileId', userAuth, fileController.updateFileDetails);
 router.delete('/delete/:fileId', userAuth, fileController.deleteFile);
-
-//Dashboard Routes
-router.get('/dashboard/:folderId', userAuth, async function (req, res) {
-	try {
-		const [userFolders, userFiles] = await Promise.all([
-			folderController.getFoldersByUserId(req,res),
-			fileController.listFiles(req,res)
-		]);
-		if(userFolders.status !== 200 || userFiles.status !== 200){
-			res.status(500).json({ message: "Internal server error" });
-		}
-		res.status(200).json({
-			userFolders: userFolders.data,
-			userFiles: userFiles.data
-		});
-	} catch (err) {
-		console.error(err);
-		res.status(500).json({ message: "Internal server error" });
-	}
-
+router.get('/list-files', userAuth, async function (req, res) {
+		const files = await fileController.listFiles(req, res);
+		res.status(files.status).json(files.data);
 });
 
+//Dashboard Routes
 router.get('/dashboard', userAuth, async function (req, res) {
 	try {
 		const [userFolders, userFiles] = await Promise.all([
@@ -74,5 +62,6 @@ router.get('/dashboard', userAuth, async function (req, res) {
 		res.status(500).json({ message: "Internal server error" });
 	}
 });
+
 
 module.exports = router;
