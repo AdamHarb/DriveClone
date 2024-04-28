@@ -46,7 +46,7 @@ router.get('/list-files', userAuth, async function (req, res) {
 //Dashboard Routes
 router.get('/dashboard', userAuth, async function (req, res) {
 	try {
-		req.parent_id = null; // Adjust this line if needed for filtering
+		req.parent_id = null; // To get root folders
 		const [userFolders, userFiles] = await Promise.all([
 			folderController.getFoldersByUserId(req,res),
 			fileController.listFiles(req,res)
