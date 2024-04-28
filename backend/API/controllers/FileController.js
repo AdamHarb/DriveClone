@@ -1,4 +1,5 @@
 const File = require('../models/File');
+const User = require('../models/User');
 const { getGridFSBucket, getDB} = require('../../db/db');
 const {ObjectId} = require("mongodb");
 
@@ -7,7 +8,9 @@ exports.uploadFile = async (req, res) => {
 		const { parent_id, name, size } = req.body;
 
 		const fileCount = await File.countDocuments({ user_id: req.user._id });
-
+		const him = await User.findOne({ _id: req.user._id });
+		const newsize = him.storage_used + size;
+		const user = await User.updateOne({ _id: req.user._id }, { storage_used: newsize });
 		const fileBuffer = req.file.buffer;
 
 		const bucket = await getGridFSBucket();
@@ -26,6 +29,8 @@ exports.uploadFile = async (req, res) => {
 			size,
 			file_id: fileId
 		});
+
+
 
 		await file.save();
 		res.status(201).json({ message: "File uploaded successfully", fileId });
