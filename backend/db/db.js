@@ -6,10 +6,7 @@ let gfsBucket;
 
 async function connectDB() {
     try {
-        await mongoose.connect(process.env.ATLAS_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        await mongoose.connect(process.env.ATLAS_URI);
         console.log("Connected to MongoDB Atlas via Mongoose");
         const db = await getDB();
         gfsBucket = new GridFSBucket(db);
