@@ -6,10 +6,6 @@ require('dotenv').config();
 const userAuth = async (req, res, next) => {
 	const token = req.cookies?.token || req.headers.authorization?.split(' ')[1]
 
-	if (!token) {
-		return res.status(401).json({ error: 'No token provided' });
-	}
-
 	try {
 		const data = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
@@ -23,6 +19,7 @@ const userAuth = async (req, res, next) => {
 
 		next();
 	} catch (err) {
+		console.log(err)
 		return res.status(401).json({ error: 'Invalid token' });
 	}
 };
