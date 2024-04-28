@@ -35,7 +35,7 @@ router.get('/download/:fileId', fileController.downloadFile);
 router.get('/details/:fileId', userAuth, fileController.getFileDetails);
 router.put('/update/:fileId', userAuth, fileController.updateFileDetails);
 router.delete('/delete-files/:fileId', userAuth, fileController.deleteFile);
-
+router.post('/rename-file', userAuth, fileController.renameFile);
 //Dashboard Routes
 router.get('/dashboard/:folderId', userAuth, driveController.getFolderStuff);
 router.get('/dashboard', userAuth, driveController.getRootStuff);
