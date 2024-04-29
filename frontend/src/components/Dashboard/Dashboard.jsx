@@ -567,9 +567,9 @@ const Dashboard = () => {
               'Authorization': `Bearer ${cookies.token}`
             }
           }
-      );
-      console.log(response.data)
-
+      ).then((r) => {
+        fetchFilesFolders()
+      })
       return response.data.folder_id;
     } catch (e) {
       console.error('Error during folder creation:', e);
