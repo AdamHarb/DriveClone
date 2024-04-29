@@ -475,6 +475,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("default");
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   useEffect(async () => {
     await fetchUser();
@@ -634,9 +635,9 @@ const Dashboard = () => {
     }
   }
 
-  const handleDownload = async () => {
+  const handleDownload = async (id) => {
     try {
-       const response = await axios.get(`http://localhost:3000/api/download/${selectedObj.file_id}`, {}, {
+       const response = await axios.get(`http://localhost:3000/api/download/${id === null ? selectedObj.file_id : id}`, {}, {
          headers: {
            withCredentials: true,
            'Authorization': `Bearer ${cookies.token}`
@@ -850,7 +851,102 @@ const handleTypeClose = () => {
   const handleSearch = () => {
     performSearch(); // Function to perform the advanced search
   };
-  
+
+  const handleFileSelect = (file) => {
+    const selectedIndex = selectedFiles.indexOf(file);
+    let newSelectedFiles = [];
+
+    if (selectedIndex === -1) {
+      newSelectedFiles = newSelectedFiles.concat(selectedFiles, file);
+    } else if (selectedIndex === 0) {
+      newSelectedFiles = newSelectedFiles.concat(selectedFiles.slice(1));
+    } else if (selectedIndex === selectedFiles.length - 1) {
+      newSelectedFiles = newSelectedFiles.concat(selectedFiles.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelectedFiles = newSelectedFiles.concat(
+          selectedFiles.slice(0, selectedIndex),
+          selectedFiles.slice(selectedIndex + 1)
+      );
+    }
+
+    setSelectedFiles(newSelectedFiles);
+  };
+
+  const handleDownloadSelectedFiles = async () => {
+    for (const file of selectedFiles) {
+      try {
+        const response = await axios.get(`http://localhost:3000/api/download/${file.file_id}`, {
+          headers: {
+            withCredentials: true,
+            'Authorization': `Bearer ${cookies.token}`
+          },
+          responseType: 'blob', // Specify the response type as 'blob'
+        });
+
+        const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = fileURL;
+        link.setAttribute('download', file.name); // Use the actual file name
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link); // Clean up the temporary link
+      } catch (e) {
+        console.error('Error during file download:', e);
+      }
+    }
+  };
+
+  const handleStarSelectedFiles = async () => {
+    try {
+      await Promise.all(
+          selectedFiles.map((file) =>
+              axios.post(
+                  `http://localhost:3000/api/toggle-type`,
+                  {
+                    fileId: file._id,
+                    type: "starred",
+                  },
+                  {
+                    headers: {
+                      withCredentials: true,
+                      Authorization: `Bearer ${cookies.token}`,
+                    },
+                  }
+              )
+          )
+      );
+      setSelectedFiles([]); // Clear the selected files after starring
+      fetchFilesFolders(); // Refresh the files and folders
+    } catch (e) {
+      console.log("Error starring files:", e);
+    }
+  };
+
+  const handleDeleteSelectedFiles = async () => {
+    try {
+      await Promise.all(
+          selectedFiles.map((file) =>
+              axios.post(
+                  `http://localhost:3000/api/toggle-type`,
+                  {
+                    fileId: file._id,
+                    type: "trashed",
+                  },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${cookies.token}`,
+                    },
+                  }
+              )
+          )
+      );
+      setSelectedFiles([]); // Clear the selected files after trashing
+      fetchFilesFolders(); // Refresh the files and folders
+    } catch (error) {
+      console.error("Error during file deletion:", error);
+    }
+  };
+
 
   const getFileIcon = (mime_type) => {
 		switch (mime_type) {
@@ -1727,8 +1823,16 @@ const handleTypeClose = () => {
                           getFileIcon={getFileIcon}
                           resetType={resetType}
                           fetchFilesFolders={fetchFilesFolders}
+                          selectedFiles={selectedFiles}
+                          handleFileSelect={handleFileSelect}
                       /> : files.filter((file) => file.type !== "trashed").map(file => (
-                          <div key={file.file_id} className={classes.fileItem} onContextMenu={handleContextMenu(file)}>
+                          <div key={file.file_id}
+                               className={classes.fileItem}
+                               onContextMenu={handleContextMenu(file)}
+                               onClick={() => handleFileSelect(file)}
+                               style={{
+                            backgroundColor: selectedFiles.indexOf(file) !== -1 ? "#e0e0e0" : "inherit",
+                          }}>
                             <div className={classes.fileIcon}>
                               {getFileIcon(file.mime_type)}
                             </div>
@@ -1810,28 +1914,31 @@ const handleTypeClose = () => {
           anchorEl.parentNode.removeChild(anchorEl);
         }
       }}>
-        <MenuItem onClick={handleShareClick}>Share</MenuItem>
-        <ShareDialog
-            open={shareDialogOpen}
-            handleClose={handleShareClose}
-            fileId={selectedObj?._id}
-        />
-        <MenuItem onClick={handleDownload}>Download</MenuItem>
-        <MenuItem onClick={handleRenameClick}>Rename</MenuItem>
-        <RenameDialog
-            open={renameDialogOpen}
-            handleClose={handleRenameClose}
-            handleRename={handleRename}
-        />
-        <MenuItem onClick={handleStar}>Star</MenuItem>
-        <MenuItem onClick={handleDeleteFile}>Delete</MenuItem>
-      </Menu>
-      <Menu
-        anchorEl={logoutAnchorEl}
-        open={Boolean(logoutAnchorEl)}
-        onClose={handleLogoutClose}
-      >
-        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        {selectedFiles.length >= 2 ? (
+            <>
+              <MenuItem onClick={handleDownloadSelectedFiles}>Download</MenuItem>
+              <MenuItem onClick={handleStarSelectedFiles}>Star</MenuItem>
+              <MenuItem onClick={handleDeleteSelectedFiles}>Delete</MenuItem>
+            </>
+        ) : (
+            <>
+              <MenuItem onClick={handleShareClick}>Share</MenuItem>
+              <ShareDialog
+                  open={shareDialogOpen}
+                  handleClose={handleShareClose}
+                  fileId={selectedObj?._id}
+              />
+              <MenuItem onClick={handleDownload}>Download</MenuItem>
+              <MenuItem onClick={handleRenameClick}>Rename</MenuItem>
+              <RenameDialog
+                  open={renameDialogOpen}
+                  handleClose={handleRenameClose}
+                  handleRename={handleRename}
+              />
+              <MenuItem onClick={handleStar}>Star</MenuItem>
+              <MenuItem onClick={handleDeleteFile}>Delete</MenuItem>
+            </>
+        )}
       </Menu>
     </div>
   );
