@@ -1680,9 +1680,17 @@ const handleTypeClose = () => {
                         </div>
                         <Typography className={classes.fileName}>{file.name}</Typography>
                         <div className={classes.fileDetails}>
-                          <Typography className={classes.fileDetailsItem}>{file.updated_at}</Typography>
-                          <Typography>{handleSharedWith(file)} people</Typography>
-                          <Typography>{file.user_id}</Typography>
+                          <Typography className={classes.fileDetailsItem} style={{
+                            marginRight: "20px"
+                          }}>{new Date(file.updated_at).toLocaleString()}</Typography>
+                          <Avatar style={{
+                            marginRight: "60px"
+                          }}>
+                            {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
+                          </Avatar>
+                          <Typography style={{
+                            marginRight: "178px"
+                          }}>My Drive</Typography>
                         </div>
                         <IconButton onClick={handleContextMenu(file)}>
                           <MoreVertIcon />
@@ -1697,32 +1705,38 @@ const handleTypeClose = () => {
                 </div>
                 <Typography className={classes.fileName}>{folder.folder_name}</Typography>
                 <div className={classes.fileDetails}>
-                  <Typography className={classes.fileDetailsItem}>
-                    {folder.created_at}
-                  </Typography>
-                  <Typography>{handleSharedWith(folder)} people</Typography>
-                  <Typography>{folder.user_id}</Typography>
+                  <Typography className={classes.fileDetailsItem} style={{
+                    marginRight: "20px"
+                  }}>{new Date(folder.updated_at).toLocaleString()}</Typography>
+                  <Avatar style={{
+                    marginRight: "60px"
+                  }}>
+                    {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
+                  </Avatar>
+                  <Typography style={{
+                    marginRight: "178px"
+                  }}>My Drive</Typography>
                 </div>
                 <IconButton onClick={handleContextMenu(folder)}>
-                  <MoreVertIcon />
+                  <MoreVertIcon/>
                 </IconButton>
               </div>
-          ))}
+              ))}
         </div>
       }
     </div>
   </>
 ) : (
-  <div className={classes.gridContainer}>
-    {selectedItemType === 'files'
-      ? files.map((file) => (
-          <div key={file.file_id} className={classes.gridItem} onContextMenu={handleContextMenu(file)} >
-            <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
-            <div className={classes.gridName}>{file.name}</div>
-            <IconButton onClick={handleContextMenu(file)}>
-              <MoreVertIcon />
-            </IconButton>
-          </div>
+    <div className={classes.gridContainer}>
+      {selectedItemType === 'files'
+          ? files.map((file) => (
+              <div key={file.file_id} className={classes.gridItem} onContextMenu={handleContextMenu(file)}>
+                <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
+                <div className={classes.gridName}>{file.name}</div>
+                <IconButton onClick={handleContextMenu(file)}>
+                  <MoreVertIcon/>
+                </IconButton>
+              </div>
         ))
       : folders.map((folder) => (
           <div key={folder.folder_id} className={classes.gridItem} onContextMenu={handleContextMenu(folder)} >
