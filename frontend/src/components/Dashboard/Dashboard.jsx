@@ -662,14 +662,16 @@ const Dashboard = () => {
   const handlePersonClose = () => {
     setPersonAnchorEl(null);
   };
-  const handlePersonSelect = (person) => {
-    if (person === null) {
+  const handlePersonSelect = (owner) => {
+    if (owner === null) {
       setSelectedPerson(null);
-      fetchFilesFolders(); // Fetch files and folders when person is deselected
+      fetchFilesFolders(); // Fetch all files and folders when person is deselected
     } else {
-      setSelectedPerson(person);
+      setSelectedPerson(owner);
+      const filteredFiles = files.filter((file) => file.owner === owner);
+      setFiles(filteredFiles);
     }
-    handlePersonClose();
+    handlePersonClose(); // Close the dropdown after selecting a person
   };
   const handleButtonClick = (event) => {
     event.stopPropagation(); // Stop event propagation
@@ -740,7 +742,7 @@ const Dashboard = () => {
   };
 
   const handlePersonClick = (event) => {
-    if (!selectedPerson) {
+    if (!selectedPerson && files.length > 0) {
       setPersonAnchorEl(event.currentTarget);
     }
   };
@@ -757,11 +759,10 @@ const newButtonRef = useRef(null);
 const [typeAnchorEl, setTypeAnchorEl] = useState(null);
 
 const handleTypeClick = (event) => {
-  if (!selectedType) {
+  if (!selectedType && files.length > 0) {
     setTypeAnchorEl(event.currentTarget);
   }
 };
-
 const handleTypeClose = () => {
   setTypeAnchorEl(null);
 };
@@ -796,7 +797,7 @@ const handleTypeClose = () => {
     } else {
       setSelectedType(type);
     }
-    handleTypeClose();
+    handleTypeClose(); // Close the dropdown after selecting a type
   };
   const handleClose = () => {
     setAnchorEl(null);
@@ -998,9 +999,9 @@ const handleTypeClose = () => {
   useEffect(() => {
     const filteredFiles = files.filter(
       (file) =>
-        file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (selectedType === null || file.mime_type === selectedType) &&
-        (selectedPerson === null || file.sharedWith?.includes(selectedPerson)) &&
+      file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (selectedType === null || file.mime_type === selectedType) &&
+      (selectedPerson === null || file.owner === selectedPerson) &&
         (selectedLocation === null ||
           selectedLocation === "Anywhere in Drive" ||
           (selectedLocation === "My Drive") ||
@@ -1020,7 +1021,6 @@ const handleTypeClose = () => {
     setFiles(filteredFiles);
     setFolders(filteredFolders);
   }, [searchTerm, selectedType, selectedPerson, selectedLocation, selectedModifiedDate]);
-
 
   const handleChangeSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -1439,31 +1439,40 @@ const handleTypeClose = () => {
   {selectedLocation || "Location"}
 </Button>
         </div>
-        <Menu
-  anchorEl={typeAnchorEl}
-  keepMounted
-  open={Boolean(typeAnchorEl)}
-  onClose={handleTypeClose}
+        {typeAnchorEl && files.length > 0 && (
+ <Menu
+ anchorEl={typeAnchorEl}
+ keepMounted
+ open={Boolean(typeAnchorEl)}
+ onClose={handleTypeClose}
 >
-  {[...new Set(files.map((file) => file.mime_type))].map((type) => (
-    <MenuItem key={type} onClick={() => handleTypeSelect(type)}>
-      {fileTypeMap[type]?.icon}
-      <Typography style={{ marginLeft: 8 }}>{fileTypeMap[type]?.displayName || type}</Typography>
-    </MenuItem>
-  ))}
+ {[...new Set(files.map((file) => file.mime_type))].map((type) => (
+   <MenuItem key={type} onClick={() => handleTypeSelect(type)}>
+     {fileTypeMap[type]?.icon}
+     <Typography style={{ marginLeft: 8 }}>{fileTypeMap[type]?.displayName || type}</Typography>
+   </MenuItem>
+ ))}
 </Menu>
-<Menu
-  anchorEl={personAnchorEl}
-  keepMounted
-  open={Boolean(personAnchorEl)}
-  onClose={handlePersonClose}
->
-  {[...new Set(files.flatMap((file) => file.sharedWith))].map((person) => (
-    <MenuItem key={person} onClick={() => handlePersonSelect(person)}>
-      {person}
-    </MenuItem>
-  ))}
-</Menu>
+)}
+{personAnchorEl && files.length > 0 && (
+  <Menu
+    anchorEl={personAnchorEl}
+    keepMounted
+    open={Boolean(personAnchorEl)}
+    onClose={handlePersonClose}
+  >
+    {[...new Set(files.map((file) => file.owner))].map((owner) => (
+      <MenuItem key={owner} onClick={() => handlePersonSelect(owner)}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Avatar style={{ marginRight: '8px' }}>
+            {owner?.split(" ").map((name) => name[0]).join("").toUpperCase()}
+          </Avatar>
+          <Typography>{owner}</Typography>
+        </div>
+      </MenuItem>
+    ))}
+  </Menu>
+)}
 <Menu
   anchorEl={locationAnchorEl}
   keepMounted
@@ -1480,22 +1489,24 @@ const handleTypeClose = () => {
     Shared with me
   </MenuItem>
 </Menu>
-<Menu
-  anchorEl={modifiedAnchorEl}
-  keepMounted
-  open={Boolean(modifiedAnchorEl)}
-  onClose={handleModifiedClose}
->
-  <MenuItem onClick={() => handleModifiedSelect("Today")}>Today</MenuItem>
-  <MenuItem onClick={() => handleModifiedSelect("Last 7 days")}>
-    Last 7 days
-  </MenuItem>
-  <MenuItem onClick={() => handleModifiedSelect("Last 30 days")}>
-    Last 30 days
-  </MenuItem>
-  <MenuItem onClick={() => handleModifiedSelect("This year")}>This year</MenuItem>
-  <MenuItem onClick={() => handleModifiedSelect("Last year")}>Last year</MenuItem>
-</Menu>
+{(files.length > 0 || folders.length > 0) && (
+  <Menu
+    anchorEl={modifiedAnchorEl}
+    keepMounted
+    open={Boolean(modifiedAnchorEl)}
+    onClose={handleModifiedClose}
+  >
+    <MenuItem onClick={() => handleModifiedSelect("Today")}>Today</MenuItem>
+    <MenuItem onClick={() => handleModifiedSelect("Last 7 days")}>
+      Last 7 days
+    </MenuItem>
+    <MenuItem onClick={() => handleModifiedSelect("Last 30 days")}>
+      Last 30 days
+    </MenuItem>
+    <MenuItem onClick={() => handleModifiedSelect("This year")}>This year</MenuItem>
+    <MenuItem onClick={() => handleModifiedSelect("Last year")}>Last year</MenuItem>
+  </Menu>
+)}
 
         {/* This is the Modal for the Advanced Search Fields */}
         <Dialog open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClick}>
