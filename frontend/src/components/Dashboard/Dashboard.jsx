@@ -1167,6 +1167,24 @@ const handleTypeClose = () => {
     }
   }
 
+  async function handleFolderClick(folder_id) {
+    try {
+      console.log(folder_id)
+      const response = await axios.get(`http://localhost:3000/api/dashboard/${folder_id}`, {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        },
+      });
+      console.log(response.data)
+      setFiles(response.data.userFiles);
+      setFolders(response.data.userFolders);
+    } catch (error) {
+        console.error('Error retrieving files');
+    }
+  }
+
+
   return (
     <div className={classes.root}>
       <Drawer
@@ -1879,7 +1897,7 @@ const handleTypeClose = () => {
                       ))
               :
               folders.map((folder) => (
-              <div key={folder.folder_id} className={classes.fileItem} onContextMenu={handleContextMenu(folder)}>
+              <div key={folder.folder_id} className={classes.fileItem} onClick={() => handleFolderClick(folder._id)} onContextMenu={handleContextMenu(folder)}>
                 <div className={classes.fileIcon}>
                   {getFolderIcon(folder.folder_name)}
                 </div>
