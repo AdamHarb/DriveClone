@@ -183,11 +183,11 @@ exports.listRootFiles = async (req, res) => {
 	}
 };
 
-exports.starFile = async (req, res) => {
+exports.toggleType = async (req, res) => {
 	try {
 		const fileId = req.body.fileId;
-
-		const file = await File.findOneAndUpdate({ _id: fileId }, { type: 'starred' }, { new: true });
+		const type = req.body.type;
+		const file = await File.findOneAndUpdate({ _id: fileId }, { type }, { new: true });
 
 		if (!file) {
 			return res.status(404).json({ message: "File not found" });
