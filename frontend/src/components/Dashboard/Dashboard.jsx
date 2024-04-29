@@ -94,6 +94,7 @@ import RenameDialog from "./Dialogues/RenameDialog.jsx";
 import ShareDialog from "./Dialogues/ShareDialog.jsx";
 import {StarredFiles} from "./Subpages/StarredFiles.jsx";
 import {TrashedFiles} from "./Subpages/TrashedFiles.jsx";
+import {DetailsDialog} from "./Dialogues/DetailsDialog.jsx";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -1318,903 +1319,899 @@ const handleTypeClose = () => {
     }
   }
 
-  return (
-    <div className={classes.root}>
-      <Drawer
-        className={classes.drawer}
-        variant="permanent"
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-      >
-        <div className={classes.logo}>
-          <img src={logo} alt="Drive Logo" className={classes.logoIcon} />
-          <Typography variant="h5">Drive</Typography>
-        </div>
-
-        <input
-          type="file"
-          style={{ display: "none" }} // Hide the file input element
-          ref={fileInputRef}
-          onChange={(event) => {
-            const file = event.target.files[0];
-            console.log(file); // Log the selected file, or handle it as needed
-          }}
-        />
-        <input
-        type="file"
-        id="file-input"
-        style={{ display: 'none' }}
-        ref={fileInputRef}
-        onChange={(event) => {
-          handleUploadFile(event.target.files[0])
-        }}
-      />
-      <input
-        type="file"
-        id="folder-input"
-        webkitdirectory=""
-        directory=""
-        style={{ display: 'none' }}
-        ref={folderInputRef}
-        onChange={handleUploadFolder}
-      />
-        <Button
-  variant="contained"
-  color="default"
-  className={classes.addButton}
-  startIcon={<AddIcon className={classes.newIcon} />}
-  onClick={handleButtonClick}
-  ref={newButtonRef}
->
-  <Typography variant="body2" style={{ fontSize: '18px' }}>
-    New
-  </Typography>
-</Button>
-<NewMenuDropdown
-  anchorEl={() => {
-    return newButtonRef.current;
-  }}
-  open={isMenuOpen}
-  handleClose={handleMenuClose}
-  handleUploadFile={() => fileInputRef.current.click()}
-  handleUploadFolder={() => folderInputRef.current.click()}
-  handleCreateFolder={handleCreateFolder}
-/>
-
-        <List>
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "home" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => {
-              handleListButtonClick("home")
-              setCurrentPage("default")
-            }}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "home" ? (
-                <HomeIcon />
-              ) : (
-                <HomeOutlinedIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Home" />
-          </ListItem>
-
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "myDrive" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => handleListButtonClick("myDrive")}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "myDrive" ? (
-                <AddToDriveOutlinedIcon />
-              ) : (
-                <AddToDriveIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="My Drive" />
-          </ListItem>
-
-          {/* Add margin to create a gap between groups */}
-          <div style={{ margin: "24px 0" }}></div>
-
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "sharedWithMe" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => handleListButtonClick("sharedWithMe")}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "sharedWithMe" ? (
-                <PeopleAltIcon />
-              ) : (
-                <PeopleAltOutlinedIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Shared with me" />
-          </ListItem>
-
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "starred" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => {
-              handleListButtonClick("starred")
-              setCurrentPage("starred")
-            }}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "starred" ? (
-                <StarOutlinedIcon />
-              ) : (
-                <StarOutlineOutlinedIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Starred" />
-          </ListItem>
-
-          {/* Add margin to create a gap between groups */}
-          <div style={{ margin: "24px 0" }}></div>
-
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor: activeListButton === "bin" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => {
-              handleListButtonClick("bin")
-              setCurrentPage("trashed")
-            }}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "bin" ? (
-                <DeleteIcon />
-              ) : (
-                <DeleteOutlinedIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Bin" />
-          </ListItem>
-          <ListItem
-            button
-            className={classes.listButton}
-            style={{
-              backgroundColor:
-                activeListButton === "storage" ? "#c2e7ff" : "white",
-            }}
-            onClick={() => handleListButtonClick("storage")}
-          >
-            <ListItemIcon className={classes.icon}>
-              {activeListButton === "storage" ? (
-                <CloudIcon />
-              ) : (
-                <CloudQueueIcon />
-              )}
-            </ListItemIcon>
-            <ListItemText primary="Storage" />
-          </ListItem>
-
-          <div className={classes.storageInfo}>
-            <div
-              style={{
-                width: "100%",
-                marginTop: -6,
-                marginBottom: 6,
-                height: 5,
-                backgroundColor: "#e1e3e1",
-                borderRadius: "5px",
-              }}
-            >
-              <div
-                style={{
-                  width: user.storage_used / 10000 * 100 + "%",
-                  height: "100%",
-                  backgroundColor: "#0b57d0",
-                  borderRadius: "5px",
-                }}
-              ></div>
-            </div>
-            <Typography variant="subtitle1">{Math.round(user.storage_used / 1024).toFixed(2)} GB of 15 GB used</Typography>
-          </div>
-          <Typography variant="subtitle1" style={{ marginTop: theme.spacing(2), marginBottom: theme.spacing(1), marginLeft: '18px', fontSize: 18,}}>
-  Filter by:
-</Typography>
-          <Button
-  variant="outlined"
-  className={classes.button}
-  onClick={handleNameClick}
-  startIcon={<TextFieldsIcon />}
-  endIcon={<ArrowDropDownOutlinedIcon />}
->
-  Name
-</Button>
-<Menu
-  anchorEl={nameAnchorEl}
-  keepMounted
-  open={Boolean(nameAnchorEl)}
-  onClose={handleNameClose}
->
-  <MenuItem onClick={() => setNameOption('asc')}>A-Z</MenuItem>
-  <MenuItem onClick={() => setNameOption('desc')}>Z-A</MenuItem>
-  <MenuItem onClick={() => setNameOption(null)}>Reset</MenuItem>
-</Menu>
-
-<Button
-  variant="outlined"
-  className={classes.button}
-  onClick={handleSizeClick}
-  startIcon={<StorageIcon />}
-  endIcon={<ArrowDropDownOutlinedIcon />}
->
-  Size
-</Button>
-<Menu
-  anchorEl={sizeAnchorEl}
-  keepMounted
-  open={Boolean(sizeAnchorEl)}
-  onClose={handleSizeClose}
->
-  <MenuItem onClick={() => setSizeOption('largest')}>Largest</MenuItem>
-  <MenuItem onClick={() => setSizeOption('smallest')}>Smallest</MenuItem>
-  <MenuItem onClick={() => setSizeOption(null)}>Reset</MenuItem>
-</Menu>
-
-<Button
-  variant="outlined"
-  className={classes.button}
-  onClick={handleUploadDateClick}
-  startIcon={<DateRangeIcon />}
-  endIcon={<ArrowDropDownOutlinedIcon />}
->
-  Upload Date
-</Button>
-<Menu
-  anchorEl={uploadDateAnchorEl}
-  keepMounted
-  open={Boolean(uploadDateAnchorEl)}
-  onClose={handleUploadDateClose}
->
-  <MenuItem onClick={() => setUploadDateOption('ascending')}>Ascending</MenuItem>
-  <MenuItem onClick={() => setUploadDateOption('descending')}>Descending</MenuItem>
-  <MenuItem onClick={() => setUploadDateOption(null)}>Reset</MenuItem>
-</Menu>
-        </List>
-      </Drawer>
-
-      <main className={classes.content}>
-      <Avatar
-  className={classes.avatar}
-  onClick={handleProfileClick}
-  ref={profilePictureRef}
->
-        {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
-</Avatar>
-<Dialog
-  open={isProfileModalOpen}
-  onClose={handleProfileModalClose}
-  anchorEl={profilePictureRef.current}
-  transformOrigin={{
-    vertical: 'top',
-    horizontal: 'right',
-  }}
-  getContentAnchorEl={null}
->
-  <DialogContent className={classes.modalContainer}>
-    <IconButton
-      className={classes.closeButton}
-      onClick={handleProfileModalClose}
-    >
-      <CloseIcon />
-    </IconButton>
-    <Typography variant="subtitle1" className={classes.email}>
-      {user.email}
-    </Typography>
-    <Avatar className={classes.profilePicture}>{user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}</Avatar>
-    <Typography variant="h6" className={classes.greeting}>
-      Hi, {user.username}!
-    </Typography>
-  </DialogContent>
-</Dialog>
-
-        <Typography variant="h4" className={classes.centeredText}>
-          Welcome to Drive
-        </Typography>
-        <TextField
-          className={classes.searchBar}
-          placeholder="Search in Drive"
-          variant="outlined"
-          onChange={handleChangeSearch}
-          value={searchTerm}
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton>
-                  <FilterListIcon onClick={handleAdvancedSearchClick} />
-                </IconButton>
-              </InputAdornment>
-            ),
-            style: {
-              borderRadius: "25px", // Set the border radius to your desired value (e.g., '25px')
-            },
-          }}
-        />
-        <div className={classes.buttonContainer}>
-
-        <Button
-  variant="outlined"
-  className={classes.button}
-  onClick={handleTypeClick}
-  startIcon={selectedType ? null : <InsertDriveFileOutlinedIcon />}
-  endIcon={
-    selectedType ? (
-      <CloseIcon
-        className={classes.closeIcon}
-        onClick={(event) => {
-          event.stopPropagation();
-          handleTypeSelect(null);
-        }}
-      />
-    ) : (
-      <ArrowDropDownOutlinedIcon />
-    )
+ const updateFileDescription = async (description) => {
+   try {
+     await axios.post(`http://localhost:3000/api/update-description/${selectedObj._id}`, {
+       description
+     }, {
+       headers: {
+         withCredentials: true,
+         'Authorization': `Bearer ${cookies.token}`
+       }});
+   } catch (e) {
+     console.log('Error updating file description:', e);
+   }
   }
-  style={{
-    backgroundColor: selectedType ? "#c2e7ff" : undefined,
-  }}
->
-  {selectedType ? fileTypeMap[selectedType]?.displayName || selectedType : "Type"}
-</Button>
-<Button
-  variant="outlined"
-  className={classes.button}
-  onClick={handlePersonClick}
-  startIcon={selectedPerson ? null : <PermIdentityOutlinedIcon />}
-  endIcon={
-    selectedPerson ? (
-      <CloseIcon
-        className={classes.closeIcon}
-        onClick={(event) => {
-          event.stopPropagation();
-          handlePersonSelect(null);
-        }}
-      />
-    ) : (
-      <ArrowDropDownOutlinedIcon />
-    )
-  }
-  style={{
-    backgroundColor: selectedPerson ? "#c2e7ff" : undefined,
-  }}
->
-  {selectedPerson || "People"}
-</Button>
-<Button
-  variant="outlined"
-  className={classes.button}
-  onClick={handleModifiedClick}
-  startIcon={selectedModifiedDate ? null : <CalendarTodayOutlinedIcon />}
-  endIcon={
-    selectedModifiedDate ? (
-      <CloseIcon
-        className={classes.closeIcon}
-        onClick={(event) => {
-          event.stopPropagation();
-          handleModifiedSelect(null);
-        }}
-      />
-    ) : (
-      <ArrowDropDownOutlinedIcon />
-    )
-  }
-  style={{
-    backgroundColor: selectedModifiedDate ? "#c2e7ff" : undefined,
-  }}
->
-  {selectedModifiedDate || "Modified"}
-</Button>
-          <Button
-  variant="outlined"
-  className={classes.button}
-  onClick={handleLocationClick}
-  startIcon={selectedLocation ? null : <FolderOpenOutlinedIcon />}
-  endIcon={
-    selectedLocation ? (
-      <CloseIcon
-        className={classes.closeIcon}
-        onClick={(event) => {
-          event.stopPropagation();
-          handleLocationSelect(null);
-        }}
-      />
-    ) : (
-      <ArrowDropDownOutlinedIcon />
-    )
-  }
-  style={{
-    backgroundColor: selectedLocation ? "#c2e7ff" : undefined,
-  }}
->
-  {selectedLocation || "Location"}
-</Button>
-        </div>
-        {typeAnchorEl && files.length > 0 && (
- <Menu
- anchorEl={typeAnchorEl}
- keepMounted
- open={Boolean(typeAnchorEl)}
- onClose={handleTypeClose}
->
- {[...new Set(files.map((file) => file.mime_type))].map((type) => (
-   <MenuItem key={type} onClick={() => handleTypeSelect(type)}>
-     {fileTypeMap[type]?.icon}
-     <Typography style={{ marginLeft: 8 }}>{fileTypeMap[type]?.displayName || type}</Typography>
-   </MenuItem>
- ))}
-</Menu>
-)}
-{personAnchorEl && files.length > 0 && (
-  <Menu
-    anchorEl={personAnchorEl}
-    keepMounted
-    open={Boolean(personAnchorEl)}
-    onClose={handlePersonClose}
-  >
-    {[...new Set(files.map((file) => ({ name: file.owner, picture: file.ownerPicture })))].map((owner) => (
-      <MenuItem key={owner.name} onClick={() => handlePersonSelect(owner.name)}>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {owner.picture ? (
-            <Avatar src={owner.picture} style={{ marginRight: '8px' }} />
-          ) : (
-            <Typography>{owner.name}</Typography>
-          )}
-        </div>
-      </MenuItem>
-    ))}
-  </Menu>
-)}
-<Menu
-  anchorEl={locationAnchorEl}
-  keepMounted
-  open={Boolean(locationAnchorEl)}
-  onClose={handleLocationClose}
->
-  <MenuItem onClick={() => handleLocationSelect("Anywhere in Drive")}>
-    Anywhere in Drive
-  </MenuItem>
-  <MenuItem onClick={() => handleLocationSelect("My Drive")}>
-    My Drive
-  </MenuItem>
-  <MenuItem onClick={() => handleLocationSelect("Shared with me")}>
-    Shared with me
-  </MenuItem>
-</Menu>
-{(files.length > 0 || folders.length > 0) && (
-  <Menu
-    anchorEl={modifiedAnchorEl}
-    keepMounted
-    open={Boolean(modifiedAnchorEl)}
-    onClose={handleModifiedClose}
-  >
-    <MenuItem onClick={() => handleModifiedSelect("Today")}>Today</MenuItem>
-    <MenuItem onClick={() => handleModifiedSelect("Last 7 days")}>
-      Last 7 days
-    </MenuItem>
-    <MenuItem onClick={() => handleModifiedSelect("Last 30 days")}>
-      Last 30 days
-    </MenuItem>
-    <MenuItem onClick={() => handleModifiedSelect("This year")}>This year</MenuItem>
-    <MenuItem onClick={() => handleModifiedSelect("Last year")}>Last year</MenuItem>
-  </Menu>
-)}
 
-        {/* This is the Modal for the Advanced Search Fields */}
-        <Dialog open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClick}>
-          <DialogTitle>Advanced Search</DialogTitle>
-          <DialogContent>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Type</InputLabel>
-              <Select
-                name="type" // Each text field gets a name attribute that corresponds to a key in the searchParams object
-                value={searchParams.type}
-                onChange={handleInputChange}
-                label="Type"
-              >
-                <MenuItem value="office-doc">
-                  Office Document (Word, Excel)
-                </MenuItem>
-                <MenuItem value="text-file">Text File</MenuItem>
-                <MenuItem value="archive">Zip/Rar File</MenuItem>
-                <MenuItem value="pdf">PDF</MenuItem>
-                <MenuItem value="video">Video</MenuItem>
-              </Select>
-            </FormControl>
+   return (
+       <div className={classes.root}>
+         <Drawer
+             className={classes.drawer}
+             variant="permanent"
+             classes={{
+               paper: classes.drawerPaper,
+             }}
+         >
+           <div className={classes.logo}>
+             <img src={logo} alt="Drive Logo" className={classes.logoIcon}/>
+             <Typography variant="h5">Drive</Typography>
+           </div>
 
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="owner-select-label">Owner</InputLabel>
-              <Select
-                labelId="owner-select-label"
-                name="owner"
-                value={searchParams.owner}
-                onChange={handleInputChange}
-                label="Owner"
-              >
-                <MenuItem></MenuItem>
-              </Select>
-            </FormControl>
+           <input
+               type="file"
+               style={{display: "none"}} // Hide the file input element
+               ref={fileInputRef}
+               onChange={(event) => {
+                 const file = event.target.files[0];
+                 console.log(file); // Log the selected file, or handle it as needed
+               }}
+           />
+           <input
+               type="file"
+               id="file-input"
+               style={{display: 'none'}}
+               ref={fileInputRef}
+               onChange={(event) => {
+                 handleUploadFile(event.target.files[0])
+               }}
+           />
+           <input
+               type="file"
+               id="folder-input"
+               webkitdirectory=""
+               directory=""
+               style={{display: 'none'}}
+               ref={folderInputRef}
+               onChange={handleUploadFolder}
+           />
+           <Button
+               variant="contained"
+               color="default"
+               className={classes.addButton}
+               startIcon={<AddIcon className={classes.newIcon}/>}
+               onClick={handleButtonClick}
+               ref={newButtonRef}
+           >
+             <Typography variant="body2" style={{fontSize: '18px'}}>
+               New
+             </Typography>
+           </Button>
+           <NewMenuDropdown
+               anchorEl={() => {
+                 return newButtonRef.current;
+               }}
+               open={isMenuOpen}
+               handleClose={handleMenuClose}
+               handleUploadFile={() => fileInputRef.current.click()}
+               handleUploadFolder={() => folderInputRef.current.click()}
+               handleCreateFolder={handleCreateFolder}
+           />
 
-            <TextField
-              name="hasTheWords"
-              label="Has the words"
-              fullWidth
-              margin="normal"
-              value={searchParams.hasTheWords}
-              onChange={handleInputChange}
-            />
+           <List>
+             <ListItem
+                 button
+                 className={classes.listButton}
+                 style={{
+                   backgroundColor:
+                       activeListButton === "home" ? "#c2e7ff" : "white",
+                 }}
+                 onClick={() => {
+                   handleListButtonClick("home")
+                   setCurrentPage("default")
+                 }}
+             >
+               <ListItemIcon className={classes.icon}>
+                 {activeListButton === "home" ? (
+                     <HomeIcon/>
+                 ) : (
+                     <HomeOutlinedIcon/>
+                 )}
+               </ListItemIcon>
+               <ListItemText primary="Home"/>
+             </ListItem>
 
-            <TextField
-              name="itemName"
-              label="Item name"
-              fullWidth
-              margin="normal"
-              value={searchParams.itemName}
-              onChange={handleInputChange}
-            />
+             <ListItem
+                 button
+                 className={classes.listButton}
+                 style={{
+                   backgroundColor:
+                       activeListButton === "myDrive" ? "#c2e7ff" : "white",
+                 }}
+                 onClick={() => handleListButtonClick("myDrive")}
+             >
+               <ListItemIcon className={classes.icon}>
+                 {activeListButton === "myDrive" ? (
+                     <AddToDriveOutlinedIcon/>
+                 ) : (
+                     <AddToDriveIcon/>
+                 )}
+               </ListItemIcon>
+               <ListItemText primary="My Drive"/>
+             </ListItem>
 
-            <FormControl fullWidth margin="normal">
-              <InputLabel id="location-select-label">Location</InputLabel>
-              <Select
-                labelId="location-select-label"
-                name="location"
-                value={searchParams.location}
-                onChange={handleInputChange}
-                label="Location"
-              >
-                <MenuItem></MenuItem>
-              </Select>
-            </FormControl>
+             {/* Add margin to create a gap between groups */}
+             <div style={{margin: "24px 0"}}></div>
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="starred"
-                  checked={searchParams.starred}
-                  onChange={handleInputChange}
-                />
-              }
-              label="Starred"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="inTrash"
-                  checked={searchParams.inTrash}
-                  onChange={handleInputChange}
-                />
-              }
-              label="In trash"
-            />
+             <ListItem
+                 button
+                 className={classes.listButton}
+                 style={{
+                   backgroundColor:
+                       activeListButton === "sharedWithMe" ? "#c2e7ff" : "white",
+                 }}
+                 onClick={() => handleListButtonClick("sharedWithMe")}
+             >
+               <ListItemIcon className={classes.icon}>
+                 {activeListButton === "sharedWithMe" ? (
+                     <PeopleAltIcon/>
+                 ) : (
+                     <PeopleAltOutlinedIcon/>
+                 )}
+               </ListItemIcon>
+               <ListItemText primary="Shared with me"/>
+             </ListItem>
 
-            <Box mt={2} display="flex" justifyContent="space-between">
-              <Button variant="outlined" onClick={handleReset}>
-                Reset
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSearch}
-              >
-                Search
-              </Button>
-            </Box>
-          </DialogContent>
-        </Dialog>
+             <ListItem
+                 button
+                 className={classes.listButton}
+                 style={{
+                   backgroundColor:
+                       activeListButton === "starred" ? "#c2e7ff" : "white",
+                 }}
+                 onClick={() => {
+                   handleListButtonClick("starred")
+                   setCurrentPage("starred")
+                 }}
+             >
+               <ListItemIcon className={classes.icon}>
+                 {activeListButton === "starred" ? (
+                     <StarOutlinedIcon/>
+                 ) : (
+                     <StarOutlineOutlinedIcon/>
+                 )}
+               </ListItemIcon>
+               <ListItemText primary="Starred"/>
+             </ListItem>
 
-        <br />
+             {/* Add margin to create a gap between groups */}
+             <div style={{margin: "24px 0"}}></div>
 
-        <div className={classes.filterOptions}>
-          <div className={classes.suggestedContainer}>
-            <Typography className={classes.suggestedText}>Suggested</Typography>
+             <ListItem
+                 button
+                 className={classes.listButton}
+                 style={{
+                   backgroundColor: activeListButton === "bin" ? "#c2e7ff" : "white",
+                 }}
+                 onClick={() => {
+                   handleListButtonClick("bin")
+                   setCurrentPage("trashed")
+                 }}
+             >
+               <ListItemIcon className={classes.icon}>
+                 {activeListButton === "bin" ? (
+                     <DeleteIcon/>
+                 ) : (
+                     <DeleteOutlinedIcon/>
+                 )}
+               </ListItemIcon>
+               <ListItemText primary="Bin"/>
+             </ListItem>
+             <ListItem
+                 button
+                 className={classes.listButton}
+                 style={{
+                   backgroundColor:
+                       activeListButton === "storage" ? "#c2e7ff" : "white",
+                 }}
+                 onClick={() => handleListButtonClick("storage")}
+             >
+               <ListItemIcon className={classes.icon}>
+                 {activeListButton === "storage" ? (
+                     <CloudIcon/>
+                 ) : (
+                     <CloudQueueIcon/>
+                 )}
+               </ListItemIcon>
+               <ListItemText primary="Storage"/>
+             </ListItem>
 
-            {/* Files and Folders buttons */}
-            <ToggleButtonGroup exclusive aria-label="files and folders">
-              <ToggleButton
-                value="files"
-                aria-label="files"
-                className={classes.fileFolderButton}
-                style={{
-                  backgroundColor:
-                    activeButton === "files" ? "#c2e7ff" : "white",
-                }}
-                onClick={() => handleToggleButtonClick("files")}
-              >
-                {activeButton === "files" ? (
-                  <DoneIcon />
-                ) : (
-                  <ArticleOutlinedIcon />
-                )}
-                <Typography style={{ marginLeft: 8, textTransform: "none" }}>
-                  Files
-                </Typography>
-              </ToggleButton>
-
-              {/* Separator between Files and Folders buttons */}
-              <div className={classes.verticalSeparator}></div>
-
-              <ToggleButton
-                value="folders"
-                aria-label="folders"
-                className={classes.fileFolderButton}
-                style={{
-                  backgroundColor:
-                    activeButton === "folders" ? "#c2e7ff" : "white",
-                }}
-                onClick={() => handleToggleButtonClick("folders")}
-              >
-                {activeButton === "folders" ? (
-                  <DoneIcon />
-                ) : (
-                  <FolderOpenOutlinedIcon />
-                )}
-                <Typography style={{ marginLeft: 8, textTransform: "none" }}>
-                  Folders
-                </Typography>
-              </ToggleButton>
-            </ToggleButtonGroup>
-
-            {/* Layout buttons */}
-            <ToggleButtonGroup exclusive aria-label="layout buttons">
-              <ToggleButton
-                value="list"
-                aria-label="list"
-                className={classes.layoutButton}
-                style={{
-                  backgroundColor:
-                    activeLayout === "list" ? "#c2e7ff" : "white",
-                }}
-                onClick={() => handleLayoutButtonClick("list")}
-              >
-                {activeLayout === "list" && <DoneIcon />}
-                <MenuOutlinedIcon />
-              </ToggleButton>
-
-              {/* Separator between List and Module buttons */}
-              <div className={classes.verticalSeparator}></div>
-
-              <ToggleButton
-                value="module"
-                aria-label="module"
-                className={classes.layoutButton}
-                style={{
-                  backgroundColor:
-                    activeLayout === "module" ? "#c2e7ff" : "white",
-                }}
-                onClick={() => handleLayoutButtonClick("module")}
-              >
-                {activeLayout === "module" && <DoneIcon />}
-                <GridViewOutlinedIcon />
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </div>
-  
-        </div>
-        {activeLayout === 'list' && (
-  <div className={classes.listLayout}>
-    <Typography className={classes.nameBold}>Name</Typography>
-    <div className={classes.listLayoutItems}>
-      <Typography className={classes.listLayoutItem}>Date Uploaded</Typography>
-      <Typography className={classes.listLayoutItem}>Owner</Typography>
-      <Typography className={classes.listLayoutItem}>Location</Typography>
-    </div>
-  </div>
-)}
-
-{activeLayout === 'list' ? (
-  <>
-    <div className={classes.fileList}>
-      {
-        loading ? <div>
-          <Skeleton height={"80px"} />
-          <Skeleton height={"80px"} />
-          <Skeleton height={"80px"} width={"700px"} />
-        </div> : <div>
-        {selectedItemType === "files" ? files.length === 0 ? <Typography>
-  No files have been created yet, feel free to create some!
-        </Typography> :
-        currentPage === "starred" ?
-            <StarredFiles
-                files={sortFiles(files)}
-                user={user}
-                classes={classes}
-                handleContextMenu={handleContextMenu}
-                getFileIcon={getFileIcon}
-                resetType={resetType}
-                fetchFilesFolders={fetchFilesFolders}
-            /> :
-            currentPage === "trashed" ? <TrashedFiles
-                files={sortFiles(files)}
-                user={user}
-                classes={classes}
-                handleContextMenu={handleContextMenu}
-                getFileIcon={getFileIcon}
-                resetType={resetType}
-                fetchFilesFolders={fetchFilesFolders}
-                selectedFiles={selectedFiles}
-                handleFileSelect={handleFileSelect}
-            /> : sortFiles(files).filter((file) => file.type !== "trashed").map(file => (
-                <div key={file.file_id}
-                     className={classes.fileItem}
-                     onContextMenu={handleContextMenu(file)}
-                     onClick={() => handleFileSelect(file)}
+             <div className={classes.storageInfo}>
+               <div
+                   style={{
+                     width: "100%",
+                     marginTop: -6,
+                     marginBottom: 6,
+                     height: 5,
+                     backgroundColor: "#e1e3e1",
+                     borderRadius: "5px",
+                   }}
+               >
+                 <div
                      style={{
-                  backgroundColor: selectedFiles.indexOf(file) !== -1 ? "#c2e7ff" : "inherit",
-                }}>
-                  <div className={classes.fileIcon}>
-                    {getFileIcon(file.mime_type)}
-                  </div>
-                  <Typography className={classes.fileName}>{file.name}</Typography>
-                  <div className={classes.fileDetails}>
-                    <Typography className={classes.fileDetailsItem} style={{
-                      marginRight: "20px"
-                    }}>{new Date(file.updated_at).toLocaleString()}</Typography>
-                    <Avatar style={{
-                      marginRight: "60px"
-                    }}>
-                      {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
-                    </Avatar>
-                    <Typography style={{
-                      marginRight: "178px"
-                    }}>My Drive</Typography>
-                  </div>
-                  <IconButton onClick={handleContextMenu(file)}>
-                    <MoreVertIcon />
-                  </IconButton>
-                </div>
-            ))
-    :
-    sortFiles(folders).map((folder) => (
-    <div key={folder.folder_id} className={classes.fileItem} onContextMenu={handleContextMenu(folder)}>
-      <div className={classes.fileIcon}>
-        {getFolderIcon(folder.folder_name)}
-      </div>
-      <Typography className={classes.fileName}>{folder.folder_name}</Typography>
-      <div className={classes.fileDetails}>
-        <Typography className={classes.fileDetailsItem} style={{
-          marginRight: "20px"
-        }}>{new Date(folder.updated_at).toLocaleString()}</Typography>
-        <Avatar style={{
-          marginRight: "60px"
-        }}>
-          {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
-        </Avatar>
-        <Typography style={{
-          marginRight: "178px"
-        }}>My Drive</Typography>
-      </div>
-      <IconButton onClick={handleContextMenu(folder)}>
-        <MoreVertIcon/>
-      </IconButton>
-    </div>
-    ))}
-        </div>
-      }
-    </div>
-  </>
-) : (
-    <div className={classes.gridContainer}>
-      {selectedItemType === 'files'
-          ? files.map((file) => (
-              <div key={file.file_id} className={classes.gridItem} onContextMenu={handleContextMenu(file)}>
-                <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
-                <div className={classes.gridName}>{file.name}</div>
-                <IconButton onClick={handleContextMenu(file)}>
-                  <MoreVertIcon/>
-                </IconButton>
-              </div>
-        ))
-      : folders.map((folder) => (
-          <div key={folder.folder_id} className={classes.gridItem} onContextMenu={handleContextMenu(folder)} >
-            <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
-            <div className={classes.gridName}>{folder.folder_name}</div>
-            <IconButton onClick={handleContextMenu(folder)}>
-              <MoreVertIcon />
-            </IconButton>
-          </div>
-        ))}
-  </div>
-)}
-      </main>
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => {
-        handleClose();
-        if (anchorEl && anchorEl.parentNode) {
-          anchorEl.parentNode.removeChild(anchorEl);
-        }
-      }}>
-        {selectedFiles.length >= 2 ? (
-            <>
-              <MenuItem onClick={handleDownloadSelectedFiles}>Download</MenuItem>
-              <MenuItem onClick={handleStarSelectedFiles}>Star</MenuItem>
-              <MenuItem onClick={handleDeleteSelectedFiles}>Delete</MenuItem>
-            </>
-        ) : (
-            <>
-              <MenuItem onClick={handleShareClick}>Share</MenuItem>
-              <ShareDialog
-                  open={shareDialogOpen}
-                  handleClose={handleShareClose}
-                  fileId={selectedObj?._id}
-              />
-              <MenuItem onClick={handleDownload}>Download</MenuItem>
-              <MenuItem onClick={handleRenameClick}>Rename</MenuItem>
-              <RenameDialog
-                  open={renameDialogOpen}
-                  handleClose={handleRenameClose}
-                  handleRename={handleRename}
-              />
-              <MenuItem onClick={handleStar}>Star</MenuItem>
-              <MenuItem onClick={handleDeleteFile}>Delete</MenuItem>
-              <MenuItem onClick={handleViewDetailsClick}>View Details</MenuItem>
-            </>
-        )}
-      </Menu>
-      <Dialog open={viewDetailsDialogOpen} onClose={() => setViewDetailsDialogOpen(false)}>
-  <DialogTitle>File Details</DialogTitle>
-  <DialogContent>
-  {selectedObj ? (
-    <>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <DescriptionIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Type: {selectedObj.mime_type}
-      </Typography>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <TextFieldsIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Size: {selectedObj.size} KB
-      </Typography>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <PersonIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Owner: {selectedObj.owner}
-      </Typography>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <FolderIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Location: My Drive
-      </Typography>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <DateRangeIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Upload Date: {new Date(selectedObj.created_at).toLocaleString()}
-      </Typography>
-      <TextField
-        label="Description"
-        multiline
-        rows={4}
-        fullWidth
-        value={selectedObj.description || ''} // Set the initial value to selectedObj.description or an empty string
-        onChange={(e) => setSelectedObj({ ...selectedObj, description: e.target.value })}
-      />
-    </>
-  ) : (
-    <Typography variant="body1">No file or folder selected.</Typography>
-  )}
-</DialogContent>
-  
-</Dialog>
-    </div>
-  );
-};
+                       width: user.storage_used / 10000 * 100 + "%",
+                       height: "100%",
+                       backgroundColor: "#0b57d0",
+                       borderRadius: "5px",
+                     }}
+                 ></div>
+               </div>
+               <Typography variant="subtitle1">{Math.round(user.storage_used / 1024).toFixed(2)} GB of 15 GB
+                 used</Typography>
+             </div>
+             <Typography variant="subtitle1" style={{
+               marginTop: theme.spacing(2),
+               marginBottom: theme.spacing(1),
+               marginLeft: '18px',
+               fontSize: 18,
+             }}>
+               Filter by:
+             </Typography>
+             <Button
+                 variant="outlined"
+                 className={classes.button}
+                 onClick={handleNameClick}
+                 startIcon={<TextFieldsIcon/>}
+                 endIcon={<ArrowDropDownOutlinedIcon/>}
+             >
+               Name
+             </Button>
+             <Menu
+                 anchorEl={nameAnchorEl}
+                 keepMounted
+                 open={Boolean(nameAnchorEl)}
+                 onClose={handleNameClose}
+             >
+               <MenuItem onClick={() => setNameOption('asc')}>A-Z</MenuItem>
+               <MenuItem onClick={() => setNameOption('desc')}>Z-A</MenuItem>
+               <MenuItem onClick={() => setNameOption(null)}>Reset</MenuItem>
+             </Menu>
+
+             <Button
+                 variant="outlined"
+                 className={classes.button}
+                 onClick={handleSizeClick}
+                 startIcon={<StorageIcon/>}
+                 endIcon={<ArrowDropDownOutlinedIcon/>}
+             >
+               Size
+             </Button>
+             <Menu
+                 anchorEl={sizeAnchorEl}
+                 keepMounted
+                 open={Boolean(sizeAnchorEl)}
+                 onClose={handleSizeClose}
+             >
+               <MenuItem onClick={() => setSizeOption('largest')}>Largest</MenuItem>
+               <MenuItem onClick={() => setSizeOption('smallest')}>Smallest</MenuItem>
+               <MenuItem onClick={() => setSizeOption(null)}>Reset</MenuItem>
+             </Menu>
+
+             <Button
+                 variant="outlined"
+                 className={classes.button}
+                 onClick={handleUploadDateClick}
+                 startIcon={<DateRangeIcon/>}
+                 endIcon={<ArrowDropDownOutlinedIcon/>}
+             >
+               Upload Date
+             </Button>
+             <Menu
+                 anchorEl={uploadDateAnchorEl}
+                 keepMounted
+                 open={Boolean(uploadDateAnchorEl)}
+                 onClose={handleUploadDateClose}
+             >
+               <MenuItem onClick={() => setUploadDateOption('ascending')}>Ascending</MenuItem>
+               <MenuItem onClick={() => setUploadDateOption('descending')}>Descending</MenuItem>
+               <MenuItem onClick={() => setUploadDateOption(null)}>Reset</MenuItem>
+             </Menu>
+           </List>
+         </Drawer>
+
+         <main className={classes.content}>
+           <Avatar
+               className={classes.avatar}
+               onClick={handleProfileClick}
+               ref={profilePictureRef}
+           >
+             {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
+           </Avatar>
+           <Dialog
+               open={isProfileModalOpen}
+               onClose={handleProfileModalClose}
+               anchorEl={profilePictureRef.current}
+               transformOrigin={{
+                 vertical: 'top',
+                 horizontal: 'right',
+               }}
+               getContentAnchorEl={null}
+           >
+             <DialogContent className={classes.modalContainer}>
+               <IconButton
+                   className={classes.closeButton}
+                   onClick={handleProfileModalClose}
+               >
+                 <CloseIcon/>
+               </IconButton>
+               <Typography variant="subtitle1" className={classes.email}>
+                 {user.email}
+               </Typography>
+               <Avatar
+                   className={classes.profilePicture}>{user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}</Avatar>
+               <Typography variant="h6" className={classes.greeting}>
+                 Hi, {user.username}!
+               </Typography>
+             </DialogContent>
+           </Dialog>
+
+           <Typography variant="h4" className={classes.centeredText}>
+             Welcome to Drive
+           </Typography>
+           <TextField
+               className={classes.searchBar}
+               placeholder="Search in Drive"
+               variant="outlined"
+               onChange={handleChangeSearch}
+               value={searchTerm}
+               fullWidth
+               InputProps={{
+                 startAdornment: (
+                     <InputAdornment position="start">
+                       <SearchIcon/>
+                     </InputAdornment>
+                 ),
+                 endAdornment: (
+                     <InputAdornment position="end">
+                       <IconButton>
+                         <FilterListIcon onClick={handleAdvancedSearchClick}/>
+                       </IconButton>
+                     </InputAdornment>
+                 ),
+                 style: {
+                   borderRadius: "25px", // Set the border radius to your desired value (e.g., '25px')
+                 },
+               }}
+           />
+           <div className={classes.buttonContainer}>
+
+             <Button
+                 variant="outlined"
+                 className={classes.button}
+                 onClick={handleTypeClick}
+                 startIcon={selectedType ? null : <InsertDriveFileOutlinedIcon/>}
+                 endIcon={
+                   selectedType ? (
+                       <CloseIcon
+                           className={classes.closeIcon}
+                           onClick={(event) => {
+                             event.stopPropagation();
+                             handleTypeSelect(null);
+                           }}
+                       />
+                   ) : (
+                       <ArrowDropDownOutlinedIcon/>
+                   )
+                 }
+                 style={{
+                   backgroundColor: selectedType ? "#c2e7ff" : undefined,
+                 }}
+             >
+               {selectedType ? fileTypeMap[selectedType]?.displayName || selectedType : "Type"}
+             </Button>
+             <Button
+                 variant="outlined"
+                 className={classes.button}
+                 onClick={handlePersonClick}
+                 startIcon={selectedPerson ? null : <PermIdentityOutlinedIcon/>}
+                 endIcon={
+                   selectedPerson ? (
+                       <CloseIcon
+                           className={classes.closeIcon}
+                           onClick={(event) => {
+                             event.stopPropagation();
+                             handlePersonSelect(null);
+                           }}
+                       />
+                   ) : (
+                       <ArrowDropDownOutlinedIcon/>
+                   )
+                 }
+                 style={{
+                   backgroundColor: selectedPerson ? "#c2e7ff" : undefined,
+                 }}
+             >
+               {selectedPerson || "People"}
+             </Button>
+             <Button
+                 variant="outlined"
+                 className={classes.button}
+                 onClick={handleModifiedClick}
+                 startIcon={selectedModifiedDate ? null : <CalendarTodayOutlinedIcon/>}
+                 endIcon={
+                   selectedModifiedDate ? (
+                       <CloseIcon
+                           className={classes.closeIcon}
+                           onClick={(event) => {
+                             event.stopPropagation();
+                             handleModifiedSelect(null);
+                           }}
+                       />
+                   ) : (
+                       <ArrowDropDownOutlinedIcon/>
+                   )
+                 }
+                 style={{
+                   backgroundColor: selectedModifiedDate ? "#c2e7ff" : undefined,
+                 }}
+             >
+               {selectedModifiedDate || "Modified"}
+             </Button>
+             <Button
+                 variant="outlined"
+                 className={classes.button}
+                 onClick={handleLocationClick}
+                 startIcon={selectedLocation ? null : <FolderOpenOutlinedIcon/>}
+                 endIcon={
+                   selectedLocation ? (
+                       <CloseIcon
+                           className={classes.closeIcon}
+                           onClick={(event) => {
+                             event.stopPropagation();
+                             handleLocationSelect(null);
+                           }}
+                       />
+                   ) : (
+                       <ArrowDropDownOutlinedIcon/>
+                   )
+                 }
+                 style={{
+                   backgroundColor: selectedLocation ? "#c2e7ff" : undefined,
+                 }}
+             >
+               {selectedLocation || "Location"}
+             </Button>
+           </div>
+           {typeAnchorEl && files.length > 0 && (
+               <Menu
+                   anchorEl={typeAnchorEl}
+                   keepMounted
+                   open={Boolean(typeAnchorEl)}
+                   onClose={handleTypeClose}
+               >
+                 {[...new Set(files.map((file) => file.mime_type))].map((type) => (
+                     <MenuItem key={type} onClick={() => handleTypeSelect(type)}>
+                       {fileTypeMap[type]?.icon}
+                       <Typography style={{marginLeft: 8}}>{fileTypeMap[type]?.displayName || type}</Typography>
+                     </MenuItem>
+                 ))}
+               </Menu>
+           )}
+           {personAnchorEl && files.length > 0 && (
+               <Menu
+                   anchorEl={personAnchorEl}
+                   keepMounted
+                   open={Boolean(personAnchorEl)}
+                   onClose={handlePersonClose}
+               >
+                 {[...new Set(files.map((file) => ({name: file.owner, picture: file.ownerPicture})))].map((owner) => (
+                     <MenuItem key={owner.name} onClick={() => handlePersonSelect(owner.name)}>
+                       <div style={{display: 'flex', alignItems: 'center'}}>
+                         {owner.picture ? (
+                             <Avatar src={owner.picture} style={{marginRight: '8px'}}/>
+                         ) : (
+                             <Typography>{owner.name}</Typography>
+                         )}
+                       </div>
+                     </MenuItem>
+                 ))}
+               </Menu>
+           )}
+           <Menu
+               anchorEl={locationAnchorEl}
+               keepMounted
+               open={Boolean(locationAnchorEl)}
+               onClose={handleLocationClose}
+           >
+             <MenuItem onClick={() => handleLocationSelect("Anywhere in Drive")}>
+               Anywhere in Drive
+             </MenuItem>
+             <MenuItem onClick={() => handleLocationSelect("My Drive")}>
+               My Drive
+             </MenuItem>
+             <MenuItem onClick={() => handleLocationSelect("Shared with me")}>
+               Shared with me
+             </MenuItem>
+           </Menu>
+           {(files.length > 0 || folders.length > 0) && (
+               <Menu
+                   anchorEl={modifiedAnchorEl}
+                   keepMounted
+                   open={Boolean(modifiedAnchorEl)}
+                   onClose={handleModifiedClose}
+               >
+                 <MenuItem onClick={() => handleModifiedSelect("Today")}>Today</MenuItem>
+                 <MenuItem onClick={() => handleModifiedSelect("Last 7 days")}>
+                   Last 7 days
+                 </MenuItem>
+                 <MenuItem onClick={() => handleModifiedSelect("Last 30 days")}>
+                   Last 30 days
+                 </MenuItem>
+                 <MenuItem onClick={() => handleModifiedSelect("This year")}>This year</MenuItem>
+                 <MenuItem onClick={() => handleModifiedSelect("Last year")}>Last year</MenuItem>
+               </Menu>
+           )}
+
+           {/* This is the Modal for the Advanced Search Fields */}
+           <Dialog open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClick}>
+             <DialogTitle>Advanced Search</DialogTitle>
+             <DialogContent>
+               <FormControl fullWidth margin="normal">
+                 <InputLabel>Type</InputLabel>
+                 <Select
+                     name="type" // Each text field gets a name attribute that corresponds to a key in the searchParams object
+                     value={searchParams.type}
+                     onChange={handleInputChange}
+                     label="Type"
+                 >
+                   <MenuItem value="office-doc">
+                     Office Document (Word, Excel)
+                   </MenuItem>
+                   <MenuItem value="text-file">Text File</MenuItem>
+                   <MenuItem value="archive">Zip/Rar File</MenuItem>
+                   <MenuItem value="pdf">PDF</MenuItem>
+                   <MenuItem value="video">Video</MenuItem>
+                 </Select>
+               </FormControl>
+
+               <FormControl fullWidth margin="normal">
+                 <InputLabel id="owner-select-label">Owner</InputLabel>
+                 <Select
+                     labelId="owner-select-label"
+                     name="owner"
+                     value={searchParams.owner}
+                     onChange={handleInputChange}
+                     label="Owner"
+                 >
+                   <MenuItem></MenuItem>
+                 </Select>
+               </FormControl>
+
+               <TextField
+                   name="hasTheWords"
+                   label="Has the words"
+                   fullWidth
+                   margin="normal"
+                   value={searchParams.hasTheWords}
+                   onChange={handleInputChange}
+               />
+
+               <TextField
+                   name="itemName"
+                   label="Item name"
+                   fullWidth
+                   margin="normal"
+                   value={searchParams.itemName}
+                   onChange={handleInputChange}
+               />
+
+               <FormControl fullWidth margin="normal">
+                 <InputLabel id="location-select-label">Location</InputLabel>
+                 <Select
+                     labelId="location-select-label"
+                     name="location"
+                     value={searchParams.location}
+                     onChange={handleInputChange}
+                     label="Location"
+                 >
+                   <MenuItem></MenuItem>
+                 </Select>
+               </FormControl>
+
+               <FormControlLabel
+                   control={
+                     <Checkbox
+                         name="starred"
+                         checked={searchParams.starred}
+                         onChange={handleInputChange}
+                     />
+                   }
+                   label="Starred"
+               />
+               <FormControlLabel
+                   control={
+                     <Checkbox
+                         name="inTrash"
+                         checked={searchParams.inTrash}
+                         onChange={handleInputChange}
+                     />
+                   }
+                   label="In trash"
+               />
+
+               <Box mt={2} display="flex" justifyContent="space-between">
+                 <Button variant="outlined" onClick={handleReset}>
+                   Reset
+                 </Button>
+                 <Button
+                     variant="contained"
+                     color="primary"
+                     onClick={handleSearch}
+                 >
+                   Search
+                 </Button>
+               </Box>
+             </DialogContent>
+           </Dialog>
+
+           <br/>
+
+           <div className={classes.filterOptions}>
+             <div className={classes.suggestedContainer}>
+               <Typography className={classes.suggestedText}>Suggested</Typography>
+
+               {/* Files and Folders buttons */}
+               <ToggleButtonGroup exclusive aria-label="files and folders">
+                 <ToggleButton
+                     value="files"
+                     aria-label="files"
+                     className={classes.fileFolderButton}
+                     style={{
+                       backgroundColor:
+                           activeButton === "files" ? "#c2e7ff" : "white",
+                     }}
+                     onClick={() => handleToggleButtonClick("files")}
+                 >
+                   {activeButton === "files" ? (
+                       <DoneIcon/>
+                   ) : (
+                       <ArticleOutlinedIcon/>
+                   )}
+                   <Typography style={{marginLeft: 8, textTransform: "none"}}>
+                     Files
+                   </Typography>
+                 </ToggleButton>
+
+                 {/* Separator between Files and Folders buttons */}
+                 <div className={classes.verticalSeparator}></div>
+
+                 <ToggleButton
+                     value="folders"
+                     aria-label="folders"
+                     className={classes.fileFolderButton}
+                     style={{
+                       backgroundColor:
+                           activeButton === "folders" ? "#c2e7ff" : "white",
+                     }}
+                     onClick={() => handleToggleButtonClick("folders")}
+                 >
+                   {activeButton === "folders" ? (
+                       <DoneIcon/>
+                   ) : (
+                       <FolderOpenOutlinedIcon/>
+                   )}
+                   <Typography style={{marginLeft: 8, textTransform: "none"}}>
+                     Folders
+                   </Typography>
+                 </ToggleButton>
+               </ToggleButtonGroup>
+
+               {/* Layout buttons */}
+               <ToggleButtonGroup exclusive aria-label="layout buttons">
+                 <ToggleButton
+                     value="list"
+                     aria-label="list"
+                     className={classes.layoutButton}
+                     style={{
+                       backgroundColor:
+                           activeLayout === "list" ? "#c2e7ff" : "white",
+                     }}
+                     onClick={() => handleLayoutButtonClick("list")}
+                 >
+                   {activeLayout === "list" && <DoneIcon/>}
+                   <MenuOutlinedIcon/>
+                 </ToggleButton>
+
+                 {/* Separator between List and Module buttons */}
+                 <div className={classes.verticalSeparator}></div>
+
+                 <ToggleButton
+                     value="module"
+                     aria-label="module"
+                     className={classes.layoutButton}
+                     style={{
+                       backgroundColor:
+                           activeLayout === "module" ? "#c2e7ff" : "white",
+                     }}
+                     onClick={() => handleLayoutButtonClick("module")}
+                 >
+                   {activeLayout === "module" && <DoneIcon/>}
+                   <GridViewOutlinedIcon/>
+                 </ToggleButton>
+               </ToggleButtonGroup>
+             </div>
+
+           </div>
+           {activeLayout === 'list' && (
+               <div className={classes.listLayout}>
+                 <Typography className={classes.nameBold}>Name</Typography>
+                 <div className={classes.listLayoutItems}>
+                   <Typography className={classes.listLayoutItem}>Date Uploaded</Typography>
+                   <Typography className={classes.listLayoutItem}>Owner</Typography>
+                   <Typography className={classes.listLayoutItem}>Location</Typography>
+                 </div>
+               </div>
+           )}
+
+           {activeLayout === 'list' ? (
+               <>
+                 <div className={classes.fileList}>
+                   {
+                     loading ? <div>
+                       <Skeleton height={"80px"}/>
+                       <Skeleton height={"80px"}/>
+                       <Skeleton height={"80px"} width={"700px"}/>
+                     </div> : <div>
+                       {selectedItemType === "files" ? files.length === 0 ? <Typography>
+                                 No files have been created yet, feel free to create some!
+                               </Typography> :
+                               currentPage === "starred" ?
+                                   <StarredFiles
+                                       files={sortFiles(files)}
+                                       user={user}
+                                       classes={classes}
+                                       handleContextMenu={handleContextMenu}
+                                       getFileIcon={getFileIcon}
+                                       resetType={resetType}
+                                       fetchFilesFolders={fetchFilesFolders}
+                                   /> :
+                                   currentPage === "trashed" ? <TrashedFiles
+                                       files={sortFiles(files)}
+                                       user={user}
+                                       classes={classes}
+                                       handleContextMenu={handleContextMenu}
+                                       getFileIcon={getFileIcon}
+                                       resetType={resetType}
+                                       fetchFilesFolders={fetchFilesFolders}
+                                       selectedFiles={selectedFiles}
+                                       handleFileSelect={handleFileSelect}
+                                   /> : sortFiles(files).filter((file) => file.type !== "trashed").map(file => (
+                                       <div key={file.file_id}
+                                            className={classes.fileItem}
+                                            onContextMenu={handleContextMenu(file)}
+                                            onClick={() => handleFileSelect(file)}
+                                            style={{
+                                              backgroundColor: selectedFiles.indexOf(file) !== -1 ? "#c2e7ff" : "inherit",
+                                            }}>
+                                         <div className={classes.fileIcon}>
+                                           {getFileIcon(file.mime_type)}
+                                         </div>
+                                         <Typography className={classes.fileName}>{file.name}</Typography>
+                                         <div className={classes.fileDetails}>
+                                           <Typography className={classes.fileDetailsItem} style={{
+                                             marginRight: "20px"
+                                           }}>{new Date(file.updated_at).toLocaleString()}</Typography>
+                                           <Avatar style={{
+                                             marginRight: "60px"
+                                           }}>
+                                             {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
+                                           </Avatar>
+                                           <Typography style={{
+                                             marginRight: "178px"
+                                           }}>My Drive</Typography>
+                                         </div>
+                                         <IconButton onClick={handleContextMenu(file)}>
+                                           <MoreVertIcon/>
+                                         </IconButton>
+                                       </div>
+                                   ))
+                           :
+                           sortFiles(folders).map((folder) => (
+                               <div key={folder.folder_id} className={classes.fileItem}
+                                    onContextMenu={handleContextMenu(folder)}>
+                                 <div className={classes.fileIcon}>
+                                   {getFolderIcon(folder.folder_name)}
+                                 </div>
+                                 <Typography className={classes.fileName}>{folder.folder_name}</Typography>
+                                 <div className={classes.fileDetails}>
+                                   <Typography className={classes.fileDetailsItem} style={{
+                                     marginRight: "20px"
+                                   }}>{new Date(folder.updated_at).toLocaleString()}</Typography>
+                                   <Avatar style={{
+                                     marginRight: "60px"
+                                   }}>
+                                     {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
+                                   </Avatar>
+                                   <Typography style={{
+                                     marginRight: "178px"
+                                   }}>My Drive</Typography>
+                                 </div>
+                                 <IconButton onClick={handleContextMenu(folder)}>
+                                   <MoreVertIcon/>
+                                 </IconButton>
+                               </div>
+                           ))}
+                     </div>
+                   }
+                 </div>
+               </>
+           ) : (
+               <div className={classes.gridContainer}>
+                 {selectedItemType === 'files'
+                     ? files.map((file) => (
+                         <div key={file.file_id} className={classes.gridItem} onContextMenu={handleContextMenu(file)}>
+                           <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
+                           <div className={classes.gridName}>{file.name}</div>
+                           <IconButton onClick={handleContextMenu(file)}>
+                             <MoreVertIcon/>
+                           </IconButton>
+                         </div>
+                     ))
+                     : folders.map((folder) => (
+                         <div key={folder.folder_id} className={classes.gridItem}
+                              onContextMenu={handleContextMenu(folder)}>
+                           <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
+                           <div className={classes.gridName}>{folder.folder_name}</div>
+                           <IconButton onClick={handleContextMenu(folder)}>
+                             <MoreVertIcon/>
+                           </IconButton>
+                         </div>
+                     ))}
+               </div>
+           )}
+         </main>
+         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => {
+           handleClose();
+           if (anchorEl && anchorEl.parentNode) {
+             anchorEl.parentNode.removeChild(anchorEl);
+           }
+         }}>
+           {selectedFiles.length >= 2 ? (
+               <>
+                 <MenuItem onClick={handleDownloadSelectedFiles}>Download</MenuItem>
+                 <MenuItem onClick={handleStarSelectedFiles}>Star</MenuItem>
+                 <MenuItem onClick={handleDeleteSelectedFiles}>Delete</MenuItem>
+               </>
+           ) : (
+               <>
+                 <MenuItem onClick={handleShareClick}>Share</MenuItem>
+                 <ShareDialog
+                     open={shareDialogOpen}
+                     handleClose={handleShareClose}
+                     fileId={selectedObj?._id}
+                 />
+                 <MenuItem onClick={handleDownload}>Download</MenuItem>
+                 <MenuItem onClick={handleRenameClick}>Rename</MenuItem>
+                 <RenameDialog
+                     open={renameDialogOpen}
+                     handleClose={handleRenameClose}
+                     handleRename={handleRename}
+                 />
+                 <MenuItem onClick={handleStar}>Star</MenuItem>
+                 <MenuItem onClick={handleDeleteFile}>Delete</MenuItem>
+                 <MenuItem onClick={handleViewDetailsClick}>View Details</MenuItem>
+                 <DetailsDialog
+                  viewDetailsDialogOpen={viewDetailsDialogOpen}
+                  setViewDetailsDialogOpen={setViewDetailsDialogOpen}
+                  selectedObj={selectedObj}
+                  updateFileDescription={updateFileDescription}
+                  setSelectedObj={setSelectedObj}
+                  user={user}
+                 />
+               </>
+           )}
+         </Menu>
+       </div>
+   );
+ };
 
 export default Dashboard;
