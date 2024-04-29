@@ -571,7 +571,7 @@ const handleUploadDateClose = () => {
     } else if (uploadDateOption === 'ascending') {
       const aDate = new Date(a.created_at);
       const bDate = new Date(b.created_at);
-      return aDate.getTime() - bDate.getTime(); 
+      return aDate.getTime() - bDate.getTime();
        // Sort based on timestamp (including minutes and seconds)
     } else if (uploadDateOption === 'descending') {
       const aDate = new Date(a.created_at);
@@ -583,7 +583,7 @@ const handleUploadDateClose = () => {
 
   return sortedFiles;
 };
-  
+
   const fetchFilesFolders = () => {
     handleDashboardApi().then((response) => {
       console.log("fetched");
@@ -1195,16 +1195,16 @@ const handleTypeClose = () => {
         folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-  
+
     if (selectedType) {
       filteredFiles = filteredFiles.filter((file) => file.mime_type === selectedType);
     }
-  
+
     if (selectedPerson) {
       filteredFiles = filteredFiles.filter((file) => file.owner === selectedPerson);
       filteredFolders = filteredFolders.filter((folder) => folder.owner === selectedPerson);
     }
-  
+
     if (selectedLocation) {
       if (selectedLocation === "Anywhere in Drive") {
         // No additional filtering needed
@@ -1215,7 +1215,7 @@ const handleTypeClose = () => {
         filteredFolders = filteredFolders.filter((folder) => folder.sharedWith?.length > 0);
       }
     }
-  
+
     if (selectedModifiedDate) {
       filteredFiles = filteredFiles.filter((file) => {
         const fileDate = new Date(file.updated_at);
@@ -1232,7 +1232,7 @@ const handleTypeClose = () => {
         }
         return false;
       });
-  
+
       filteredFolders = filteredFolders.filter((folder) => {
         const folderDate = new Date(folder.updated_at);
         if (selectedModifiedDate === "Today") {
@@ -1249,7 +1249,7 @@ const handleTypeClose = () => {
         return false;
       });
     }
-  
+
     if (nameOption !== null) {
       filteredFiles = filteredFiles.sort((a, b) => {
         if (nameOption === 'asc') {
@@ -1259,7 +1259,7 @@ const handleTypeClose = () => {
         }
         return 0;
       });
-  
+
       filteredFolders = filteredFolders.sort((a, b) => {
         if (nameOption === 'asc') {
           return a.folder_name.localeCompare(b.folder_name);
@@ -1269,7 +1269,7 @@ const handleTypeClose = () => {
         return 0;
       });
     }
-  
+
     if (sizeOption !== null) {
       filteredFiles = filteredFiles.sort((a, b) => {
         if (sizeOption === 'largest') {
@@ -1280,7 +1280,7 @@ const handleTypeClose = () => {
         return 0;
       });
     }
-  
+
     if (uploadDateOption !== null) {
       filteredFiles = filteredFiles.sort((a, b) => {
         if (uploadDateOption === 'ascending') {
@@ -1290,7 +1290,7 @@ const handleTypeClose = () => {
         }
         return 0;
       });
-  
+
       filteredFolders = filteredFolders.sort((a, b) => {
         if (uploadDateOption === 'ascending') {
           return new Date(b.created_at) - new Date(a.created_at);
@@ -1315,7 +1315,7 @@ const handleTypeClose = () => {
     files,
     folders,
   ]);
-  
+
 
   const handleChangeSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -1354,6 +1354,24 @@ const handleTypeClose = () => {
       console.log('Error resetting file:', e);
     }
   }
+
+  async function handleFolderClick(folder_id) {
+    try {
+      console.log(folder_id)
+      const response = await axios.get(`http://localhost:3000/api/dashboard/${folder_id}`, {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        },
+      });
+      console.log(response.data)
+      setFiles(response.data.userFiles);
+      setFolders(response.data.userFolders);
+    } catch (error) {
+        console.error('Error retrieving files');
+    }
+  }
+
 
   return (
     <div className={classes.root}>
@@ -2054,7 +2072,7 @@ const handleTypeClose = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </div>
-  
+
         </div>
         {activeLayout === 'list' && (
   <div className={classes.listLayout}>
@@ -2131,13 +2149,13 @@ const handleTypeClose = () => {
             ))
     :
     sortFiles(folders).map((folder) => (
-    <div key={folder.folder_id} className={classes.fileItem} onContextMenu={handleContextMenu(folder)}>
-      <div className={classes.fileIcon}>
-        {getFolderIcon(folder.folder_name)}
-      </div>
-      <Typography className={classes.fileName}>{folder.folder_name}</Typography>
-      <div className={classes.fileDetails}>
-        <Typography className={classes.fileDetailsItem} style={{
+    <div key={folder.folder_id} className={classes.fileItem} onClick={() => handleFolderClick(folder._id)} onContextMenu={handleContextMenu(folder)}>
+        <div className={classes.fileIcon}>
+            {getFolderIcon(folder.folder_name)}
+        </div>
+        <Typography className={classes.fileName}>{folder.folder_name}</Typography>
+        <div className={classes.fileDetails}>
+            <Typography className={classes.fileDetailsItem} style={{
           marginRight: "20px"
         }}>{new Date(folder.updated_at).toLocaleString()}</Typography>
         <Avatar style={{
