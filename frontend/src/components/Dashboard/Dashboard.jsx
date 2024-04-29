@@ -358,37 +358,42 @@ const useStyles = makeStyles((theme) => ({
   modalContainer: {
     position: "relative",
     padding: theme.spacing(3),
-    maxWidth: 600,
-    width: 550,
-    height: 350,
+    maxWidth: 350,
+    width: 350,
+    height: 'auto',
     background: '#e9eef6',
-    
-
-    margin: "0 auto", // Center the modal horizontally
-
+    borderRadius: '10px',
+    boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)',
+    margin: "0 auto",
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
   },
   closeButton: {
     position: "absolute",
     top: theme.spacing(1),
     right: theme.spacing(1),
-    color: 'black',
-    "&:hover": {
-      color: theme.palette.error.main,
+    color: 'rgba(0, 0, 0, 0.54)',
+    '&:hover': {
+      color: 'rgba(0, 0, 0, 0.87)',
     },
   },
   email: {
-    textAlign: "center",
     marginBottom: theme.spacing(2),
-    fontFamily: 'productSans',
+    fontWeight: 'bold',
+    fontSize: '1.1rem',
   },
   profilePicture: {
     width: 100,
     height: 100,
-    margin: "0 auto",
     marginBottom: theme.spacing(2),
+    fontSize: '3rem',
+    backgroundColor: '#c2185b',
   },
   greeting: {
-    textAlign: "center",
+    fontSize: '1.75rem',
   },
   gridContainer: {
     display: 'flex',
@@ -1236,9 +1241,13 @@ const handleTypeClose = () => {
     >
       <CloseIcon />
     </IconButton>
-    <h2 className={classes.email}>nourzamel35@gmail.com</h2>
+    <Typography variant="subtitle1" className={classes.email}>
+      nourzamel35@gmail.com
+    </Typography>
     <Avatar className={classes.profilePicture}>NZ</Avatar>
-    <p className={classes.greeting}>Hi, Nour Zamel!</p>
+    <Typography variant="h6" className={classes.greeting}>
+      Hi, Nebula!
+    </Typography>
   </DialogContent>
 </Dialog>
 
