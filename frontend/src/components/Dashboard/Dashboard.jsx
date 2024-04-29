@@ -1190,14 +1190,16 @@ const handleTypeClose = () => {
   useEffect(() => {
     let filteredFiles = files;
     let filteredFolders = folders;
-  
-    if (searchTerm) {
+
+    if (searchTerm !== "") {
       filteredFiles = filteredFiles.filter((file) =>
-        file.name.toLowerCase().includes(searchTerm.toLowerCase())
+          file.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       filteredFolders = filteredFolders.filter((folder) =>
-        folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
+          folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
       );
+    } else {
+      fetchFilesFolders()
     }
 
     if (selectedType) {
@@ -1315,9 +1317,7 @@ const handleTypeClose = () => {
     selectedModifiedDate,
     nameOption,
     sizeOption,
-    uploadDateOption,
-    files,
-    folders,
+    uploadDateOption
   ]);
 
 
