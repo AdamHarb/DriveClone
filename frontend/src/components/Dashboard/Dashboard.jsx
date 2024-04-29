@@ -526,6 +526,7 @@ const handleUploadDateClose = () => {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("default");
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [dir, setdir] = useState();
 
   useEffect(async () => {
     await fetchUser();
@@ -594,6 +595,7 @@ const handleUploadDateClose = () => {
       setLoading(false);
     });
   };
+
   useEffect(async () => {
     fetchFilesFolders();
   }, [])
@@ -612,6 +614,7 @@ const handleUploadDateClose = () => {
         console.error('Error during login:', error);
     }
   }
+
   const handleDashboardApi = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/dashboard', {
@@ -639,15 +642,16 @@ const handleUploadDateClose = () => {
       }
 
       console.log(file);
-
       const formData = new FormData();
       formData.append('file', file);
-
+      if(dir){
+        formData.append('parent_id', dir);
+      }
       const response = await axios.post('http://localhost:3000/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${cookies.token}`
-        }
+        },
       }).then((r) => {
         fetchFilesFolders()
         fetchUser()
@@ -659,7 +663,9 @@ const handleUploadDateClose = () => {
 
   const handleCreateFolder = async (folderName) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/create-folder', {}, {
+      const parentId = dir ? dir : null;
+      console.log(parentId)
+      const response = await axios.post('http://localhost:3000/api/create-folder', {parent_id:parentId}, {
             headers: {
               'Authorization': `Bearer ${cookies.token}`
             }
@@ -1354,6 +1360,25 @@ const handleTypeClose = () => {
       console.log('Error resetting file:', e);
     }
   }
+
+  async function handleFolderClick(folder_id) {
+    try {
+      console.log(folder_id)
+      const response = await axios.get(`http://localhost:3000/api/dashboard/${folder_id}`, {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        },
+      });
+      console.log(response.data)
+      setFiles(response.data.userFiles);
+      setFolders(response.data.userFolders);
+      setdir(folder_id)
+    } catch (error) {
+        console.error('Error retrieving files');
+    }
+  }
+
 
   return (
     <div className={classes.root}>
@@ -2076,57 +2101,64 @@ const handleTypeClose = () => {
           <Skeleton height={"80px"} />
           <Skeleton height={"80px"} width={"700px"} />
         </div> : <div>
-        {selectedItemType === "files" ? files.length === 0 ? <Typography>
-  No files have been created yet, feel free to create some!
-        </Typography> :
-        currentPage === "starred" ?
-            <StarredFiles
-                files={sortFiles(files)}
-                user={user}
-                classes={classes}
-                handleContextMenu={handleContextMenu}
-                getFileIcon={getFileIcon}
-                resetType={resetType}
-                fetchFilesFolders={fetchFilesFolders}
-            /> :
-            currentPage === "trashed" ? <TrashedFiles
-                files={sortFiles(files)}
-                user={user}
-                classes={classes}
-                handleContextMenu={handleContextMenu}
-                getFileIcon={getFileIcon}
-                resetType={resetType}
-                fetchFilesFolders={fetchFilesFolders}
-                selectedFiles={selectedFiles}
-                handleFileSelect={handleFileSelect}
-            /> : sortFiles(files).filter((file) => file.type !== "trashed").map(file => (
-                <div key={file.file_id}
-                     className={classes.fileItem}
-                     onContextMenu={handleContextMenu(file)}
-                     onClick={() => handleFileSelect(file)}
-                     style={{
-                  backgroundColor: selectedFiles.indexOf(file) !== -1 ? "#c2e7ff" : "inherit",
-                }}>
-                  <div className={classes.fileIcon}>
-                    {getFileIcon(file.mime_type)}
-                  </div>
-                  <Typography className={classes.fileName}>{file.name}</Typography>
-                  <div className={classes.fileDetails}>
-                    <Typography className={classes.fileDetailsItem} style={{
-                      marginRight: "20px"
-                    }}>{new Date(file.updated_at).toLocaleString()}</Typography>
-                    <Avatar style={{
-                      marginRight: "60px"
-                    }}>
-                      {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
-                    </Avatar>
-                    <Typography style={{
-                      marginRight: "178px"
-                    }}>My Drive</Typography>
-                  </div>
-                  <IconButton onClick={handleContextMenu(file)}>
-                    <MoreVertIcon />
-                  </IconButton>
+          {selectedItemType === "files" ? files.length === 0 ? <Typography>
+            No files have been created yet, feel free to create some!
+                  </Typography> :
+                  currentPage === "starred" ?
+                      <StarredFiles
+                          files={files}
+                          user={user}
+                          classes={classes}
+                          handleContextMenu={handleContextMenu}
+                          getFileIcon={getFileIcon}
+                          resetType={resetType}
+                          fetchFilesFolders={fetchFilesFolders}
+                      /> :
+                      currentPage === "trashed" ? <TrashedFiles
+                          files={files}
+                          user={user}
+                          classes={classes}
+                          handleContextMenu={handleContextMenu}
+                          getFileIcon={getFileIcon}
+                          resetType={resetType}
+                          fetchFilesFolders={fetchFilesFolders}
+                          selectedFiles={selectedFiles}
+                          handleFileSelect={handleFileSelect}
+                      /> : files.filter((file) => file.type !== "trashed").map(file => (
+                          <div key={file.file_id}
+                               className={classes.fileItem}
+                               onContextMenu={handleContextMenu(file)}
+                               onClick={() => handleFileSelect(file)}
+                               style={{
+                            backgroundColor: selectedFiles.indexOf(file) !== -1 ? "#c2e7ff" : "inherit",
+                          }}>
+                            <div className={classes.fileIcon}>
+                              {getFileIcon(file.mime_type)}
+                            </div>
+                            <Typography className={classes.fileName}>{file.name}</Typography>
+                            <div className={classes.fileDetails}>
+                              <Typography className={classes.fileDetailsItem} style={{
+                                marginRight: "20px"
+                              }}>{new Date(file.updated_at).toLocaleString()}</Typography>
+                              <Avatar style={{
+                                marginRight: "60px"
+                              }}>
+                                {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
+                              </Avatar>
+                              <Typography style={{
+                                marginRight: "178px"
+                              }}>My Drive</Typography>
+                            </div>
+                            <IconButton onClick={handleContextMenu(file)}>
+                              <MoreVertIcon />
+                            </IconButton>
+                          </div>
+                      ))
+              :
+              folders.map((folder) => (
+              <div key={folder.folder_id} className={classes.fileItem} onClick={() => handleFolderClick(folder._id)} onContextMenu={handleContextMenu(folder)}>
+                <div className={classes.fileIcon}>
+                  {getFolderIcon(folder.folder_name)}
                 </div>
             ))
     :
