@@ -75,7 +75,11 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'; // for PDFs
 import ArticleIcon from '@mui/icons-material/Article';
 import MovieIcon from '@mui/icons-material/Movie';
 import FolderZipIcon from '@mui/icons-material/FolderZip';
+import TextFieldsIcon from "@mui/icons-material/TextFields";
+import PersonIcon from "@mui/icons-material/Person";
+import {DialogActions} from '@mui/material';
 
+import DateRangeIcon from '@mui/icons-material/DateRange';
 
 
 
@@ -456,6 +460,7 @@ const Dashboard = () => {
   const [locationAnchorEl, setLocationAnchorEl] = useState(null);
   const [selectedModifiedDate, setSelectedModifiedDate] = useState(null);
   const [modifiedAnchorEl, setModifiedAnchorEl] = useState(null);
+  const [viewDetailsDialogOpen, setViewDetailsDialogOpen] = useState(false);
   const [personAnchorEl, setPersonAnchorEl] = useState(null);
   const [searchParams, setSearchParams] = useState({
     type: "",
@@ -538,6 +543,10 @@ const Dashboard = () => {
         console.error('Error during login:', error);
     }
   }
+
+  const handleViewDetailsClick = () => {
+    setViewDetailsDialogOpen(true);
+  };
 
   const handleUploadFile = async (file) => {
     try {
@@ -1948,9 +1957,45 @@ const handleTypeClose = () => {
               />
               <MenuItem onClick={handleStar}>Star</MenuItem>
               <MenuItem onClick={handleDeleteFile}>Delete</MenuItem>
+              <MenuItem onClick={handleViewDetailsClick}>View Details</MenuItem>
             </>
         )}
       </Menu>
+      <Dialog open={viewDetailsDialogOpen} onClose={() => setViewDetailsDialogOpen(false)}>
+  <DialogTitle>File Details</DialogTitle>
+  <DialogContent>
+  {selectedObj ? (
+    <>
+      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
+        <DescriptionIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Type: {selectedObj.mime_type}
+      </Typography>
+      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
+        <TextFieldsIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Size: {selectedObj.size} KB
+      </Typography>
+      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
+        <PersonIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Owner: {selectedObj.owner}
+      </Typography>
+      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
+        <FolderIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Location: My Drive
+      </Typography>
+      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
+        <DateRangeIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Upload Date: {new Date(selectedObj.created_at).toLocaleString()}
+      </Typography>
+      <TextField
+        label="Description"
+        multiline
+        rows={4}
+        fullWidth
+        value={selectedObj.description || ''} // Set the initial value to selectedObj.description or an empty string
+        onChange={(e) => setSelectedObj({ ...selectedObj, description: e.target.value })}
+      />
+    </>
+  ) : (
+    <Typography variant="body1">No file or folder selected.</Typography>
+  )}
+</DialogContent>
+  
+</Dialog>
     </div>
   );
 };
