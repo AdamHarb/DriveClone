@@ -86,6 +86,7 @@ import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
 import RenameDialog from "./RenameDialog.jsx";
+import ShareDialog from "./ShareDialog.jsx";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -465,6 +466,7 @@ const Dashboard = () => {
     storage_used: 0
   });
   const [loading, setLoading] = useState(true);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   useEffect(async () => {
     await fetchUser();
@@ -716,6 +718,14 @@ const Dashboard = () => {
     } catch (e) {
       console.error('Error during file renaming:', e);
     }
+  };
+
+  const handleShareClick = () => {
+    setShareDialogOpen(true);
+  };
+
+  const handleShareClose = () => {
+    setShareDialogOpen(false);
   };
 
   const handlePersonClick = (event) => {
@@ -1703,7 +1713,12 @@ const handleTypeClose = () => {
 )}
       </main>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-        <MenuItem onClick={handleClose}>Share</MenuItem>
+        <MenuItem onClick={handleShareClick}>Share</MenuItem>
+        <ShareDialog
+            open={shareDialogOpen}
+            handleClose={handleShareClose}
+            fileId={selectedObj?._id}
+        />
         <MenuItem onClick={handleDownload}>Download</MenuItem>
         <MenuItem onClick={handleRenameClick}>Rename</MenuItem>
         <RenameDialog
