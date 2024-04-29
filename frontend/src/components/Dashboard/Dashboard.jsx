@@ -763,8 +763,23 @@ const handleTypeClose = () => {
     setActiveListButton(buttonType);
   };
 
-  const handleClick = (obj) => (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleContextMenu = (obj) => (event) => {
+    event.preventDefault(); // Prevent the default right-click behavior
+
+    const cursorPosition = {
+      left: event.clientX,
+      top: event.clientY,
+    };
+
+    const virtualElement = document.createElement('div');
+    virtualElement.style.position = 'fixed';
+    virtualElement.style.left = `${cursorPosition.left}px`;
+    virtualElement.style.top = `${cursorPosition.top}px`;
+    virtualElement.style.width = '1px';
+    virtualElement.style.height = '1px';
+    document.body.appendChild(virtualElement);
+
+    setAnchorEl(virtualElement);
     setSelectedObj(obj);
   };
 
@@ -935,7 +950,7 @@ const handleTypeClose = () => {
                 <div className={classes.gridDetails}>
                   <div className={classes.gridName}>{file.name}</div>
                 </div>
-                <IconButton className={classes.kebabMenu} onClick={handleClick(file)}>
+                <IconButton className={classes.kebabMenu} onClick={handleContextMenu(file)}>
                   <MoreVertIcon />
                 </IconButton>
               </div>
@@ -1659,7 +1674,7 @@ const handleTypeClose = () => {
             No files have been created yet, feel free to create some!
                   </Typography> :
                   files.map(file => (
-                      <div key={file.file_id} className={classes.fileItem}>
+                      <div key={file.file_id} className={classes.fileItem} onContextMenu={handleContextMenu(file)}>
                         <div className={classes.fileIcon}>
                           {getFileIcon(file.mime_type)}
                         </div>
@@ -1669,14 +1684,14 @@ const handleTypeClose = () => {
                           <Typography>{handleSharedWith(file)} people</Typography>
                           <Typography>{file.user_id}</Typography>
                         </div>
-                        <IconButton onClick={handleClick(file)}>
+                        <IconButton onClick={handleContextMenu(file)}>
                           <MoreVertIcon />
                         </IconButton>
                       </div>
                   ))
               :
               folders.map((folder) => (
-              <div key={folder.folder_id} className={classes.fileItem}>
+              <div key={folder.folder_id} className={classes.fileItem} onContextMenu={handleContextMenu(folder)}>
                 <div className={classes.fileIcon}>
                   {getFolderIcon(folder.folder_name)}
                 </div>
@@ -1688,7 +1703,7 @@ const handleTypeClose = () => {
                   <Typography>{handleSharedWith(folder)} people</Typography>
                   <Typography>{folder.user_id}</Typography>
                 </div>
-                <IconButton onClick={handleClick(folder)}>
+                <IconButton onClick={handleContextMenu(folder)}>
                   <MoreVertIcon />
                 </IconButton>
               </div>
@@ -1704,7 +1719,7 @@ const handleTypeClose = () => {
           <div key={file.file_id} className={classes.gridItem}>
             <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
             <div className={classes.gridName}>{file.name}</div>
-            <IconButton onClick={handleClick(file)}>
+            <IconButton onClick={handleContextMenu(file)}>
               <MoreVertIcon />
             </IconButton>
           </div>
@@ -1713,7 +1728,7 @@ const handleTypeClose = () => {
           <div key={folder.folder_id} className={classes.gridItem}>
             <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
             <div className={classes.gridName}>{folder.folder_name}</div>
-            <IconButton onClick={handleClick(folder)}>
+            <IconButton onClick={handleContextMenu(folder)}>
               <MoreVertIcon />
             </IconButton>
           </div>
@@ -1721,7 +1736,12 @@ const handleTypeClose = () => {
   </div>
 )}
       </main>
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => {
+        handleClose();
+        if (anchorEl && anchorEl.parentNode) {
+          anchorEl.parentNode.removeChild(anchorEl);
+        }
+      }}>
         <MenuItem onClick={handleShareClick}>Share</MenuItem>
         <ShareDialog
             open={shareDialogOpen}
