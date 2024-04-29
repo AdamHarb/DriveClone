@@ -694,7 +694,7 @@ const Dashboard = () => {
   const handleLocationClose = () => {
     setLocationAnchorEl(null);
   };
-  const handleLocationSelect = (location) => {
+  const  handleLocationSelect = (location) => {
     if (location === null) {
       setSelectedLocation(null);
       fetchFilesFolders(); // Fetch files and folders when location is deselected
@@ -997,7 +997,7 @@ const handleTypeClose = () => {
         (selectedPerson === null || file.sharedWith?.includes(selectedPerson)) &&
         (selectedLocation === null ||
           selectedLocation === "Anywhere in Drive" ||
-          (selectedLocation === "My Drive" && file.location === "My Drive") ||
+          (selectedLocation === "My Drive") ||
           (selectedLocation === "Shared with me" && file.sharedWith?.length > 0)) &&
         (selectedModifiedDate === null ||
           (selectedModifiedDate === "Today" && isToday(new Date(file.updated_at))) ||
