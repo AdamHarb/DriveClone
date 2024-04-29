@@ -41,13 +41,13 @@ exports.createFolder = async (req, res) => {
     try {
         user_id = req.user._id;
         const {folder_name, parent_id} = req.body;
-
         const folderCount = await Folder.countDocuments({user_id: user_id});
 
         const folder = new Folder({
             user_id,
             folder_name: folder_name || `Folder ${folderCount + 1} `,
-            parent_id
+            parent_id,
+            shared_with: [],
         });
 
         await folder.save();
@@ -73,6 +73,25 @@ exports.deleteFolder = async (req, res) => {
         res.status(200).json({message: "Folder deleted successfully"});
     }
     catch (err) {
+        console.error(err);
+        res.status(500).json({message: "Internal server error"});
+    }
+}
+
+exports.shareFolder = async (req, res) => {
+try {
+        const folder_id = req.body.folderId;
+        const user_id = req.user._id;
+        const shared_with = req.body.shared_with;
+
+        const folder = await Folder.findOneAndUpdate({user_id: user_id, _id: folder_id}, {$push: {shared_with: shared_with}}, {new: true});
+
+        if (!folder) {
+            return res.status(404).json({message: "Folder not found"});
+        }
+
+        res.status(200).json(folder);
+    } catch (err) {
         console.error(err);
         res.status(500).json({message: "Internal server error"});
     }
