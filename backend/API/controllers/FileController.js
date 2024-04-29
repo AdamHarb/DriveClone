@@ -31,7 +31,6 @@ exports.uploadFile = async (req, res) => {
 		});
 
 		await file.save();
-
 		res.status(201).json({ message: "File uploaded successfully", fileId });
 	} catch (err) {
 		console.error(err);
@@ -202,3 +201,28 @@ exports.starFile = async (req, res) => {
 		res.status(500).json({ message: "Internal server error" });
 	}
 }
+
+exports.viewFile = async (req, res) => {
+	try {
+		const fileId = new ObjectId(req.params.fileId);
+
+		const file = await File.findOne({ _id: fileId });
+
+		if (!file) {
+			return res.status(404).json({ message: "File not found" });
+		}
+
+		const bucket = await getGridFSBucket();
+		const downloadStream = bucket.openDownloadStream(file.file_id);
+
+		res.set({
+			'Content-Type': file.mime_type,
+			'Content-Disposition': `inline; filename="${file.name}"`,
+		});
+
+		downloadStream.pipe(res);
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ message: "Internal server error" });
+	}
+};
