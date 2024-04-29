@@ -1716,7 +1716,7 @@ const handleTypeClose = () => {
   <div className={classes.gridContainer}>
     {selectedItemType === 'files'
       ? files.map((file) => (
-          <div key={file.file_id} className={classes.gridItem}>
+          <div key={file.file_id} className={classes.gridItem} onContextMenu={handleContextMenu(file)} >
             <div className={classes.gridIcon}>{getFileIcon(file.mime_type)}</div>
             <div className={classes.gridName}>{file.name}</div>
             <IconButton onClick={handleContextMenu(file)}>
@@ -1725,7 +1725,7 @@ const handleTypeClose = () => {
           </div>
         ))
       : folders.map((folder) => (
-          <div key={folder.folder_id} className={classes.gridItem}>
+          <div key={folder.folder_id} className={classes.gridItem} onContextMenu={handleContextMenu(folder)} >
             <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
             <div className={classes.gridName}>{folder.folder_name}</div>
             <IconButton onClick={handleContextMenu(folder)}>
