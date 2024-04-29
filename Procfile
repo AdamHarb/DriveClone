@@ -1,1 +1,1 @@
-web: nodemon ./backend/server.js
+web: npm run start --prefix ./backend/server.js
