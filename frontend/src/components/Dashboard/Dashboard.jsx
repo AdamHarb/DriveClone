@@ -2243,29 +2243,40 @@ const handleTypeClose = () => {
   <DialogContent>
   {selectedObj ? (
     <>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <DescriptionIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Type: {selectedObj.mime_type}
+      <Typography variant="body1" style={{marginBottom: '1rem'}}>
+        <DescriptionIcon
+            style={{verticalAlign: 'middle', marginRight: '0.5rem'}}/> Type: {selectedObj.mime_type}
       </Typography>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <TextFieldsIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Size: {selectedObj.size} KB
+      <Typography variant="body1" style={{marginBottom: '1rem'}}>
+        <TextFieldsIcon style={{
+          verticalAlign: 'middle',
+          marginRight: '0.5rem'
+        }}/> Size: {Math.round(selectedObj.size / 1024 / 1024).toFixed(2)} MB
       </Typography>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <PersonIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Owner: {selectedObj.owner}
+      <Typography variant="body1" style={{marginBottom: '1rem'}}>
+        <PersonIcon style={{verticalAlign: 'middle', marginRight: '0.5rem'}}/> Owner: {user.username}
       </Typography>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <FolderIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Location: My Drive
+      <Typography variant="body1" style={{marginBottom: '1rem'}}>
+        <FolderIcon style={{verticalAlign: 'middle', marginRight: '0.5rem'}}/> Location: My Drive
       </Typography>
-      <Typography variant="body1" style={{ marginBottom: '1rem' }}>
-        <DateRangeIcon style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} /> Upload Date: {new Date(selectedObj.created_at).toLocaleString()}
+      <Typography variant="body1" style={{marginBottom: '1rem'}}>
+        <DateRangeIcon style={{verticalAlign: 'middle', marginRight: '0.5rem'}}/> Upload
+        Date: {new Date(selectedObj.uploaded_at).toLocaleString()}
       </Typography>
-      <TextField
-        label="Description"
-        multiline
-        rows={4}
-        fullWidth
-        value={selectedObj.description || ''} // Set the initial value to selectedObj.description or an empty string
-        onChange={(e) => setSelectedObj({ ...selectedObj, description: e.target.value })}
-      />
+      <form onSubmit={console.log("updated!")}>
+        <TextField
+            label="Description"
+            autoFocus
+            margin="dense"
+            type="text"
+            fullWidth
+            value={selectedObj.description || ""}
+            onChange={(e) => {
+              handleInputChange(e)
+            }}
+        />
+        <Button type="submit" color="primary">Update</Button>
+      </form>
     </>
   ) : (
     <Typography variant="body1">No file or folder selected.</Typography>
