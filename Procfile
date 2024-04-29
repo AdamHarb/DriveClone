@@ -1,1 +1,1 @@
-web: npm run start --prefix ./backend/server.js
+web: node --prefix ./backend
