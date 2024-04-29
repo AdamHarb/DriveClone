@@ -7,7 +7,8 @@ const FolderSchema = new mongoose.Schema({
     },
     user_id: { type: mongoose.Schema.Types.ObjectId , ref: 'User', required: true },
     folder_name: { type: String, required: true },
-    parent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Folder', required: false },
+    parent_id: { type: String, ref: 'Folder', required: false },
+    shared_with : [{ type: String, ref: 'User' }],
     created_at: { type: Date, required: false, default: Date.now },
     updated_at: { type: Date, required: false, default: Date.now },
     files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'File' }]

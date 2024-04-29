@@ -24,6 +24,7 @@ exports.uploadFile = async (req, res) => {
 		const file = new File({
 			user_id: req.user._id,
 			parent_id,
+			shared_with: [],
 			name: req.file.originalname,
 			mime_type: req.file.mimetype,
 			size: req.file.size,
@@ -226,3 +227,31 @@ exports.viewFile = async (req, res) => {
 		res.status(500).json({ message: "Internal server error" });
 	}
 };
+
+exports.shareFile = async (req, res) => {
+	try {
+		const {fileId, shared_with} = req.body;
+		console.log(shared_with)
+		const user = await User.findOne({username: shared_with});
+		console.log(user)
+		if (!user) {
+			return res.status(404).json({message: "User not found"});
+		}
+
+		const file = await File.findOneAndUpdate({
+			_id: fileId,
+			user_id: req.user._id
+		}, {$push: {shared_with: shared_with}}, {new: true});
+
+		if (!file) {
+			return res.status(404).json({message: "File not found"});
+		}
+
+		res.status(200).json(file);
+
+	}
+	catch (err) {
+		console.error(err);
+		res.status(500).json({message: "Internal server error"});
+	}
+}

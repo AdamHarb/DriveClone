@@ -511,6 +511,7 @@ const Dashboard = () => {
       setLoading(false);
     });
   };
+
   useEffect(async () => {
     fetchFilesFolders();
   }, [])
@@ -529,6 +530,7 @@ const Dashboard = () => {
         console.error('Error during login:', error);
     }
   }
+
   const handleDashboardApi = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/dashboard', {
