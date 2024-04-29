@@ -79,14 +79,16 @@ import FolderZipIcon from '@mui/icons-material/FolderZip';
 
 
 
-import TypeDropdown from "./TypeDropdown";
-import NewMenuDropdown from './NewMenuDropdown';
+import TypeDropdown from "./Dropdowns/TypeDropdown.jsx";
+import NewMenuDropdown from './Dropdowns/NewMenuDropdown.jsx';
 
 import {useCookies} from "react-cookie";
 import {useNavigate} from "react-router-dom";
 import axios from "axios";
-import RenameDialog from "./RenameDialog.jsx";
-import ShareDialog from "./ShareDialog.jsx";
+import RenameDialog from "./Dialogues/RenameDialog.jsx";
+import ShareDialog from "./Dialogues/ShareDialog.jsx";
+import {StarredFiles} from "./Subpages/StarredFiles.jsx";
+import {TrashedFiles} from "./Subpages/TrashedFiles.jsx";
 
 const drawerWidth = 240;
 // makestyles is from material ui . its a hook that defines CSS with JavaScript objects
@@ -472,6 +474,7 @@ const Dashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState("default");
 
   useEffect(async () => {
     await fetchUser();
@@ -577,11 +580,14 @@ const Dashboard = () => {
   }
   const handleDeleteFile = async () => {
     try {
-      const response = await axios.delete(`http://localhost:3000/api/delete-files/${selectedObj._id}`, {
+      const response = await axios.post(`http://localhost:3000/api/toggle-type`, {
+          fileId: selectedObj._id,
+          type: "trashed"
+        }, {
         headers: {
-            'Authorization': `Bearer ${cookies.token}`
+          'Authorization': `Bearer ${cookies.token}`
         }
-        }).then((r) => {
+      }).then((r) => {
           handleClose()
           fetchFilesFolders();
       });
@@ -1022,8 +1028,27 @@ const handleTypeClose = () => {
 
   const handleStar = async () => {
     try {
-      await axios.post(`http://localhost:3000/api/star-file`, {
-        fileId: selectedObj._id
+      await axios.post(`http://localhost:3000/api/toggle-type`, {
+        fileId: selectedObj._id,
+        type: "starred"
+      }, {
+        headers: {
+          withCredentials: true,
+          'Authorization': `Bearer ${cookies.token}`
+        },
+      }).then((r) => {
+        fetchFilesFolders()
+      });
+    } catch(e) {
+      console.log('Error starring file:', e);
+    }
+  }
+
+  const resetType = async (file) => {
+    try {
+      await axios.post(`http://localhost:3000/api/toggle-type`, {
+        fileId: selectedObj?._id || file?._id,
+        type: "default"
       }, {
         headers: {
           withCredentials: true,
@@ -1031,7 +1056,7 @@ const handleTypeClose = () => {
         },
       })
     } catch(e) {
-      console.log('Error starring file:', e);
+      console.log('Error resetting file:', e);
     }
   }
 
@@ -1107,7 +1132,10 @@ const handleTypeClose = () => {
               backgroundColor:
                 activeListButton === "home" ? "#c2e7ff" : "white",
             }}
-            onClick={() => handleListButtonClick("home")}
+            onClick={() => {
+              handleListButtonClick("home")
+              setCurrentPage("default")
+            }}
           >
             <ListItemIcon className={classes.icon}>
               {activeListButton === "home" ? (
@@ -1167,7 +1195,10 @@ const handleTypeClose = () => {
               backgroundColor:
                 activeListButton === "starred" ? "#c2e7ff" : "white",
             }}
-            onClick={() => handleListButtonClick("starred")}
+            onClick={() => {
+              handleListButtonClick("starred")
+              setCurrentPage("starred")
+            }}
           >
             <ListItemIcon className={classes.icon}>
               {activeListButton === "starred" ? (
@@ -1188,7 +1219,10 @@ const handleTypeClose = () => {
             style={{
               backgroundColor: activeListButton === "bin" ? "#c2e7ff" : "white",
             }}
-            onClick={() => handleListButtonClick("bin")}
+            onClick={() => {
+              handleListButtonClick("bin")
+              setCurrentPage("trashed")
+            }}
           >
             <ListItemIcon className={classes.icon}>
               {activeListButton === "bin" ? (
@@ -1686,30 +1720,48 @@ const handleTypeClose = () => {
           {selectedItemType === "files" ? files.length === 0 ? <Typography>
             No files have been created yet, feel free to create some!
                   </Typography> :
-                  files.map(file => (
-                      <div key={file.file_id} className={classes.fileItem} onContextMenu={handleContextMenu(file)}>
-                        <div className={classes.fileIcon}>
-                          {getFileIcon(file.mime_type)}
-                        </div>
-                        <Typography className={classes.fileName}>{file.name}</Typography>
-                        <div className={classes.fileDetails}>
-                          <Typography className={classes.fileDetailsItem} style={{
-                            marginRight: "20px"
-                          }}>{new Date(file.updated_at).toLocaleString()}</Typography>
-                          <Avatar style={{
-                            marginRight: "60px"
-                          }}>
-                            {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
-                          </Avatar>
-                          <Typography style={{
-                            marginRight: "178px"
-                          }}>My Drive</Typography>
-                        </div>
-                        <IconButton onClick={handleContextMenu(file)}>
-                          <MoreVertIcon />
-                        </IconButton>
-                      </div>
-                  ))
+                  currentPage === "starred" ?
+                      <StarredFiles
+                          files={files}
+                          user={user}
+                          classes={classes}
+                          handleContextMenu={handleContextMenu}
+                          getFileIcon={getFileIcon}
+                          resetType={resetType}
+                          fetchFilesFolders={fetchFilesFolders}
+                      /> :
+                      currentPage === "trashed" ? <TrashedFiles
+                          files={files}
+                          user={user}
+                          classes={classes}
+                          handleContextMenu={handleContextMenu}
+                          getFileIcon={getFileIcon}
+                          resetType={resetType}
+                          fetchFilesFolders={fetchFilesFolders}
+                      /> : files.filter((file) => file.type !== "trashed").map(file => (
+                          <div key={file.file_id} className={classes.fileItem} onContextMenu={handleContextMenu(file)}>
+                            <div className={classes.fileIcon}>
+                              {getFileIcon(file.mime_type)}
+                            </div>
+                            <Typography className={classes.fileName}>{file.name}</Typography>
+                            <div className={classes.fileDetails}>
+                              <Typography className={classes.fileDetailsItem} style={{
+                                marginRight: "20px"
+                              }}>{new Date(file.updated_at).toLocaleString()}</Typography>
+                              <Avatar style={{
+                                marginRight: "60px"
+                              }}>
+                                {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
+                              </Avatar>
+                              <Typography style={{
+                                marginRight: "178px"
+                              }}>My Drive</Typography>
+                            </div>
+                            <IconButton onClick={handleContextMenu(file)}>
+                              <MoreVertIcon />
+                            </IconButton>
+                          </div>
+                      ))
               :
               folders.map((folder) => (
               <div key={folder.folder_id} className={classes.fileItem} onContextMenu={handleContextMenu(folder)}>

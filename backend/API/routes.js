@@ -37,7 +37,7 @@ router.get('/details/:fileId', userAuth, fileController.getFileDetails);
 router.put('/update/:fileId', userAuth, fileController.updateFileDetails);
 router.delete('/delete-files/:fileId', userAuth, fileController.deleteFile);
 router.post('/rename-file', userAuth, fileController.renameFile);
-router.post('/star-file', userAuth, fileController.starFile);
+router.post('/toggle-type', userAuth, fileController.toggleType);
 router.get('/view-file/:fileId', fileController.viewFile);
 
 //Dashboard Routes
