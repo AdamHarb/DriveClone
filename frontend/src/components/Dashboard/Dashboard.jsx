@@ -30,6 +30,7 @@ import StorageIcon from "@material-ui/icons/Storage";
 import Button from "@material-ui/core/Button";
 import AddIcon from "@material-ui/icons/Add";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import { useTheme } from '@material-ui/core/styles';
 import SearchIcon from "@material-ui/icons/Search";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import ViewListIcon from "@material-ui/icons/ViewList";
@@ -179,6 +180,12 @@ const useStyles = makeStyles((theme) => ({
     right: theme.spacing(2),
     cursor: "pointer",
   },
+  sortButtons: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    padding: theme.spacing(2),
+  },
   logo: {
     display: "flex",
     alignItems: "center",
@@ -291,6 +298,7 @@ const useStyles = makeStyles((theme) => ({
     border: "none", // Remove the border from the buttons
     padding: theme.spacing(1, 2), // Adjust padding as desired
     marginLeft: theme.spacing(1), // Add small margin between buttons
+    marginBottom: theme.spacing(1),
     fontSize: "18px",
     marginRight: theme.spacing(1),
     "&:first-child": {
@@ -460,8 +468,45 @@ const Dashboard = () => {
   const [locationAnchorEl, setLocationAnchorEl] = useState(null);
   const [selectedModifiedDate, setSelectedModifiedDate] = useState(null);
   const [modifiedAnchorEl, setModifiedAnchorEl] = useState(null);
+  const [sortOption, setSortOption] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
   const [viewDetailsDialogOpen, setViewDetailsDialogOpen] = useState(false);
   const [personAnchorEl, setPersonAnchorEl] = useState(null);
+  const [nameOption, setNameOption] = useState(null);
+  const [sizeOption, setSizeOption] = useState(null);
+  const [uploadDateOption, setUploadDateOption] = useState(null);
+  const [nameAnchorEl, setNameAnchorEl] = useState(null);
+const [sizeAnchorEl, setSizeAnchorEl] = useState(null);
+const [uploadDateAnchorEl, setUploadDateAnchorEl] = useState(null);
+
+const handleNameClick = (event) => {
+  setNameAnchorEl(event.currentTarget);
+};
+
+const handleSizeClick = (event) => {
+  setSizeAnchorEl(event.currentTarget);
+};
+
+const handleUploadDateClick = (event) => {
+  setUploadDateAnchorEl(event.currentTarget);
+};
+
+const handleNameClose = () => {
+  setNameAnchorEl(null);
+  setNameOption(null);
+  fetchFilesFolders();
+};
+
+const handleSizeClose = () => {
+  setSizeAnchorEl(null);
+  setSizeOption(null);
+  fetchFilesFolders();
+};
+const handleUploadDateClose = () => {
+  setUploadDateAnchorEl(null);
+  setUploadDateOption(null);
+  fetchFilesFolders();
+};
   const [searchParams, setSearchParams] = useState({
     type: "",
     owner: "",
@@ -501,7 +546,45 @@ const Dashboard = () => {
     });
     setUser(res.data.user);
   }
+  const sortFiles = (files) => {
+  const sortedFiles = files.filter(file => file !== undefined); // Filter out undefined values
 
+  sortedFiles.sort((a, b) => {
+    const isAFolder = !a.hasOwnProperty('name'); // Check if 'a' is a folder
+    const isBFolder = !b.hasOwnProperty('name'); // Check if 'b' is a folder
+
+    if (nameOption === 'asc') {
+      return isAFolder
+        ? a.folder_name.localeCompare(b.folder_name || b.name)
+        : isBFolder
+        ? (a.name || a.folder_name).localeCompare(b.folder_name)
+        : a.name.localeCompare(b.name);
+    } else if (nameOption === 'desc') {
+      return isAFolder
+        ? b.folder_name.localeCompare(a.folder_name || a.name)
+        : isBFolder
+        ? (b.name || b.folder_name).localeCompare(a.folder_name)
+        : b.name.localeCompare(a.name);
+    } else if (sizeOption === 'largest') {
+      return isBFolder ? -1 : isAFolder ? 1 : b.size - a.size;
+    } else if (sizeOption === 'smallest') {
+      return isBFolder ? -1 : isAFolder ? 1 : a.size - b.size;
+    } else if (uploadDateOption === 'ascending') {
+      const aDate = new Date(a.created_at);
+      const bDate = new Date(b.created_at);
+      return aDate.getTime() - bDate.getTime(); 
+       // Sort based on timestamp (including minutes and seconds)
+    } else if (uploadDateOption === 'descending') {
+      const aDate = new Date(a.created_at);
+      const bDate = new Date(b.created_at);
+      return bDate.getTime() - aDate.getTime(); // Sort based on timestamp (including minutes and seconds)
+    }
+    return 0;
+  });
+
+  return sortedFiles;
+};
+  
   const fetchFilesFolders = () => {
     handleDashboardApi().then((response) => {
       console.log("fetched");
@@ -540,16 +623,17 @@ const Dashboard = () => {
           'Authorization': `Bearer ${cookies.token}`
         }
       });
-      console.log(response.data)
+      console.log(response.data);
       return response.data;
     } catch (error) {
-        console.error('Error during login:', error);
+      console.error('Error during login:', error);
     }
-  }
+  };
 
   const handleViewDetailsClick = () => {
     setViewDetailsDialogOpen(true);
   };
+  const theme = useTheme();
 
   const handleUploadFile = async (file) => {
     try {
@@ -762,7 +846,6 @@ const Dashboard = () => {
       setPersonAnchorEl(event.currentTarget);
     }
   };
-
   const handleMenuClose = () => {
     setAnchorEl(null);
     setIsMenuOpen(false);
@@ -1106,32 +1189,139 @@ const handleTypeClose = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
 
-
   useEffect(() => {
-    const filteredFiles = files.filter(
-      (file) =>
-      file.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedType === null || file.mime_type === selectedType) &&
-      (selectedPerson === null || file.owner === selectedPerson) &&
-        (selectedLocation === null ||
-          selectedLocation === "Anywhere in Drive" ||
-          (selectedLocation === "My Drive") ||
-          (selectedLocation === "Shared with me" && file.sharedWith?.length > 0)) &&
-        (selectedModifiedDate === null ||
-          (selectedModifiedDate === "Today" && isToday(new Date(file.updated_at))) ||
-          (selectedModifiedDate === "Last 7 days" && isLast7Days(new Date(file.updated_at))) ||
-          (selectedModifiedDate === "Last 30 days" && isLast30Days(new Date(file.updated_at))) ||
-          (selectedModifiedDate === "This year" && isThisYear(new Date(file.updated_at))) ||
-          (selectedModifiedDate === "Last year" && isLastYear(new Date(file.updated_at))))
-    );
+    let filteredFiles = files;
+    let filteredFolders = folders;
   
-    const filteredFolders = folders.filter((folder) =>
-      folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (searchTerm) {
+      filteredFiles = filteredFiles.filter((file) =>
+        file.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      filteredFolders = filteredFolders.filter((folder) =>
+        folder.folder_name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+  
+    if (selectedType) {
+      filteredFiles = filteredFiles.filter((file) => file.mime_type === selectedType);
+    }
+  
+    if (selectedPerson) {
+      filteredFiles = filteredFiles.filter((file) => file.owner === selectedPerson);
+      filteredFolders = filteredFolders.filter((folder) => folder.owner === selectedPerson);
+    }
+  
+    if (selectedLocation) {
+      if (selectedLocation === "Anywhere in Drive") {
+        // No additional filtering needed
+      } else if (selectedLocation === "My Drive") {
+        // No additional filtering needed
+      } else if (selectedLocation === "Shared with me") {
+        filteredFiles = filteredFiles.filter((file) => file.sharedWith?.length > 0);
+        filteredFolders = filteredFolders.filter((folder) => folder.sharedWith?.length > 0);
+      }
+    }
+  
+    if (selectedModifiedDate) {
+      filteredFiles = filteredFiles.filter((file) => {
+        const fileDate = new Date(file.updated_at);
+        if (selectedModifiedDate === "Today") {
+          return isToday(fileDate);
+        } else if (selectedModifiedDate === "Last 7 days") {
+          return isLast7Days(fileDate);
+        } else if (selectedModifiedDate === "Last 30 days") {
+          return isLast30Days(fileDate);
+        } else if (selectedModifiedDate === "This year") {
+          return isThisYear(fileDate);
+        } else if (selectedModifiedDate === "Last year") {
+          return isLastYear(fileDate);
+        }
+        return false;
+      });
+  
+      filteredFolders = filteredFolders.filter((folder) => {
+        const folderDate = new Date(folder.updated_at);
+        if (selectedModifiedDate === "Today") {
+          return isToday(folderDate);
+        } else if (selectedModifiedDate === "Last 7 days") {
+          return isLast7Days(folderDate);
+        } else if (selectedModifiedDate === "Last 30 days") {
+          return isLast30Days(folderDate);
+        } else if (selectedModifiedDate === "This year") {
+          return isThisYear(folderDate);
+        } else if (selectedModifiedDate === "Last year") {
+          return isLastYear(folderDate);
+        }
+        return false;
+      });
+    }
+  
+    if (nameOption !== null) {
+      filteredFiles = filteredFiles.sort((a, b) => {
+        if (nameOption === 'asc') {
+          return a.name.localeCompare(b.name);
+        } else if (nameOption === 'desc') {
+          return b.name.localeCompare(a.name);
+        }
+        return 0;
+      });
+  
+      filteredFolders = filteredFolders.sort((a, b) => {
+        if (nameOption === 'asc') {
+          return a.folder_name.localeCompare(b.folder_name);
+        } else if (nameOption === 'desc') {
+          return b.folder_name.localeCompare(a.folder_name);
+        }
+        return 0;
+      });
+    }
+  
+    if (sizeOption !== null) {
+      filteredFiles = filteredFiles.sort((a, b) => {
+        if (sizeOption === 'largest') {
+          return b.size - a.size;
+        } else if (sizeOption === 'smallest') {
+          return a.size - b.size;
+        }
+        return 0;
+      });
+    }
+  
+    if (uploadDateOption !== null) {
+      filteredFiles = filteredFiles.sort((a, b) => {
+        if (uploadDateOption === 'ascending') {
+          return new Date(b.created_at) - new Date(a.created_at);
+        } else if (uploadDateOption === 'descending') {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+        return 0;
+      });
+  
+      filteredFolders = filteredFolders.sort((a, b) => {
+        if (uploadDateOption === 'ascending') {
+          return new Date(b.created_at) - new Date(a.created_at);
+        } else if (uploadDateOption === 'descending') {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+        return 0;
+      });
+    }
   
     setFiles(filteredFiles);
     setFolders(filteredFolders);
-  }, [searchTerm, selectedType, selectedPerson, selectedLocation, selectedModifiedDate]);
+  }, [
+    searchTerm,
+    selectedType,
+    selectedPerson,
+    selectedLocation,
+    selectedModifiedDate,
+    nameOption,
+    sizeOption,
+    uploadDateOption,
+    files,
+    folders,
+  ]);
+  
 
   const handleChangeSearch = (event) => {
     setSearchTerm(event.target.value);
@@ -1404,6 +1594,68 @@ const handleTypeClose = () => {
             </div>
             <Typography variant="subtitle1">{Math.round(user.storage_used / 1024).toFixed(2)} GB of 15 GB used</Typography>
           </div>
+          <Typography variant="subtitle1" style={{ marginTop: theme.spacing(2), marginBottom: theme.spacing(1), marginLeft: '18px', fontSize: 18,}}>
+  Filter by:
+</Typography>
+          <Button
+  variant="outlined"
+  className={classes.button}
+  onClick={handleNameClick}
+  startIcon={<TextFieldsIcon />}
+  endIcon={<ArrowDropDownOutlinedIcon />}
+>
+  Name
+</Button>
+<Menu
+  anchorEl={nameAnchorEl}
+  keepMounted
+  open={Boolean(nameAnchorEl)}
+  onClose={handleNameClose}
+>
+  <MenuItem onClick={() => setNameOption('asc')}>A-Z</MenuItem>
+  <MenuItem onClick={() => setNameOption('desc')}>Z-A</MenuItem>
+  <MenuItem onClick={() => setNameOption(null)}>Reset</MenuItem>
+</Menu>
+
+<Button
+  variant="outlined"
+  className={classes.button}
+  onClick={handleSizeClick}
+  startIcon={<StorageIcon />}
+  endIcon={<ArrowDropDownOutlinedIcon />}
+>
+  Size
+</Button>
+<Menu
+  anchorEl={sizeAnchorEl}
+  keepMounted
+  open={Boolean(sizeAnchorEl)}
+  onClose={handleSizeClose}
+>
+  <MenuItem onClick={() => setSizeOption('largest')}>Largest</MenuItem>
+  <MenuItem onClick={() => setSizeOption('smallest')}>Smallest</MenuItem>
+  <MenuItem onClick={() => setSizeOption(null)}>Reset</MenuItem>
+</Menu>
+
+<Button
+  variant="outlined"
+  className={classes.button}
+  onClick={handleUploadDateClick}
+  startIcon={<DateRangeIcon />}
+  endIcon={<ArrowDropDownOutlinedIcon />}
+>
+  Upload Date
+</Button>
+<Menu
+  anchorEl={uploadDateAnchorEl}
+  keepMounted
+  open={Boolean(uploadDateAnchorEl)}
+  onClose={handleUploadDateClose}
+>
+  <MenuItem onClick={() => setUploadDateOption('ascending')}>Ascending</MenuItem>
+  <MenuItem onClick={() => setUploadDateOption('descending')}>Descending</MenuItem>
+  <MenuItem onClick={() => setUploadDateOption(null)}>Reset</MenuItem>
+</Menu>
         </List>
       </Drawer>
 
@@ -1591,13 +1843,14 @@ const handleTypeClose = () => {
     open={Boolean(personAnchorEl)}
     onClose={handlePersonClose}
   >
-    {[...new Set(files.map((file) => file.owner))].map((owner) => (
-      <MenuItem key={owner} onClick={() => handlePersonSelect(owner)}>
+    {[...new Set(files.map((file) => ({ name: file.owner, picture: file.ownerPicture })))].map((owner) => (
+      <MenuItem key={owner.name} onClick={() => handlePersonSelect(owner.name)}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar style={{ marginRight: '8px' }}>
-            {owner?.split(" ").map((name) => name[0]).join("").toUpperCase()}
-          </Avatar>
-          <Typography>{owner}</Typography>
+          {owner.picture ? (
+            <Avatar src={owner.picture} style={{ marginRight: '8px' }} />
+          ) : (
+            <Typography>{owner.name}</Typography>
+          )}
         </div>
       </MenuItem>
     ))}
@@ -1826,6 +2079,7 @@ const handleTypeClose = () => {
               </ToggleButton>
             </ToggleButtonGroup>
           </div>
+  
         </div>
         {activeLayout === 'list' && (
   <div className={classes.listLayout}>
@@ -1906,25 +2160,32 @@ const handleTypeClose = () => {
                 <div className={classes.fileIcon}>
                   {getFolderIcon(folder.folder_name)}
                 </div>
-                <Typography className={classes.fileName}>{folder.folder_name}</Typography>
-                <div className={classes.fileDetails}>
-                  <Typography className={classes.fileDetailsItem} style={{
-                    marginRight: "20px"
-                  }}>{new Date(folder.updated_at).toLocaleString()}</Typography>
-                  <Avatar style={{
-                    marginRight: "60px"
-                  }}>
-                    {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
-                  </Avatar>
-                  <Typography style={{
-                    marginRight: "178px"
-                  }}>My Drive</Typography>
-                </div>
-                <IconButton onClick={handleContextMenu(folder)}>
-                  <MoreVertIcon/>
-                </IconButton>
-              </div>
-              ))}
+            ))
+    :
+    sortFiles(folders).map((folder) => (
+    <div key={folder.folder_id} className={classes.fileItem} onContextMenu={handleContextMenu(folder)}>
+      <div className={classes.fileIcon}>
+        {getFolderIcon(folder.folder_name)}
+      </div>
+      <Typography className={classes.fileName}>{folder.folder_name}</Typography>
+      <div className={classes.fileDetails}>
+        <Typography className={classes.fileDetailsItem} style={{
+          marginRight: "20px"
+        }}>{new Date(folder.updated_at).toLocaleString()}</Typography>
+        <Avatar style={{
+          marginRight: "60px"
+        }}>
+          {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
+        </Avatar>
+        <Typography style={{
+          marginRight: "178px"
+        }}>My Drive</Typography>
+      </div>
+      <IconButton onClick={handleContextMenu(folder)}>
+        <MoreVertIcon/>
+      </IconButton>
+    </div>
+    ))}
         </div>
       }
     </div>
