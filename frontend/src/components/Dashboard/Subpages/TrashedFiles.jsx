@@ -5,14 +5,15 @@ import React from "react";
 import axios from "axios";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import RestoreIcon from '@mui/icons-material/Restore';
+import {useCookies} from "react-cookie";
 
-export const TrashedFiles = ({files, classes, handleContextMenu, getFileIcon, user, fetchFilesFolders}) => {
+export const TrashedFiles = ({files, classes, handleContextMenu, getFileIcon, user, resetType, fetchFilesFolders}) => {
 	const trashedFiles = files.filter(file => file.type === "trashed");
+	const [cookies, setCookie, removeCookie] = useCookies(['token']);
 
 	const deleteFile = async(id) => {
 		try {
-			const response = await axios.post(`http://localhost:3000/api/delete-files/${id}`, {
-			}, {
+			const response = await axios.delete(`http://localhost:3000/api/delete-files/${id}`, {
 				headers: {
 					'Authorization': `Bearer ${cookies.token}`
 				}
@@ -54,7 +55,7 @@ export const TrashedFiles = ({files, classes, handleContextMenu, getFileIcon, us
 							<RestoreIcon />
 						</IconButton>
 						<IconButton onClick={() => {
-							resetType(file).then(() => {
+							deleteFile(file._id).then(() => {
 								fetchFilesFolders();
 							})
 						}}>
