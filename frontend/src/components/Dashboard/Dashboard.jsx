@@ -481,6 +481,7 @@ const Dashboard = () => {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState("default");
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [dir, setdir] = useState();
 
   useEffect(async () => {
     await fetchUser();
@@ -557,15 +558,16 @@ const Dashboard = () => {
       }
 
       console.log(file);
-
       const formData = new FormData();
       formData.append('file', file);
-
+      if(dir){
+        formData.append('parent_id', dir);
+      }
       const response = await axios.post('http://localhost:3000/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${cookies.token}`
-        }
+        },
       }).then((r) => {
         fetchFilesFolders()
         fetchUser()
@@ -577,7 +579,9 @@ const Dashboard = () => {
 
   const handleCreateFolder = async (folderName) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/create-folder', {}, {
+      const parentId = dir ? dir : null;
+      console.log(parentId)
+      const response = await axios.post('http://localhost:3000/api/create-folder', {parent_id:parentId}, {
             headers: {
               'Authorization': `Bearer ${cookies.token}`
             }
@@ -1179,6 +1183,7 @@ const handleTypeClose = () => {
       console.log(response.data)
       setFiles(response.data.userFiles);
       setFolders(response.data.userFolders);
+      setdir(folder_id)
     } catch (error) {
         console.error('Error retrieving files');
     }
