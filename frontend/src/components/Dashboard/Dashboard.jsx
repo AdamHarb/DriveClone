@@ -2154,7 +2154,7 @@ const handleTypeClose = () => {
             ))
     :
     sortFiles(folders).map((folder) => (
-    <div key={folder.folder_id} className={classes.fileItem} onClick={() => handleFolderClick(folder._id)} onContextMenu={handleContextMenu(folder)}>
+    <div key={folder.folder_id} className={classes.fileItem} onClick={() => handleFolderClick(folder._id)}  onContextMenu={handleContextMenu(folder)}>
         <div className={classes.fileIcon}>
             {getFolderIcon(folder.folder_name)}
         </div>
@@ -2194,7 +2194,7 @@ const handleTypeClose = () => {
               </div>
         ))
       : folders.map((folder) => (
-          <div key={folder.folder_id} className={classes.gridItem} onContextMenu={handleContextMenu(folder)} >
+          <div key={folder.folder_id} className={classes.gridItem} onClick={() => handleFolderClick(folder._id)} onContextMenu={handleContextMenu(folder)} >
             <div className={classes.gridIcon}>{getFolderIcon(folder.folder_name)}</div>
             <div className={classes.gridName}>{folder.folder_name}</div>
             <IconButton onClick={handleContextMenu(folder)}>
