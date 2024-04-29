@@ -35,6 +35,7 @@ router.post('/upload', userAuth, upload.single('file'), fileController.uploadFil
 router.get('/download/:fileId', fileController.downloadFile);
 router.get('/details/:fileId', userAuth, fileController.getFileDetails);
 router.put('/update/:fileId', userAuth, fileController.updateFileDetails);
+router.put('/update-description/:fileId', userAuth, fileController.updateDescription);
 router.delete('/delete-files/:fileId', userAuth, fileController.deleteFile);
 router.post('/rename-file', userAuth, fileController.renameFile);
 router.post('/toggle-type', userAuth, fileController.toggleType);

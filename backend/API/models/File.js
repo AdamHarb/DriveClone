@@ -18,6 +18,10 @@ const FileSchema = new mongoose.Schema({
         type: String,
         enum: ['starred', 'trashed', 'normal'],
         default: 'normal'
+    },
+    description: {
+        type: String,
+        required: false
     }
 });
 

@@ -226,3 +226,20 @@ exports.viewFile = async (req, res) => {
 		res.status(500).json({ message: "Internal server error" });
 	}
 };
+
+exports.updateDescription = async (req, res) => {
+	try {
+		const fileId = req.params.fileId;
+		const {description} = req.body;
+
+		const file = await File.findOneAndUpdate({_id: fileId}, {description}, {new: true});
+
+		if (!file) {
+			return res.status(404).json({message: "File not found"});
+		}
+
+		res.status(200).json(file);
+	} catch (e) {
+		res.status(500).json({message: "Internal server error"});
+	}
+}
