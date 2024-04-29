@@ -1232,7 +1232,7 @@ const handleTypeClose = () => {
   onClick={handleProfileClick}
   ref={profilePictureRef}
 >
-  JD
+        {user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}
 </Avatar>
 <Dialog
   open={isProfileModalOpen}
@@ -1252,11 +1252,11 @@ const handleTypeClose = () => {
       <CloseIcon />
     </IconButton>
     <Typography variant="subtitle1" className={classes.email}>
-      nourzamel35@gmail.com
+      {user.email}
     </Typography>
-    <Avatar className={classes.profilePicture}>NZ</Avatar>
+    <Avatar className={classes.profilePicture}>{user?.username?.split(" ").map((name) => name[0]).join("").toUpperCase()}</Avatar>
     <Typography variant="h6" className={classes.greeting}>
-      Hi, Nebula!
+      Hi, {user.username}!
     </Typography>
   </DialogContent>
 </Dialog>
