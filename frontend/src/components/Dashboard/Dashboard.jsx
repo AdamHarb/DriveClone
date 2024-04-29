@@ -546,27 +546,44 @@ const handleUploadDateClose = () => {
     setUser(res.data.user);
   }
   const sortFiles = (files) => {
-    const sortedFiles = [...files];
+  const sortedFiles = files.filter(file => file !== undefined); // Filter out undefined values
+
+  sortedFiles.sort((a, b) => {
+    const isAFolder = !a.hasOwnProperty('name'); // Check if 'a' is a folder
+    const isBFolder = !b.hasOwnProperty('name'); // Check if 'b' is a folder
+
+    if (nameOption === 'asc') {
+      return isAFolder
+        ? a.folder_name.localeCompare(b.folder_name || b.name)
+        : isBFolder
+        ? (a.name || a.folder_name).localeCompare(b.folder_name)
+        : a.name.localeCompare(b.name);
+    } else if (nameOption === 'desc') {
+      return isAFolder
+        ? b.folder_name.localeCompare(a.folder_name || a.name)
+        : isBFolder
+        ? (b.name || b.folder_name).localeCompare(a.folder_name)
+        : b.name.localeCompare(a.name);
+    } else if (sizeOption === 'largest') {
+      return isBFolder ? -1 : isAFolder ? 1 : b.size - a.size;
+    } else if (sizeOption === 'smallest') {
+      return isBFolder ? -1 : isAFolder ? 1 : a.size - b.size;
+    } else if (uploadDateOption === 'ascending') {
+      const aDate = new Date(a.created_at);
+      const bDate = new Date(b.created_at);
+      return aDate.getTime() - bDate.getTime(); 
+       // Sort based on timestamp (including minutes and seconds)
+    } else if (uploadDateOption === 'descending') {
+      const aDate = new Date(a.created_at);
+      const bDate = new Date(b.created_at);
+      return bDate.getTime() - aDate.getTime(); // Sort based on timestamp (including minutes and seconds)
+    }
+    return 0;
+  });
+
+  return sortedFiles;
+};
   
-    sortedFiles.sort((a, b) => {
-      if (nameOption === 'asc') {
-        return a.name.localeCompare(b.name);
-      } else if (nameOption === 'desc') {
-        return b.name.localeCompare(a.name);
-      } else if (sizeOption === 'largest') {
-        return b.size - a.size;
-      } else if (sizeOption === 'smallest') {
-        return a.size - b.size;
-      } else if (uploadDateOption === 'ascending') {
-        return new Date(b.created_at) - new Date(a.created_at);
-      } else if (uploadDateOption === 'descending') {
-        return new Date(a.created_at) - new Date(b.created_at);
-      }
-      return 0;
-    });
-  
-    return sortedFiles;
-  };
   const fetchFilesFolders = () => {
     handleDashboardApi().then((response) => {
       console.log("fetched");
@@ -1170,7 +1187,6 @@ const handleTypeClose = () => {
     let filteredFiles = files;
     let filteredFolders = folders;
   
-    // Apply search term filtering
     if (searchTerm) {
       filteredFiles = filteredFiles.filter((file) =>
         file.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -1180,40 +1196,60 @@ const handleTypeClose = () => {
       );
     }
   
-    // Apply selected type filtering
     if (selectedType) {
       filteredFiles = filteredFiles.filter((file) => file.mime_type === selectedType);
     }
   
-    // Apply selected person filtering
     if (selectedPerson) {
       filteredFiles = filteredFiles.filter((file) => file.owner === selectedPerson);
+      filteredFolders = filteredFolders.filter((folder) => folder.owner === selectedPerson);
     }
   
-    // Apply selected location filtering
     if (selectedLocation) {
-      if (selectedLocation === "Shared with me") {
+      if (selectedLocation === "Anywhere in Drive") {
+        // No additional filtering needed
+      } else if (selectedLocation === "My Drive") {
+        // No additional filtering needed
+      } else if (selectedLocation === "Shared with me") {
         filteredFiles = filteredFiles.filter((file) => file.sharedWith?.length > 0);
+        filteredFolders = filteredFolders.filter((folder) => folder.sharedWith?.length > 0);
       }
     }
   
-    // Apply selected modified date filtering
     if (selectedModifiedDate) {
       filteredFiles = filteredFiles.filter((file) => {
         const fileDate = new Date(file.updated_at);
-        // Call functions like isToday, isLast7Days, isLast30Days, isThisYear, isLastYear
-        // to filter based on the selected modified date
-        return (
-          (selectedModifiedDate === "Today" && isToday(fileDate)) ||
-          (selectedModifiedDate === "Last 7 days" && isLast7Days(fileDate)) ||
-          (selectedModifiedDate === "Last 30 days" && isLast30Days(fileDate)) ||
-          (selectedModifiedDate === "This year" && isThisYear(fileDate)) ||
-          (selectedModifiedDate === "Last year" && isLastYear(fileDate))
-        );
+        if (selectedModifiedDate === "Today") {
+          return isToday(fileDate);
+        } else if (selectedModifiedDate === "Last 7 days") {
+          return isLast7Days(fileDate);
+        } else if (selectedModifiedDate === "Last 30 days") {
+          return isLast30Days(fileDate);
+        } else if (selectedModifiedDate === "This year") {
+          return isThisYear(fileDate);
+        } else if (selectedModifiedDate === "Last year") {
+          return isLastYear(fileDate);
+        }
+        return false;
+      });
+  
+      filteredFolders = filteredFolders.filter((folder) => {
+        const folderDate = new Date(folder.updated_at);
+        if (selectedModifiedDate === "Today") {
+          return isToday(folderDate);
+        } else if (selectedModifiedDate === "Last 7 days") {
+          return isLast7Days(folderDate);
+        } else if (selectedModifiedDate === "Last 30 days") {
+          return isLast30Days(folderDate);
+        } else if (selectedModifiedDate === "This year") {
+          return isThisYear(folderDate);
+        } else if (selectedModifiedDate === "Last year") {
+          return isLastYear(folderDate);
+        }
+        return false;
       });
     }
   
-    // Apply name option sorting
     if (nameOption !== null) {
       filteredFiles = filteredFiles.sort((a, b) => {
         if (nameOption === 'asc') {
@@ -1223,9 +1259,17 @@ const handleTypeClose = () => {
         }
         return 0;
       });
+  
+      filteredFolders = filteredFolders.sort((a, b) => {
+        if (nameOption === 'asc') {
+          return a.folder_name.localeCompare(b.folder_name);
+        } else if (nameOption === 'desc') {
+          return b.folder_name.localeCompare(a.folder_name);
+        }
+        return 0;
+      });
     }
   
-    // Apply size option sorting
     if (sizeOption !== null) {
       filteredFiles = filteredFiles.sort((a, b) => {
         if (sizeOption === 'largest') {
@@ -1237,35 +1281,28 @@ const handleTypeClose = () => {
       });
     }
   
-    // Custom comparator function for sorting files by created_at date
-    function sortByDate(a, b, option) {
-      const dateA = new Date(a.created_at);
-      const dateB = new Date(b.created_at);
-  
-      // Check if dateA and dateB are valid dates
-      if (isNaN(dateA) || isNaN(dateB)) {
-        return 0;
-      }
-  
-      if (option === 'ascending') {
-        // Sort in ascending order
-        return dateA - dateB;
-      } else if (option === 'descending') {
-        // Sort in descending order
-        return dateB - dateA;
-      }
-      return 0;
-    }
-  
-    // Apply upload date option sorting
     if (uploadDateOption !== null) {
-      filteredFiles = filteredFiles.sort((a, b) => sortByDate(a, b, uploadDateOption));
+      filteredFiles = filteredFiles.sort((a, b) => {
+        if (uploadDateOption === 'ascending') {
+          return new Date(b.created_at) - new Date(a.created_at);
+        } else if (uploadDateOption === 'descending') {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+        return 0;
+      });
+  
+      filteredFolders = filteredFolders.sort((a, b) => {
+        if (uploadDateOption === 'ascending') {
+          return new Date(b.created_at) - new Date(a.created_at);
+        } else if (uploadDateOption === 'descending') {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+        return 0;
+      });
     }
   
-    // Update state with filtered and sorted files and folders
     setFiles(filteredFiles);
     setFolders(filteredFolders);
-  
   }, [
     searchTerm,
     selectedType,
