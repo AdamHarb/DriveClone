@@ -29,7 +29,6 @@ router.get('/current-user', userAuth, userController.getCurrentUser);
 // Folder Routes
 router.post('/create-folder', userAuth, folderController.createFolder);
 router.delete('/delete-folder/:folderId', userAuth, folderController.deleteFolder);
-router.post('/share-folder', userAuth, folderController.shareFolder);
 
 // File Routes
 router.post('/upload', userAuth, upload.single('file'), fileController.uploadFile);
@@ -40,7 +39,6 @@ router.delete('/delete-files/:fileId', userAuth, fileController.deleteFile);
 router.post('/rename-file', userAuth, fileController.renameFile);
 router.post('/toggle-type', userAuth, fileController.toggleType);
 router.get('/view-file/:fileId', fileController.viewFile);
-router.post('/share-file', userAuth, fileController.shareFile);
 
 //Dashboard Routes
 router.get('/dashboard/:folderId', userAuth, driveController.getFolderStuff);
