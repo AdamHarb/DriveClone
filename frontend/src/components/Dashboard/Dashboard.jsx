@@ -1089,7 +1089,9 @@ const handleTypeClose = () => {
   </Typography>
 </Button>
 <NewMenuDropdown
-  anchorEl={anchorEl}
+  anchorEl={() => {
+    return newButtonRef.current;
+  }}
   open={isMenuOpen}
   handleClose={handleMenuClose}
   handleUploadFile={() => fileInputRef.current.click()}
