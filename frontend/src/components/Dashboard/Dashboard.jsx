@@ -1842,7 +1842,7 @@ const handleTypeClose = () => {
                                onContextMenu={handleContextMenu(file)}
                                onClick={() => handleFileSelect(file)}
                                style={{
-                            backgroundColor: selectedFiles.indexOf(file) !== -1 ? "#e0e0e0" : "inherit",
+                            backgroundColor: selectedFiles.indexOf(file) !== -1 ? "#c2e7ff" : "inherit",
                           }}>
                             <div className={classes.fileIcon}>
                               {getFileIcon(file.mime_type)}
