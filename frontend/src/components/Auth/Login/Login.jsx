@@ -15,7 +15,7 @@ const Login = () => {
             password: document.getElementById('password').value,
         };
         try {
-            const response = await axios.post('http://localhost:3000/api/login', formData).then((response) => {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/login`, formData).then((response) => {
                 if (response.status === 200) {
                     setCookie('token', response.data.token)
                     navigate('/');

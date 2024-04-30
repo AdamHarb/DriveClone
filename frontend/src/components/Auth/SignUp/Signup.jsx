@@ -32,7 +32,7 @@ const Signup = () => {
 
 
         try {
-            const response = await axios.post('http://localhost:3000/api/create-user', newFormData); // Make API request
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/create-user`, newFormData); // Make API request
             console.log(response.data);
             // Handle successful response
             if (response.data.success) {

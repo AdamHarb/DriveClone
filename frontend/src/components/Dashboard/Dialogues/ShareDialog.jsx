@@ -29,7 +29,7 @@ const ShareDialog = ({ open, handleClose, fileId }) => {
 	const classes = useStyles();
 	const [copied, setCopied] = useState(false);
 
-	const shareLink = `http://localhost:3000/api/view-file/${fileId}`;
+	const shareLink = `${import.meta.env.VITE_BACKEND_URL}/api/view-file/${fileId}`;
 
 	const handleCopy = () => {
 		navigator.clipboard.writeText(shareLink);

@@ -539,7 +539,7 @@ const handleUploadDateClose = () => {
   }, [])
 
   const fetchUser = async () => {
-    const res = await axios.get('http://localhost:3000/api/current-user', {
+    const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/current-user`, {
       headers: {
         'Authorization': `Bearer ${cookies.token}`
       }
@@ -601,7 +601,7 @@ const handleUploadDateClose = () => {
 
   const handleSizeApi = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/profile', {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/profile`, {
         headers: {
           withCredentials: true,
           'Authorization': `Bearer ${cookies.token}`
@@ -615,7 +615,7 @@ const handleUploadDateClose = () => {
   }
   const handleDashboardApi = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/dashboard', {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard`, {
         headers: {
           withCredentials: true,
           'Authorization': `Bearer ${cookies.token}`
@@ -645,7 +645,7 @@ const handleUploadDateClose = () => {
       if(dir){
         formData.append('parent_id', dir);
       }
-      const response = await axios.post('http://localhost:3000/api/upload', formData, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${cookies.token}`
@@ -663,7 +663,7 @@ const handleUploadDateClose = () => {
     try {
       const parentId = dir ? dir : null;
       console.log(parentId)
-      const response = await axios.post('http://localhost:3000/api/create-folder', {parent_id:parentId}, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/create-folder`, {parent_id:parentId}, {
             headers: {
               'Authorization': `Bearer ${cookies.token}`
             }
@@ -678,7 +678,7 @@ const handleUploadDateClose = () => {
   }
   const handleDeleteFile = async () => {
     try {
-      const response = await axios.post(`http://localhost:3000/api/toggle-type`, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/toggle-type`, {
           fileId: selectedObj._id,
           type: "trashed"
         }, {
@@ -714,7 +714,7 @@ const handleUploadDateClose = () => {
         formData.append('parent_id', folder_id);
 
         try {
-          const response = await axios.post('http://localhost:3000/api/upload', formData, {
+          const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/upload`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
               'Authorization': `Bearer ${cookies.token}`
@@ -734,7 +734,7 @@ const handleUploadDateClose = () => {
 
   const handleDownload = async (id) => {
     try {
-       const response = await axios.get(`http://localhost:3000/api/download/${id === null ? selectedObj.file_id : id}`, {}, {
+       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/download/${id === null ? selectedObj.file_id : id}`, {}, {
          headers: {
            withCredentials: true,
            'Authorization': `Bearer ${cookies.token}`
@@ -813,7 +813,7 @@ const handleUploadDateClose = () => {
 
   const handleRename = async (newName) => {
     try {
-      const response = await axios.post(`http://localhost:3000/api/rename-file`, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/rename-file`, {
         newName,
         name: selectedObj.name,
         fileId: selectedObj.file_id
@@ -972,7 +972,7 @@ const handleTypeClose = () => {
   const handleDownloadSelectedFiles = async () => {
     for (const file of selectedFiles) {
       try {
-        const response = await axios.get(`http://localhost:3000/api/download/${file.file_id}`, {
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/download/${file.file_id}`, {
           headers: {
             withCredentials: true,
             'Authorization': `Bearer ${cookies.token}`
@@ -998,7 +998,7 @@ const handleTypeClose = () => {
       await Promise.all(
           selectedFiles.map((file) =>
               axios.post(
-                  `http://localhost:3000/api/toggle-type`,
+                  `${import.meta.env.VITE_BACKEND_URL}/api/toggle-type`,
                   {
                     fileId: file._id,
                     type: "starred",
@@ -1024,7 +1024,7 @@ const handleTypeClose = () => {
       await Promise.all(
           selectedFiles.map((file) =>
               axios.post(
-                  `http://localhost:3000/api/toggle-type`,
+                  `${import.meta.env.VITE_BACKEND_URL}/api/toggle-type`,
                   {
                     fileId: file._id,
                     type: "trashed",
@@ -1327,7 +1327,7 @@ const handleTypeClose = () => {
 
   const handleStar = async () => {
     try {
-      await axios.post(`http://localhost:3000/api/toggle-type`, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/toggle-type`, {
         fileId: selectedObj._id,
         type: "starred"
       }, {
@@ -1345,7 +1345,7 @@ const handleTypeClose = () => {
 
   const resetType = async (file) => {
     try {
-      await axios.post(`http://localhost:3000/api/toggle-type`, {
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/toggle-type`, {
         fileId: selectedObj?._id || file?._id,
         type: "default"
       }, {
@@ -1362,7 +1362,7 @@ const handleTypeClose = () => {
   async function handleFolderClick(folder_id) {
     try {
       console.log(folder_id)
-      const response = await axios.get(`http://localhost:3000/api/dashboard/${folder_id}`, {
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard/${folder_id}`, {
         headers: {
           withCredentials: true,
           'Authorization': `Bearer ${cookies.token}`

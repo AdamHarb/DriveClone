@@ -8,7 +8,6 @@ multer({ storage: storage });
 
 connectDB().catch(console.error).then(() => {
 	app.listen(process.env.PORT, () => {
-		console.log('Server is running on http://localhost:' + process.env.PORT);
-		console.log('API is running on http://localhost:' + process.env.PORT + '/api');
+		console.log(`API is running on ${process.env.BACKEND_URL}:${process.env.PORT}/api`);
 	});
 });

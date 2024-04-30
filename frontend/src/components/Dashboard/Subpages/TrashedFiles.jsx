@@ -13,7 +13,7 @@ export const TrashedFiles = ({files, classes, handleContextMenu, getFileIcon, us
 
 	const deleteFile = async(id) => {
 		try {
-			const response = await axios.delete(`http://localhost:3000/api/delete-files/${id}`, {
+			const response = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/delete-files/${id}`, {
 				headers: {
 					'Authorization': `Bearer ${cookies.token}`
 				}
